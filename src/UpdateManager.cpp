@@ -65,3 +65,8 @@ void UpdateManager::Start()
         obj->Start();
     }
 }
+
+size_t UpdateManager::getNumberOfObjects()
+{
+    return _objects.size();
+}

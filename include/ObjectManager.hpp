@@ -11,13 +11,16 @@ class ObjectManager
 {
 public:
     /// @returns nullptr if the object does not exist 
-    static Object::Ptr<> getObject(unsigned long long id);
+    static Object::Ptr<> getObject(size_t id);
 
-    static unsigned long long getNumberOfObjects();
+    static size_t getNumberOfObjects();
 
     /// @brief destroys all the objects in the queue
     /// @note only use this if you know what you are doing
     static void ClearDestroyQueue();
+
+    /// @note instantly destroys all objects
+    static void destroyAllObjects();
 
 protected:
     static Object::Ptr<> addObject(Object* object);
@@ -32,8 +35,8 @@ private:
     class _objectCompClass : public Object
     {
     public:
-        _objectCompClass(unsigned long long id);
-        void setID(unsigned long long id);
+        _objectCompClass(size_t id);
+        void setID(size_t id);
         createDestroy();
     };
 

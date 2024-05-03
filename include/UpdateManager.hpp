@@ -20,6 +20,7 @@ public:
     static void FixedUpdate();
     /// @brief called just before opening the window
     static void Start();
+    static size_t getNumberOfObjects();
 
 protected:
     static void addUpdateObject(UpdateInterface* obj);

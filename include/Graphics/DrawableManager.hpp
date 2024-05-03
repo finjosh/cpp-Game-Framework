@@ -14,6 +14,7 @@ class DrawableManager
 public:
     /// @brief draws all drawable objs
     static void draw(sf::RenderWindow& window);
+    static size_t getNumberOfObjects();
 
 protected:
     static void addDrawable(DrawableObject* DrawableObject);

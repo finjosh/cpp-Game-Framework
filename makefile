@@ -11,13 +11,14 @@ INCLUDE_DIRS=/VSCodeFolder/Libraries/SFML-2.6.1/include /VSCodeFolder/Libraries/
 # extra include flags
 INCLUDE_FLAGS=-D SFML_STATIC
 # the paths to libs for linking
-LIB_DIRS=/VSCodeFolder/Libraries/SFML-2.6.1/lib /VSCodeFolder/Libraries/TGUI-1.2/lib ${PROJECT_DIR_TEMP}/lib \VSCodeFolder\Libraries\Box2d-3.0\bin
+LIB_DIRS=/VSCodeFolder/Libraries/SFML-2.6.1/lib /VSCodeFolder/Libraries/TGUI-1.2/lib /Git_projects/cpp-Utilities/libs \VSCodeFolder\Libraries\Box2d-3.0\bin
 # source files directory (the project directory is automatically added)
 SRC:=src
 # the directory for lib files that are made with "make lib"
-LIB_DIR:=libs
+# this should be the full path
+LIB_DIR:=${PROJECT_DIR_TEMP}/lib
 # the directory where all the source files that you want in the lib are
-LIB_SOURCE:=src/Utils
+LIB_SOURCE:=src
 
 # compiler command
 CC:=g++

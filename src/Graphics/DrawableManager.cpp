@@ -20,3 +20,8 @@ void DrawableManager::removeDrawable(DrawableObject* DrawableObject)
 {
     _drawables.erase(DrawableObject);
 }
+
+size_t DrawableManager::getNumberOfObjects()
+{
+    return _drawables.size();
+}

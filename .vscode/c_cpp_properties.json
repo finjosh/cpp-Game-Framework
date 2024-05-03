@@ -6,7 +6,8 @@
                 "${default}",
                 "${workspaceFolder}",
                 "${workspaceFolder}/include",
-                "/Git_projects/cpp-Utilities/include"
+                "/Git_projects/cpp-Utilities/include",
+                "${workspaceFolder}/VisualizeData/include"
             ],
             "defines": [
                 "_DEBUG",
