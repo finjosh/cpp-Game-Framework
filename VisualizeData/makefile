@@ -3,7 +3,7 @@ PROJECT_DIR_TEMP:=$(patsubst %/makefile,%, $(abspath $(lastword ${MAKEFILE_LIST}
 #! DONT EDIT ABOVE THIS
 
 # exe name
-PROJECT:=main
+PROJECT:=Visualizer
 # the directory in which all .o and .d files will be made
 OBJ_O_DIR:=bin
 # the include flags for compilation by default includes the project directory and include directory
