@@ -17,6 +17,10 @@
 #include "ObjectManager.hpp"
 #include "Physics/CollisionManager.hpp"
 
+//! TESTING
+#include "TestHelper.hpp"
+//! -------
+
 using namespace std;
 using namespace sf;
 
@@ -56,158 +60,160 @@ class EmptyUpdateObject : public virtual Object, public UpdateInterface
 
 int main()
 {
-    // setup for sfml and tgui
-    sf::RenderWindow window(sf::VideoMode::getDesktopMode(), "Game Framework", sf::Style::Fullscreen);
-    // window.setFramerateLimit(60);
-    WindowHandler::setRenderWindow(&window);
+    TestHelper::initTest("Object Update", "# of Objects", {[](){ UpdateManager::Update(0); }}, {[](){ new EmptyUpdateObject(); }}, 1000, {[](){ ObjectManager::destroyAllObjects(); }}, 100);
+    TestHelper::runTest();
 
-    tgui::Gui gui{window};
-    gui.setRelativeView({0, 0, 1920/(float)window.getSize().x, 1080/(float)window.getSize().y});
-    tgui::Theme::setDefault("Assets/themes/Dark.txt");
-    Command::color::setDefaultColor({255,255,255,255});
-    // -----------------------
+    // // setup for sfml and tgui
+    // sf::RenderWindow window(sf::VideoMode::getDesktopMode(), "Game Framework", sf::Style::Fullscreen);
+    // // window.setFramerateLimit(60);
+    // WindowHandler::setRenderWindow(&window);
 
-    WorldHandler::getWorld().SetGravity({0.f,0.f});
-    WorldHandler::getWorld().SetContactListener(new CollisionManager); // TODO put this stuff into the constructor
+    // tgui::Gui gui{window};
+    // gui.setRelativeView({0, 0, 1920/(float)window.getSize().x, 1080/(float)window.getSize().y});
+    // tgui::Theme::setDefault("Assets/themes/Dark.txt");
+    // Command::color::setDefaultColor({255,255,255,255});
+    // // -----------------------
 
-    //! Required to initialize VarDisplay and CommandPrompt
-    // creates the UI for the VarDisplay
-    VarDisplay::init(gui); 
-    // creates the UI for the CommandPrompt
-    Command::Prompt::init(gui);
-    addThemeCommands();
-    // create the UI for the TFuncDisplay
-    TFuncDisplay::init(gui);
+    // WorldHandler::getWorld().SetGravity({0.f,0.f});
+    // WorldHandler::getWorld().SetContactListener(new CollisionManager); // TODO put this stuff into the constructor
 
-    //! ---------------------------------------------------
+    // //! Required to initialize VarDisplay and CommandPrompt
+    // // creates the UI for the VarDisplay
+    // VarDisplay::init(gui); 
+    // // creates the UI for the CommandPrompt
+    // Command::Prompt::init(gui);
+    // addThemeCommands();
+    // // create the UI for the TFuncDisplay
+    // TFuncDisplay::init(gui);
 
-    auto fpsLabel = tgui::Label::create("FPS");
-    gui.add(fpsLabel);
-    auto objectsLabel = tgui::Label::create("Objects");
-    objectsLabel->setPosition({0,25});
-    gui.add(objectsLabel);
+    // //! ---------------------------------------------------
 
-    std::vector<double> totalTime;
-    totalTime.resize(30000);
-    std::vector<size_t> numObjects;
-    numObjects.resize(30000);
-    timer::Stopwatch timer;
-    int tests = 10;
-    int counter = 0;
-    auto testLabel = tgui::Label::create("Test: " + std::to_string(counter+1) + "/" + std::to_string(tests));
-    testLabel->setPosition({0,50});
-    gui.add(testLabel);
+    // auto fpsLabel = tgui::Label::create("FPS");
+    // gui.add(fpsLabel);
+    // auto objectsLabel = tgui::Label::create("Objects");
+    // objectsLabel->setPosition({0,25});
+    // gui.add(objectsLabel);
 
-    int fps = 0;
-    float secondTimer = 0;
+    // std::vector<double> totalTime;
+    // totalTime.resize(30000);
+    // std::vector<size_t> numObjects;
+    // numObjects.resize(30000);
+    // timer::Stopwatch timer;
+    // int tests = 10;
+    // int counter = 0;
+    // auto testLabel = tgui::Label::create("Test: " + std::to_string(counter+1) + "/" + std::to_string(tests));
+    // testLabel->setPosition({0,50});
+    // gui.add(testLabel);
 
-    sf::Clock deltaClock;
-    float fixedUpdate = 0;
-    UpdateManager::Start();
-    while (window.isOpen())
-    {
-        EventHelper::Event::ThreadSafe::update();
-        window.clear();
-        // updating the delta time var
-        sf::Time deltaTime = deltaClock.restart();
-        fixedUpdate += deltaTime.asSeconds();
-        secondTimer += deltaTime.asSeconds();
-        if (secondTimer >= 1)
-        {
-            fpsLabel->setText("FPS: " + std::to_string(fps));
-            fps = 0;
-            secondTimer = 0;
-        }
-        fps++;
-        objectsLabel->setText("Objects: " + std::to_string(ObjectManager::getNumberOfObjects()));
-        sf::Event event;
-        while (window.pollEvent(event))
-        {
-            if (event.type == sf::Event::Closed)
-                window.close();
+    // int fps = 0;
+    // float secondTimer = 0;
 
-            gui.handleEvent(event);
+    // sf::Clock deltaClock;
+    // float fixedUpdate = 0;
+    // UpdateManager::Start();
+    // while (window.isOpen())
+    // {
+    //     EventHelper::Event::ThreadSafe::update();
+    //     window.clear();
+    //     // updating the delta time var
+    //     sf::Time deltaTime = deltaClock.restart();
+    //     fixedUpdate += deltaTime.asSeconds();
+    //     secondTimer += deltaTime.asSeconds();
+    //     if (secondTimer >= 1)
+    //     {
+    //         fpsLabel->setText("FPS: " + std::to_string(fps));
+    //         fps = 0;
+    //         secondTimer = 0;
+    //     }
+    //     fps++;
+    //     objectsLabel->setText("Objects: " + std::to_string(ObjectManager::getNumberOfObjects()));
+    //     sf::Event event;
+    //     while (window.pollEvent(event))
+    //     {
+    //         if (event.type == sf::Event::Closed)
+    //             window.close();
 
-            //! Required for LiveVar and CommandPrompt to work as intended
-            LiveVar::UpdateLiveVars(event);
-            Command::Prompt::UpdateEvent(event);
-            //! ----------------------------------------------------------
-        }
-        timer.start();
-        UpdateManager::Update(deltaTime.asSeconds());
-        auto temp = timer.lap<timer::nanoseconds>();
-        totalTime[UpdateManager::getNumberOfObjects()] += temp/10000000.0;
-        numObjects[UpdateManager::getNumberOfObjects()] = UpdateManager::getNumberOfObjects();
-        if (fixedUpdate >= 0.2)
-        {
-            fixedUpdate = 0;
-            temp = timer.lap<timer::nanoseconds>();
-        }
-        UpdateManager::LateUpdate(deltaTime.asSeconds());
-        //! Updates all the vars being displayed
-        VarDisplay::Update();
-        //! ------------------------------=-----
-        //! Updates all Terminating Functions
-        TerminatingFunction::UpdateFunctions(deltaTime.asSeconds());
-        //* Updates for the terminating functions display
-        TFuncDisplay::update(); // updates the terminating functions display
-        //! ------------------------------
+    //         gui.handleEvent(event);
 
-        //! Do physics before this for consistent physics (in object update)
-        WorldHandler::updateWorld(deltaTime.asSeconds()); // updates the world physics
-        CollisionManager::Update(); // updates the collision callbacks
-        //! Draw after this
+    //         //! Required for LiveVar and CommandPrompt to work as intended
+    //         LiveVar::UpdateLiveVars(event);
+    //         Command::Prompt::UpdateEvent(event);
+    //         //! ----------------------------------------------------------
+    //     }
+    //     timer.start();
+    //     UpdateManager::Update(deltaTime.asSeconds());
+    //     auto temp = timer.lap<timer::nanoseconds>();
+    //     totalTime[UpdateManager::getNumberOfObjects()] += temp/10000000.0;
+    //     numObjects[UpdateManager::getNumberOfObjects()] = UpdateManager::getNumberOfObjects();
+    //     if (fixedUpdate >= 0.2)
+    //     {
+    //         fixedUpdate = 0;
+    //     }
+    //     UpdateManager::LateUpdate(deltaTime.asSeconds());
+    //     //! Updates all the vars being displayed
+    //     VarDisplay::Update();
+    //     //! ------------------------------=-----
+    //     //! Updates all Terminating Functions
+    //     TerminatingFunction::UpdateFunctions(deltaTime.asSeconds());
+    //     //* Updates for the terminating functions display
+    //     TFuncDisplay::update(); // updates the terminating functions display
+    //     //! ------------------------------
 
-        //* Write code here
+    //     //! Do physics before this for consistent physics (in object update)
+    //     WorldHandler::updateWorld(deltaTime.asSeconds()); // updates the world physics
+    //     CollisionManager::Update(); // updates the collision callbacks
+    //     //! Draw after this
 
-        if (UpdateManager::getNumberOfObjects() >= 30000)
-        {
-            counter++;
-            if (counter >= tests)
-                break;
+    //     //* Write code here
 
-            testLabel->setText("Test: " + std::to_string(counter+1) + "/" + std::to_string(tests));
+    //     if (UpdateManager::getNumberOfObjects() >= 30000)
+    //     {
+    //         counter++;
+    //         if (counter >= tests)
+    //             break;
 
-            ObjectManager::destroyAllObjects();
-        }
+    //         testLabel->setText("Test: " + std::to_string(counter+1) + "/" + std::to_string(tests));
 
-        new EmptyUpdateObject();
+    //         ObjectManager::destroyAllObjects();
+    //     }
 
-        // ---------------
+    //     new EmptyUpdateObject();
 
-        DrawableManager::draw(window);
+    //     // ---------------
 
-        // draw for tgui
-        gui.draw();
-        // display for sfml window
-        window.display();
-    }
+    //     DrawableManager::draw(window);
 
-    iniParser saveData;
-    saveData.setFilePath("data.ini");
-    if (!saveData.isOpen())
-    {
-        saveData.createFile("data.ini");
-        saveData.setFilePath("data.ini");
-    }
-    saveData.overrideData();
-    saveData.addValue("General", "Sizes", StringHelper::fromVector<size_t>(numObjects));
-    for (size_t i = 0; i < totalTime.size(); i++)
-    {
-        totalTime[i] /= tests;
-    }
-    saveData.addValue("Normal Update", "Times", StringHelper::fromVector<double>(totalTime));
-    saveData.SaveData();
+    //     // draw for tgui
+    //     gui.draw();
+    //     // display for sfml window
+    //     window.display();
+    // }
 
-    //! Required so that VarDisplay and CommandPrompt release all data
-    VarDisplay::close();
-    Command::Prompt::close();
-    TFuncDisplay::close();
-    //! --------------------------------------------------------------
+    // iniParser saveData;
+    // saveData.setFilePath("data.ini");
+    // if (!saveData.isOpen())
+    // {
+    //     saveData.createFile("data.ini");
+    //     saveData.setFilePath("data.ini");
+    // }
+    // saveData.overrideData();
+    // saveData.addValue("General", "Sizes", StringHelper::fromVector<size_t>(numObjects));
+    // for (size_t i = 0; i < totalTime.size(); i++)
+    // {
+    //     totalTime[i] /= tests;
+    // }
+    // saveData.addValue("Normal Update", "Times", StringHelper::fromVector<double>(totalTime));
+    // saveData.SaveData();
 
-    window.close();
+    // //! Required so that VarDisplay and CommandPrompt release all data
+    // VarDisplay::close();
+    // Command::Prompt::close();
+    // TFuncDisplay::close();
+    // //! --------------------------------------------------------------
 
-    return 0;
+    // window.close();
+
+    // return 0;
 }
 
 void addThemeCommands()

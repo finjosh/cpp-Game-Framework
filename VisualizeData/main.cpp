@@ -22,63 +22,26 @@ void addThemeCommands();
 *Any other section will be graphed individually 
 *The name of the second is what will be shown in the legend
 *The data should have a key name of "Values"
-*Color of the data is stored under "Color" and you can chose from any of the following {"Black", "White", "Blue", "Magenta", "Yellow", "Red", "Green", "Cyan"}
+*Color of the data is stored under "Color" and must be a list of size 4
 *Graph Type is stored under "Graph Type" options: {"Scatter", "Histogram", "Line", "Bar"}
 */
 
-template<typename T, typename T2>
-std::map<T2,T> reverseMap(const std::map<T,T2>& map)
-{
-    std::map<T2,T> rtn;
-    for (auto i = map.begin(); i != map.end(); ++i)
-        rtn[i->second] = i->first;
-    return rtn;
-}
-
-std::map<std::string, GraphType> _stringToGraphType = {{"scatter", GraphType::Scatter}, {"histogram", GraphType::Histogram}, {"line", GraphType::Line}, {"bar", GraphType::Bar}};
-std::map<GraphType, std::string> _graphTypeToString = reverseMap<std::string, GraphType>(_stringToGraphType);
-std::vector<std::pair<std::string, sf::Color>> _stringToColor = {{"black", sf::Color::Black}, {"white", sf::Color::White}, {"blue", sf::Color::Blue}, {"magenta", sf::Color::Magenta},
-                                                    {"yellow", sf::Color::Yellow}, {"red", sf::Color::Red}, {"green", sf::Color::Green}, {"cyan", sf::Color::Cyan}};
-std::vector<std::pair<sf::Color, std::string>> _colorToString = {{sf::Color::Black, "black"}, {sf::Color::White, "white"}, {sf::Color::Blue, "blue"}, {sf::Color::Magenta, "magenta"},
-                                                    {sf::Color::Yellow, "yellow"}, {sf::Color::Red, "red"}, {sf::Color::Green, "green"}, {sf::Color::Cyan, "cyan"}};
-
-GraphType toGraphType(const std::string& str)
-{
-    auto temp = _stringToGraphType.find(StringHelper::toLower_copy(str));
-    if (temp == _stringToGraphType.end())
-        return GraphType::Line;
-    return temp->second;
-}
-
-std::string toString(const GraphType& type)
-{
-    auto temp = _graphTypeToString.find(type);
-    if (temp == _graphTypeToString.end())
-        return "Not in dictionary";
-    return temp->second;
-}
-
-/// @brief if the color is not in dictionary returns sf::White
+/// @brief if not able to convert to a color returns sf::Color::White
 sf::Color toColor(const std::string& str)
 {
-    auto temp = StringHelper::toLower_copy(str);
-    for (auto pair: _stringToColor)
-    {
-        if (pair.first == temp)
-            return pair.second;
-    }
-    return sf::Color::White;
+    std::vector<int> data = StringHelper::toVector<int>(str, &StringHelper::toInt);
+    if (data.size() != 4)
+        return sf::Color::White;
+    return {(uint8_t)data[0], (uint8_t)data[1], (uint8_t)data[2], (uint8_t)data[3]};
 }
 
-/// @brief if the color is not in dictionary returns "white"
+// @returns string formatted as a list of size 4
 std::string toString(const sf::Color& color)
 {
-    for (auto pair: _colorToString)
-    {
-        if (pair.first == color)
-            return pair.second;
-    }
-    return "white";
+    return "[" + std::to_string(color.r) + "," +
+                        std::to_string(color.g) + "," +
+                        std::to_string(color.b) + "," +
+                        std::to_string(color.a) + "]";
 }
 
 /// @brief assumes that the data has all the required fields
@@ -96,7 +59,7 @@ void makeGraph(Graph& graph, const iniParser& data, const float& scatterThicknes
             continue;
         graphData.setYValues(StringHelper::toVector<float>(data.getValue(i.first, "Values")));
         graphData.setColor(toColor(data.getValue(i.first, "Color")));
-        graphData.setGraphType(toGraphType(data.getValue(i.first, "Graph Type")));
+        graphData.setGraphType(Graph::strToType(data.getValue(i.first, "Graph Type")));
         graphData.setLabel(i.first);
 
         switch (graphData.getGraphType())
