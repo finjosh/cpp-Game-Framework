@@ -13,6 +13,7 @@
 #include "Utils/iniParser.hpp"
 #include "Utils/Stopwatch.hpp"
 #include "Utils/funcHelper.hpp"
+#include "Utils/Graph.hpp"
 
 class TestHelper
 {
@@ -32,18 +33,24 @@ public:
     /// @param iterations the number of iterations the test has
     /// @param repetitions the number of times we want to run the test (used to find average)
     /// @param timeFormat how the time will be stored (it will always be recorded in nanoseconds but converted to the given format)
+    /// @param startingValue the starting value for iteration (when reseting will call iterateTest until reaching this value without testing)
     static void initTest(const std::string& name, const std::string& xName,
-                         const funcHelper::func<>& test, const funcHelper::func<>& iterateTest, const size_t& iterations = 1, const funcHelper::func<>& resetTest = {[](){}},
-                         const size_t& repetitions = 1, const timer::TimeFormat& timeFormat = timer::TimeFormat::MILLISECONDS);
+                         const funcHelper::func<>& test, const funcHelper::func<>& iterateTest, const size_t& iterations, const size_t& startingValue = 0,
+                         const funcHelper::func<>& resetTest = {[](){}}, const size_t& repetitions = 1, const timer::TimeFormat& timeFormat = timer::TimeFormat::MILLISECONDS);
     /// @note This runs the test and opens a window that shows the progress of the test
-    /// @note this also saves the data collected to a 'name of test'Test.ini file 
+    /// @note this also saves the data collected to a 'name of test'Test.ini file
     /// @note if the file already exists a new one will be created with a different name
     /// @warning if the window is closed early then nothing will be
-    static void runTest();
+    /// @returns the name of the file that was made (if no file was made returns "")
+    static std::string runTest();
     static void setXName(const std::string& name);
     static std::string getXName();
+    /// @brief opens a window that attempts to graph all .ini files in the given folder
+    /// @param folder the folder where the ini files are stored (put "" for the current folder)
+    static void graphData(const std::string& folder, const std::string& fontFile);
 
 protected:
+    static void makeGraph(Graph& graph, const iniParser& data, const float& thickness = 5);
 
 private:
     inline TestHelper() = default;
@@ -52,6 +59,7 @@ private:
     static funcHelper::func<> m_iterateTest;
     static funcHelper::func<> m_resetTest;
     static size_t m_iterations;
+    static size_t m_startingValue;
 
     static std::string m_name;
     static std::string m_xName;

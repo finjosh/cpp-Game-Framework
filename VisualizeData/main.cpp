@@ -109,7 +109,7 @@ int main()
 
     tgui::String dataFolder = "Data";
     std::vector<tgui::String> dataFiles;
-    for (const auto& entry : filesystem::directory_iterator(dataFolder.toStdString()))
+    for (const auto& entry: filesystem::directory_iterator(dataFolder.toStdString()))
         dataFiles.emplace_back(entry.path());
     size_t currentFile = 0;
 
