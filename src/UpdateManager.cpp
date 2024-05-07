@@ -1,6 +1,5 @@
 #include "UpdateManager.hpp"
 #include "ObjectManager.hpp"
-#include <thread>
 
 std::unordered_set<UpdateInterface*> UpdateManager::m_objects;
 std::unordered_set<UpdateInterface*>::iterator UpdateManager::m_iterator;
@@ -20,20 +19,20 @@ void UpdateManager::removeUpdateObject(UpdateInterface* obj)
 // - give each thread a range of objects to update (could be bad if all the objects in one thread have long updates)
     // - give each thread a range then allow them to continue if done early (would be difficult to implement properly)
 // - give each object a atomic<bool> for if it was updated this frame (would have to reset the var after each update)
-void UpdateManager::Update(float deltaTime, int numThreads)
+void UpdateManager::Update(float deltaTime, int numThreads, BS::thread_pool& pool)
 {
     m_iterator = m_objects.begin();
     
-    std::list<std::thread> threads;
+    std::list<std::future<void>> threads;
 
     for (int i = 0; i < numThreads; i++)
     {
-        threads.emplace_back(&_update, deltaTime);
+        threads.emplace_back(pool.submit_task([deltaTime]{ _update(deltaTime); }));
     }
 
     for (auto& thread: threads)
     {
-        thread.join();
+        thread.wait();
     }
 
     threads.clear();

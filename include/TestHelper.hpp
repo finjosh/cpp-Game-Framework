@@ -47,7 +47,7 @@ public:
     static std::string getXName();
     /// @brief opens a window that attempts to graph all .ini files in the given folder
     /// @param folder the folder where the ini files are stored (put "" for the current folder)
-    static void graphData(const std::string& folder, const std::string& fontFile);
+    static void graphData(const std::string& folder);
 
 protected:
     static void makeGraph(Graph& graph, const iniParser& data, const float& thickness = 5);

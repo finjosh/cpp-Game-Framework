@@ -3,9 +3,11 @@
 
 #pragma once
 
-#include "UpdateInterface.hpp"
-
 #include <unordered_set>
+
+#include "BS_thread_pool.hpp"
+
+#include "UpdateInterface.hpp"
 
 class UpdateInterface;
 
@@ -13,7 +15,7 @@ class UpdateManager
 {
 public:
     /// @brief called once every frame
-    static void Update(float deltaTime, int numThreads);
+    static void Update(float deltaTime, int numThreads, BS::thread_pool& pool);
     /// @brief called after update
     static void LateUpdate(float deltaTime);
     /// @brief called up to 50 times a second

@@ -1,4 +1,5 @@
 #include "TestHelper.hpp"
+#include "TGUI/DefaultFont.hpp"
 
 std::string TestHelper::m_name = "Unknown";
 funcHelper::func<> TestHelper::m_test = {[](){}};
@@ -241,7 +242,7 @@ std::string TestHelper::getXName()
     return m_xName;
 }
 
-void TestHelper::graphData(const std::string& folder, const std::string& fontFile)
+void TestHelper::graphData(const std::string& folder)
 {
     if (folder != "" && !std::filesystem::is_directory(folder))
         return;
@@ -282,7 +283,7 @@ void TestHelper::graphData(const std::string& folder, const std::string& fontFil
 
     Graph graph;
     sf::Font font;
-    font.loadFromFile(fontFile);
+    font.loadFromMemory(static_cast<const unsigned char*>(defaultFontBytes), sizeof(defaultFontBytes));
     graph.setFont(font);
     graph.setResolution({window.getSize().x, window.getSize().y});
     graph.setSize({(float)window.getSize().x, (float)window.getSize().y});
