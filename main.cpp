@@ -61,31 +61,30 @@ int main()
 {
     BS::thread_pool pool;
 
-    TestHelper::initTest("Normal", "# of Objects", {[](){ UpdateManager::_update(0); }}, {[](){ new EmptyUpdateObject(); }}, 10001, 0, {[](){ ObjectManager::destroyAllObjects(); }}, 10);
-    TestHelper::runTest(); // TODO have the ability to either replace, dont do anything if already existent, make new file with a suffix, also add the ability to choose folder destination (make the folder if none existent)
+    // TestHelper::initTest("Normal", "# of Objects", {[](){ UpdateManager::_update(0); }}, {[](){ new EmptyUpdateObject(); }}, 10001, 0, {[](){ ObjectManager::destroyAllObjects(); }}, 10);
+    // TestHelper::runTest(TestHelper::FileExists::Replace); 
     TestHelper::initTest("1 Thread", "# of Objects", {[&pool](){ UpdateManager::Update(0,1,pool); }}, {[](){ new EmptyUpdateObject(); }}, 10001, 0, {[](){ ObjectManager::destroyAllObjects(); }}, 10);
-    TestHelper::runTest();
-    TestHelper::initTest("2 Threads", "# of Objects", {[&pool](){ UpdateManager::Update(0,2,pool); }}, {[](){ new EmptyUpdateObject(); }}, 10001, 0, {[](){ ObjectManager::destroyAllObjects(); }}, 10);
-    TestHelper::runTest();
-    TestHelper::initTest("3 Threads", "# of Objects", {[&pool](){ UpdateManager::Update(0,3,pool); }}, {[](){ new EmptyUpdateObject(); }}, 10001, 0, {[](){ ObjectManager::destroyAllObjects(); }}, 10);
-    TestHelper::runTest();
-    TestHelper::initTest("4 Threads", "# of Objects", {[&pool](){ UpdateManager::Update(0,4,pool); }}, {[](){ new EmptyUpdateObject(); }}, 10001, 0, {[](){ ObjectManager::destroyAllObjects(); }}, 10);
-    TestHelper::runTest();
-    TestHelper::initTest("5 Threads", "# of Objects", {[&pool](){ UpdateManager::Update(0,5,pool); }}, {[](){ new EmptyUpdateObject(); }}, 10001, 0, {[](){ ObjectManager::destroyAllObjects(); }}, 10);
-    TestHelper::runTest();
-    TestHelper::initTest("6 Threads", "# of Objects", {[&pool](){ UpdateManager::Update(0,6,pool); }}, {[](){ new EmptyUpdateObject(); }}, 10001, 0, {[](){ ObjectManager::destroyAllObjects(); }}, 10);
-    TestHelper::runTest();
-    TestHelper::initTest("7 Threads", "# of Objects", {[&pool](){ UpdateManager::Update(0,7,pool); }}, {[](){ new EmptyUpdateObject(); }}, 10001, 0, {[](){ ObjectManager::destroyAllObjects(); }}, 10);
-    TestHelper::runTest();
-    TestHelper::initTest("8 Threads", "# of Objects", {[&pool](){ UpdateManager::Update(0,8,pool); }}, {[](){ new EmptyUpdateObject(); }}, 10001, 0, {[](){ ObjectManager::destroyAllObjects(); }}, 10);
-    TestHelper::runTest();
-    TestHelper::initTest("9 Threads", "# of Objects", {[&pool](){ UpdateManager::Update(0,9,pool); }}, {[](){ new EmptyUpdateObject(); }}, 10001, 0, {[](){ ObjectManager::destroyAllObjects(); }}, 10);
-    TestHelper::runTest();
-    TestHelper::initTest("10 Threads", "# of Objects", {[&pool](){ UpdateManager::Update(0,10,pool); }}, {[](){ new EmptyUpdateObject(); }}, 10001, 0, {[](){ ObjectManager::destroyAllObjects(); }}, 10);
-    TestHelper::runTest();
+    TestHelper::runTest(TestHelper::FileExists::Replace);
+    // TestHelper::initTest("2 Threads", "# of Objects", {[&pool](){ UpdateManager::Update(0,2,pool); }}, {[](){ new EmptyUpdateObject(); }}, 10001, 0, {[](){ ObjectManager::destroyAllObjects(); }}, 10);
+    // TestHelper::runTest();
+    // TestHelper::initTest("3 Threads", "# of Objects", {[&pool](){ UpdateManager::Update(0,3,pool); }}, {[](){ new EmptyUpdateObject(); }}, 10001, 0, {[](){ ObjectManager::destroyAllObjects(); }}, 10);
+    // TestHelper::runTest();
+    // TestHelper::initTest("4 Threads", "# of Objects", {[&pool](){ UpdateManager::Update(0,4,pool); }}, {[](){ new EmptyUpdateObject(); }}, 10001, 0, {[](){ ObjectManager::destroyAllObjects(); }}, 10);
+    // TestHelper::runTest();
+    // TestHelper::initTest("5 Threads", "# of Objects", {[&pool](){ UpdateManager::Update(0,5,pool); }}, {[](){ new EmptyUpdateObject(); }}, 10001, 0, {[](){ ObjectManager::destroyAllObjects(); }}, 10);
+    // TestHelper::runTest();
+    // TestHelper::initTest("6 Threads", "# of Objects", {[&pool](){ UpdateManager::Update(0,6,pool); }}, {[](){ new EmptyUpdateObject(); }}, 10001, 0, {[](){ ObjectManager::destroyAllObjects(); }}, 10);
+    // TestHelper::runTest();
+    // TestHelper::initTest("7 Threads", "# of Objects", {[&pool](){ UpdateManager::Update(0,7,pool); }}, {[](){ new EmptyUpdateObject(); }}, 10001, 0, {[](){ ObjectManager::destroyAllObjects(); }}, 10);
+    // TestHelper::runTest();
+    // TestHelper::initTest("8 Threads", "# of Objects", {[&pool](){ UpdateManager::Update(0,8,pool); }}, {[](){ new EmptyUpdateObject(); }}, 10001, 0, {[](){ ObjectManager::destroyAllObjects(); }}, 10);
+    // TestHelper::runTest();
+    // TestHelper::initTest("9 Threads", "# of Objects", {[&pool](){ UpdateManager::Update(0,9,pool); }}, {[](){ new EmptyUpdateObject(); }}, 10001, 0, {[](){ ObjectManager::destroyAllObjects(); }}, 10);
+    // TestHelper::runTest();
+    // TestHelper::initTest("10 Threads", "# of Objects", {[&pool](){ UpdateManager::Update(0,10,pool); }}, {[](){ new EmptyUpdateObject(); }}, 10001, 0, {[](){ ObjectManager::destroyAllObjects(); }}, 10);
+    // TestHelper::runTest();
     
-    // TODO be able to give it a suffix or prefix each file has to end with
-    TestHelper::graphData(""); // TODO be able to give a list of files 
+    TestHelper::graphData(); // TODO be able to give a list of files 
 
     // // setup for sfml and tgui
     // sf::RenderWindow window(sf::VideoMode::getDesktopMode(), "Game Framework", sf::Style::Fullscreen);

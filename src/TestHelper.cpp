@@ -35,6 +35,7 @@ void TestHelper::reset()
     m_iterations = 1;
     m_startingValue = 0;
     m_yData.clear();
+    m_timeFormat = timer::TimeFormat::MILLISECONDS;
 }
 
 void TestHelper::initTest(const std::string& name, const std::string& xName,
@@ -54,11 +55,20 @@ void TestHelper::initTest(const std::string& name, const std::string& xName,
     m_yData.resize(iterations);
 }
 
-std::string TestHelper::runTest()
+std::string TestHelper::runTest(const TestHelper::FileExists& fileExists, const std::string& suffix, std::string folderPath)
 {
+    if (!std::filesystem::is_directory(folderPath))
+    {
+        folderPath = "";
+    }
+
+    iniParser data;
     // if the y data size there is no test to do
-    if (m_yData.size() == 0)
+    data.setFilePath(folderPath + m_name + "Test" + suffix + ".ini");
+    if (m_yData.size() == 0 || (data.isOpen() && fileExists == FileExists::DoNothing))
+    {
         return "";
+    }
 
     auto desktopMode = sf::VideoMode::getDesktopMode();
     sf::RenderWindow window(sf::VideoMode(desktopMode.width / 3, desktopMode.height / 3, desktopMode.bitsPerPixel), "Test: " + m_name, sf::Style::Resize);
@@ -201,24 +211,23 @@ std::string TestHelper::runTest()
             m_yData[i] /= m_repetitions;
         }
 
-    iniParser data;
     size_t temp = 0;
-    data.setFilePath(m_name + "Test.ini");
-    while (data.isOpen())
+    data.setFilePath(folderPath + m_name + "Test" + suffix + ".ini");
+    while (data.isOpen() && fileExists != FileExists::Replace)
     {
         temp++;
-        data.setFilePath(m_name + "Test (" + std::to_string(temp) + ").ini");
+        data.setFilePath(folderPath + m_name + "Test (" + std::to_string(temp) + ")" + suffix + ".ini");
     }
 
     if (temp == 0)
     {
-        data.createFile(m_name + "Test.ini");
-        data.setFilePath(m_name + "Test.ini");
+        data.createFile(folderPath + m_name + "Test" + suffix + ".ini");
+        data.setFilePath(folderPath + m_name + "Test" + suffix + ".ini");
     }
     else
     {
-        data.createFile(m_name + "Test (" + std::to_string(temp) + ").ini");
-        data.setFilePath(m_name + "Test (" + std::to_string(temp) + ").ini");
+        data.createFile(folderPath + m_name + "Test (" + std::to_string(temp) + ")" + suffix + ".ini");
+        data.setFilePath(folderPath + m_name + "Test (" + std::to_string(temp) + ")" + suffix + ".ini");
     }
     data.overrideData();
     data.addValue("General", "XLabel", m_xName);
@@ -242,7 +251,7 @@ std::string TestHelper::getXName()
     return m_xName;
 }
 
-void TestHelper::graphData(const std::string& folder)
+void TestHelper::graphData(const std::string& folder, const std::string& suffix)
 {
     if (folder != "" && !std::filesystem::is_directory(folder))
         return;
@@ -254,7 +263,7 @@ void TestHelper::graphData(const std::string& folder)
     std::list<std::string> files;
     for (const auto& entry: std::filesystem::directory_iterator(folder == "" ? std::filesystem::current_path() : folder))
     {
-        if (entry.path().extension() == ".ini")
+        if (entry.path().extension() == ".ini" && entry.path().filename().generic_string().ends_with(suffix))
             files.push_back(entry.path().filename().generic_string());
     }
 

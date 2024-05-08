@@ -18,6 +18,13 @@
 class TestHelper
 {
 public:
+    enum FileExists
+    {
+        Replace = 0,
+        DoNothing = 1, // skips the test
+        MakeNew = 2 // adds a counter to the end of the new file as windows does
+    };
+
     /// @brief sets the current name for collected data
     static void setName(const std::string& name);
     /// @returns the current name
@@ -39,15 +46,18 @@ public:
                          const funcHelper::func<>& resetTest = {[](){}}, const size_t& repetitions = 1, const timer::TimeFormat& timeFormat = timer::TimeFormat::MILLISECONDS);
     /// @note This runs the test and opens a window that shows the progress of the test
     /// @note this also saves the data collected to a 'name of test'Test.ini file
-    /// @note if the file already exists a new one will be created with a different name
-    /// @warning if the window is closed early then nothing will be
+    /// @warning if the window is closed early then nothing will be saved
+    /// @param fileExists an enum to decide what happens if the file already exists
+    /// @param suffix the suffix that will be added to the file name (added after number add if file name had copies)
+    /// @param folderPath the folder to put the files in
     /// @returns the name of the file that was made (if no file was made returns "")
-    static std::string runTest();
+    static std::string runTest(const TestHelper::FileExists& fileExists = TestHelper::MakeNew, const std::string& suffix = "", std::string folderPath = "");
     static void setXName(const std::string& name);
     static std::string getXName();
     /// @brief opens a window that attempts to graph all .ini files in the given folder
     /// @param folder the folder where the ini files are stored (put "" for the current folder)
-    static void graphData(const std::string& folder);
+    /// @param suffix the required suffix for the file to have (anything before the .ini)
+    static void graphData(const std::string& folder = "", const std::string& suffix = "");
 
 protected:
     static void makeGraph(Graph& graph, const iniParser& data, const float& thickness = 5);
