@@ -37,11 +37,6 @@ private:
 
     static std::unordered_set<UpdateInterface*> m_objects;
 
-    static std::thread* m_thread;
-    static std::function<void()> m_threadFunction;
-    static std::atomic_bool m_done;
-    static std::mutex m_threadLock;
-
     // iterator used for thread updating
     static std::unordered_set<UpdateInterface*>::iterator m_iterator;
     static std::mutex m_iteratorLock;

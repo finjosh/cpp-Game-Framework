@@ -137,6 +137,11 @@ std::string TestHelper::runTest(const TestHelper::FileExists& fileExists, const 
         break;
     }
 
+    for (size_t i = 0; i < m_startingValue; i++)
+    {
+        m_iterateTest.invoke();
+    }
+
     sf::Clock deltaClock;
     float second = 0;
     size_t ips = 0;
@@ -179,22 +184,22 @@ std::string TestHelper::runTest(const TestHelper::FileExists& fileExists, const 
             m_resetTest.invoke();
             testProgress->setText("Test: " + std::to_string(m_currentTest) + "/" + std::to_string(m_repetitions));
             testProgress->setValue(m_currentTest);
-        }
 
-        while (m_startingValue > iter)
-        {
-            iter++;
-            m_iterateTest.invoke();
+            for (size_t i = 0; i < m_startingValue; i++)
+            {
+                m_iterateTest.invoke();
+            }
         }
         
+        uint64_t nanoSec;
         timer.start();
         m_test.invoke();
-        auto nanoSec = timer.lap<timer::nanoseconds>();
+        nanoSec = timer.lap<timer::nanoseconds>();
         m_yData[iter] = (float)(nanoSec/conversionFactor); // using y data as total for now
         iter++;
         m_iterateTest.invoke();
 
-        progress->setText("Test Progress: " + StringHelper::FloatToStringRound((float)iter/m_iterations*100, 1) + "%");
+        progress->setText("Test Progress: " + StringHelper::FloatToStringRound((float)(iter)/(m_iterations)*100, 1) + "%");
         progress->setValue(iter);
 
         // draw for tgui

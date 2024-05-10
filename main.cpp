@@ -61,10 +61,10 @@ int main()
 {
     BS::thread_pool pool;
 
-    // TestHelper::initTest("Normal", "# of Objects", {[](){ UpdateManager::_update(0); }}, {[](){ new EmptyUpdateObject(); }}, 10001, 0, {[](){ ObjectManager::destroyAllObjects(); }}, 10);
-    // TestHelper::runTest(TestHelper::FileExists::Replace); 
+    TestHelper::initTest("Normal", "# of Objects", {[&pool](){ UpdateManager::Update(0,0,pool); }}, {[](){ new EmptyUpdateObject(); }}, 10001, 0, {[](){ ObjectManager::destroyAllObjects(); }}, 10);
+    TestHelper::runTest(TestHelper::FileExists::MakeNew); 
     TestHelper::initTest("1 Thread", "# of Objects", {[&pool](){ UpdateManager::Update(0,1,pool); }}, {[](){ new EmptyUpdateObject(); }}, 10001, 0, {[](){ ObjectManager::destroyAllObjects(); }}, 10);
-    TestHelper::runTest(TestHelper::FileExists::Replace);
+    TestHelper::runTest(TestHelper::FileExists::MakeNew);
     // TestHelper::initTest("2 Threads", "# of Objects", {[&pool](){ UpdateManager::Update(0,2,pool); }}, {[](){ new EmptyUpdateObject(); }}, 10001, 0, {[](){ ObjectManager::destroyAllObjects(); }}, 10);
     // TestHelper::runTest();
     // TestHelper::initTest("3 Threads", "# of Objects", {[&pool](){ UpdateManager::Update(0,3,pool); }}, {[](){ new EmptyUpdateObject(); }}, 10001, 0, {[](){ ObjectManager::destroyAllObjects(); }}, 10);

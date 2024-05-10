@@ -5,11 +5,6 @@ std::unordered_set<UpdateInterface*> UpdateManager::m_objects;
 std::unordered_set<UpdateInterface*>::iterator UpdateManager::m_iterator;
 std::mutex UpdateManager::m_iteratorLock;
 
-std::thread* UpdateManager::m_thread = nullptr;
-std::function<void()> UpdateManager::m_threadFunction = [](){};
-std::atomic_bool UpdateManager::m_done = false;
-std::mutex UpdateManager::m_threadLock;
-
 void UpdateManager::addUpdateObject(UpdateInterface* obj)
 {
     m_objects.insert({obj});
@@ -26,35 +21,28 @@ void UpdateManager::removeUpdateObject(UpdateInterface* obj)
 // - give each object a atomic<bool> for if it was updated this frame (would have to reset the var after each update)
 void UpdateManager::Update(float deltaTime, int numThreads, BS::thread_pool& pool)
 {
-    if (m_thread == nullptr)
-    {
-        m_thread = new std::thread([](){ while (true) { m_threadLock.lock(); m_threadFunction(); m_threadFunction = [](){}; m_threadLock.unlock(); m_done = true; } });
-    }
-
     m_iterator = m_objects.begin();
-    m_done = false;
 
-    m_threadLock.lock();
-    m_threadFunction = [deltaTime](){ _update(deltaTime); };
-    m_threadLock.unlock();
-    
-    while (m_done == false) {}
+    if (numThreads != 0)
+    {
+        std::list<std::future<void>> threads;
 
-    // std::list<std::future<void>> threads;
+        for (int i = 0; i < numThreads; i++)
+        {
+            threads.emplace_back(pool.submit_task([deltaTime]{ _update(deltaTime); }));
+        }
 
-    // for (int i = 0; i < numThreads; i++)
-    // {
-    //     threads.emplace_back(pool.submit_task([deltaTime]{ _update(deltaTime); }));
-    // }
+        for (auto& thread: threads)
+        {
+            thread.wait();
+        }
 
-    // for (auto& thread: threads)
-    // {
-    //     thread.wait();
-    // }
-
-    // threads.clear();
-
-    // _update(deltaTime);
+        threads.clear();
+    }
+    else
+    {
+        _update(deltaTime);
+    }
 
     // std::unordered_set<UpdateInterface*>::iterator i = m_objects.begin();
     // while (i != m_objects.end())
@@ -71,27 +59,27 @@ void UpdateManager::Update(float deltaTime, int numThreads, BS::thread_pool& poo
 
 void UpdateManager::_update(float deltaTime)
 {
-    // m_iteratorLock.lock();
+    m_iteratorLock.lock();
     if (m_iterator == m_objects.end())
     {
-        // m_iteratorLock.unlock();
+        m_iteratorLock.unlock();
         return;
     }
     std::unordered_set<UpdateInterface*>::iterator i = m_iterator++;
-    // m_iteratorLock.unlock();
+    m_iteratorLock.unlock();
 
     while (true)
     {
         if ((*i)->isEnabled())
             (*i)->Update(deltaTime);
-        // m_iteratorLock.lock();
+        m_iteratorLock.lock();
         if (m_iterator == m_objects.end())
         {
-            // m_iteratorLock.unlock();
+            m_iteratorLock.unlock();
             return;
         }
         i = m_iterator++;
-        // m_iteratorLock.unlock();
+        m_iteratorLock.unlock();
     }
 }
 
