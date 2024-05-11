@@ -66,8 +66,10 @@ int main()
     for (size_t i = 1; i <= pool.get_thread_count(); i++)
     {
         TestHelper::initTest("2nd Update - " + std::to_string(i) + " Threads", "# of Objects", {[&pool, i](){ UpdateManager::Update2(0,i,pool); }}, {[](){ new EmptyUpdateObject(); }}, 10001, 0, {[](){ ObjectManager::destroyAllObjects(); }}, 10);
-        TestHelper::runTest(TestHelper::FileExists::DoNothing); // TODO add more info where only IPS is shown (pause button, stop button, last iterations runtime)
+        TestHelper::runTest(TestHelper::FileExists::DoNothing);
     }
+    TestHelper::initTest(std::to_string(16) + " Threads", "# of Objects", {[&pool](){ UpdateManager::Update2(0,16,pool); }}, {[](){ new EmptyUpdateObject(); }}, 100001, 0, {[](){ ObjectManager::destroyAllObjects(); }}, 10);
+    TestHelper::runTest(TestHelper::FileExists::MakeNew);
     
     // TODO add a searching function, list of all files that can be shown, the ability to zoom into a specific section of the data (from x0 to x1 OR from y0 to y1)
     TestHelper::graphData(); // TODO be able to give a list of files 

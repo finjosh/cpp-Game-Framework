@@ -86,29 +86,59 @@ std::string TestHelper::runTest(const TestHelper::FileExists& fileExists, const 
         }
     }
 
+    gui.setTextSize(window.getSize().x/20);
+
     auto panel = tgui::HorizontalWrap::create();
     panel->setAutoLayoutUpdateEnabled(true);
     auto testProgress = tgui::ProgressBar::create();
     auto progress = tgui::ProgressBar::create();
-    auto IPS = tgui::Label::create(); // iterations per second
+    auto subPanel = tgui::Panel::create();
+    auto IPS = tgui::Label::create("IPS"); // iterations per second
+    auto lastRuntime = tgui::Label::create("IT"); // time of the last iteration
+    auto time = tgui::Label::create("Run Time: 0s");
+    auto pause_resume = tgui::Button::create("Pause");
+    auto stop = tgui::Button::create("Stop");
+
+    // Setup for testProgress
     panel->add(testProgress);
+    testProgress->setSize({"100%", "25%"});
+    testProgress->setText("Test: " + std::to_string(m_currentTest) + "/" + std::to_string(m_repetitions));
+    testProgress->setMaximum(m_repetitions);
+
+    // setup for progress
     panel->add(progress);
-    panel->add(IPS);
+    progress->setSize({"100%", "25%"});
+    progress->setText("Test Progress: 0%");
+    progress->setMaximum(m_iterations);
+
+    // setup for extra info
+    panel->add(subPanel);
+    subPanel->setSize({"100%","50%"});
+    subPanel->add(time);
+    time->setVerticalAlignment(tgui::Label::VerticalAlignment::Center);
+    time->setSize({"66%", "33%"});
+    subPanel->add(IPS);
     IPS->setVerticalAlignment(tgui::Label::VerticalAlignment::Center);
-    IPS->setHorizontalAlignment(tgui::Label::HorizontalAlignment::Center);
-    IPS->setTextSize(window.getSize().x/20);
+    IPS->setSize({"66%", "33%"});
+    IPS->setPosition({0, "33%"});
+    subPanel->add(lastRuntime);
+    lastRuntime->setVerticalAlignment(tgui::Label::VerticalAlignment::Center);
+    lastRuntime->setSize({"66%", "33%"});
+    lastRuntime->setPosition({0, "66%"});
+    subPanel->add(pause_resume);
+    pause_resume->setSize({"34%", "50%"});
+    pause_resume->setPosition({"66%", 0});
+    bool paused = false;
+    pause_resume->onClick([&paused, pause_resume](){ paused = !paused; pause_resume->setText(paused ? "Resume" : "Pause"); });
+    subPanel->add(stop);
+    stop->setSize({"34%", "50%"});
+    stop->setPosition({"66%", "50%"});
+    bool STOP = false;
+    stop->onClick([&STOP, stop](){ if (stop->getText() == "Stop") stop->setText("Confirm"); else STOP = true; });
+    stop->onUnfocus([stop](){ stop->setText("Stop"); });
+    
     gui.add(panel);
 
-    testProgress->setSize({"100%", "33%"});
-    testProgress->setText("Test: " + std::to_string(m_currentTest) + "/" + std::to_string(m_repetitions));
-    testProgress->setTextSize(window.getSize().x/20);
-    testProgress->setMaximum(m_repetitions);
-    progress->setSize({"100%", "33%"});
-    progress->setText("Test Progress: 0%");
-    progress->setTextSize(window.getSize().x/20);
-    progress->setMaximum(m_iterations);
-    IPS->setSize({"100%", "33%"});
-    IPS->setText("Iterations Per Second (IPS)");
     panel->setSize({"100%", "100%"});
     panel->updateChildrenWithAutoLayout();
 
@@ -143,18 +173,16 @@ std::string TestHelper::runTest(const TestHelper::FileExists& fileExists, const 
     }
 
     sf::Clock deltaClock;
+    float deltaTime = 0;
     float second = 0;
+    float totalTime = 0;
     size_t ips = 0;
     while (window.isOpen())
     {
-        second += deltaClock.restart().asSeconds();
-        ips++;
-        if (second >= 1)
-        {
-            IPS->setText("IPS: " + std::to_string(ips));
-            ips = 0;
-            second = 0;
-        }
+        if (STOP) return "";
+
+        deltaTime = deltaClock.restart().asSeconds();
+        second += deltaTime;
         window.clear();
 
         sf::Event event;
@@ -167,40 +195,51 @@ std::string TestHelper::runTest(const TestHelper::FileExists& fileExists, const 
             {
                 panel->setSize(window.getSize().x, window.getSize().y);
                 panel->updateChildrenWithAutoLayout();
-                testProgress->setTextSize(window.getSize().x/20);
-                progress->setTextSize(window.getSize().x/20);
-                IPS->setTextSize(window.getSize().x/20);
+                gui.setTextSize(window.getSize().x/20);
             }
 
             gui.handleEvent(event);
         }
 
-        if (iter >= m_iterations)
+        if (!paused)
         {
-            m_currentTest++;
-            if (m_currentTest > m_repetitions)
-                break;
-            iter = 0;
-            m_resetTest.invoke();
-            testProgress->setText("Test: " + std::to_string(m_currentTest) + "/" + std::to_string(m_repetitions));
-            testProgress->setValue(m_currentTest);
-
-            for (size_t i = 0; i < m_startingValue; i++)
+            if (iter >= m_iterations)
             {
-                m_iterateTest.invoke();
-            }
-        }
-        
-        uint64_t nanoSec;
-        timer.start();
-        m_test.invoke();
-        nanoSec = timer.lap<timer::nanoseconds>();
-        m_yData[iter] = (float)(nanoSec/conversionFactor); // using y data as total for now
-        iter++;
-        m_iterateTest.invoke();
+                m_currentTest++;
+                if (m_currentTest > m_repetitions)
+                    break;
+                iter = 0;
+                m_resetTest.invoke();
+                testProgress->setText("Test: " + std::to_string(m_currentTest) + "/" + std::to_string(m_repetitions));
+                testProgress->setValue(m_currentTest);
 
-        progress->setText("Test Progress: " + StringHelper::FloatToStringRound((float)(iter)/(m_iterations)*100, 1) + "%");
-        progress->setValue(iter);
+                for (size_t i = 0; i < m_startingValue; i++)
+                {
+                    m_iterateTest.invoke();
+                }
+            }
+            
+            uint64_t nanoSec;
+            timer.start();
+            m_test.invoke();
+            nanoSec = timer.lap<timer::nanoseconds>();
+            m_yData[iter] = (float)(nanoSec/conversionFactor); // using y data as total for now
+            iter++;
+            m_iterateTest.invoke();
+
+            progress->setText("Test Progress: " + StringHelper::FloatToStringRound((float)(iter)/(m_iterations)*100, 1) + "%");
+            progress->setValue(iter);
+            totalTime += deltaTime;
+            time->setText("Run Time: " + StringHelper::FloatToStringRound(totalTime, 1) + "s");
+            lastRuntime->setText("IT: " + std::to_string((float)(nanoSec/conversionFactor)) + timeFormatStr);
+            if (second >= 1)
+            {
+                IPS->setText("IPS: " + std::to_string(ips));
+                ips = 0;
+                second = 0;
+            }
+            ips++;
+        }
 
         // draw for tgui
         gui.draw();
@@ -237,6 +276,7 @@ std::string TestHelper::runTest(const TestHelper::FileExists& fileExists, const 
     data.overrideData();
     data.addValue("General", "XLabel", m_xName);
     data.addValue("General", "YLabel", "Time (" + timeFormatStr + ")");
+    data.addValue("General", "Average Test Time", std::to_string(totalTime/m_repetitions));
     data.addValue(m_name, "Values", StringHelper::fromVector<float>(m_yData));
     std::vector<size_t> xValues;
     xValues.resize(m_iterations);
