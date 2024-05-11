@@ -61,29 +61,15 @@ int main()
 {
     BS::thread_pool pool;
 
-    TestHelper::initTest("Normal", "# of Objects", {[&pool](){ UpdateManager::Update(0,0,pool); }}, {[](){ new EmptyUpdateObject(); }}, 10001, 0, {[](){ ObjectManager::destroyAllObjects(); }}, 10);
-    TestHelper::runTest(TestHelper::FileExists::MakeNew); 
-    TestHelper::initTest("1 Thread", "# of Objects", {[&pool](){ UpdateManager::Update(0,1,pool); }}, {[](){ new EmptyUpdateObject(); }}, 10001, 0, {[](){ ObjectManager::destroyAllObjects(); }}, 10);
-    TestHelper::runTest(TestHelper::FileExists::MakeNew);
-    // TestHelper::initTest("2 Threads", "# of Objects", {[&pool](){ UpdateManager::Update(0,2,pool); }}, {[](){ new EmptyUpdateObject(); }}, 10001, 0, {[](){ ObjectManager::destroyAllObjects(); }}, 10);
-    // TestHelper::runTest();
-    // TestHelper::initTest("3 Threads", "# of Objects", {[&pool](){ UpdateManager::Update(0,3,pool); }}, {[](){ new EmptyUpdateObject(); }}, 10001, 0, {[](){ ObjectManager::destroyAllObjects(); }}, 10);
-    // TestHelper::runTest();
-    // TestHelper::initTest("4 Threads", "# of Objects", {[&pool](){ UpdateManager::Update(0,4,pool); }}, {[](){ new EmptyUpdateObject(); }}, 10001, 0, {[](){ ObjectManager::destroyAllObjects(); }}, 10);
-    // TestHelper::runTest();
-    // TestHelper::initTest("5 Threads", "# of Objects", {[&pool](){ UpdateManager::Update(0,5,pool); }}, {[](){ new EmptyUpdateObject(); }}, 10001, 0, {[](){ ObjectManager::destroyAllObjects(); }}, 10);
-    // TestHelper::runTest();
-    // TestHelper::initTest("6 Threads", "# of Objects", {[&pool](){ UpdateManager::Update(0,6,pool); }}, {[](){ new EmptyUpdateObject(); }}, 10001, 0, {[](){ ObjectManager::destroyAllObjects(); }}, 10);
-    // TestHelper::runTest();
-    // TestHelper::initTest("7 Threads", "# of Objects", {[&pool](){ UpdateManager::Update(0,7,pool); }}, {[](){ new EmptyUpdateObject(); }}, 10001, 0, {[](){ ObjectManager::destroyAllObjects(); }}, 10);
-    // TestHelper::runTest();
-    // TestHelper::initTest("8 Threads", "# of Objects", {[&pool](){ UpdateManager::Update(0,8,pool); }}, {[](){ new EmptyUpdateObject(); }}, 10001, 0, {[](){ ObjectManager::destroyAllObjects(); }}, 10);
-    // TestHelper::runTest();
-    // TestHelper::initTest("9 Threads", "# of Objects", {[&pool](){ UpdateManager::Update(0,9,pool); }}, {[](){ new EmptyUpdateObject(); }}, 10001, 0, {[](){ ObjectManager::destroyAllObjects(); }}, 10);
-    // TestHelper::runTest();
-    // TestHelper::initTest("10 Threads", "# of Objects", {[&pool](){ UpdateManager::Update(0,10,pool); }}, {[](){ new EmptyUpdateObject(); }}, 10001, 0, {[](){ ObjectManager::destroyAllObjects(); }}, 10);
-    // TestHelper::runTest();
+    TestHelper::initTest("2nd Update - Normal", "# of Objects", {[&pool](){ UpdateManager::Update2(0,0,pool); }}, {[](){ new EmptyUpdateObject(); }}, 10001, 0, {[](){ ObjectManager::destroyAllObjects(); }}, 10);
+    TestHelper::runTest(TestHelper::FileExists::DoNothing); 
+    for (size_t i = 1; i <= pool.get_thread_count(); i++)
+    {
+        TestHelper::initTest("2nd Update - " + std::to_string(i) + " Threads", "# of Objects", {[&pool, i](){ UpdateManager::Update2(0,i,pool); }}, {[](){ new EmptyUpdateObject(); }}, 10001, 0, {[](){ ObjectManager::destroyAllObjects(); }}, 10);
+        TestHelper::runTest(TestHelper::FileExists::DoNothing); // TODO add more info where only IPS is shown (pause button, stop button, last iterations runtime)
+    }
     
+    // TODO add a searching function, list of all files that can be shown, the ability to zoom into a specific section of the data (from x0 to x1 OR from y0 to y1)
     TestHelper::graphData(); // TODO be able to give a list of files 
 
     // // setup for sfml and tgui
