@@ -20,6 +20,7 @@ public:
     static void ClearDestroyQueue();
 
     /// @note instantly destroys all objects
+    /// @note resets all object IDs
     static void destroyAllObjects();
 
 protected:
@@ -41,8 +42,8 @@ private:
     };
 
     /// @brief if the comp class is deleted the object will be removed with the id
-    static _objectCompClass _compClass;
-    static std::unordered_set<Object*> _objects;
+    static _objectCompClass m_compClass;
+    static std::unordered_set<Object*> m_objects;
 };
 
 #endif

@@ -6,37 +6,37 @@ bool _objectComp::operator()(const Object* lhs, const Object* rhs) const
     return lhs->getID() < rhs->getID();
 }
 
-std::list<Object::Ptr<>> Object::_destroyQueue;
-std::atomic_ullong Object::_lastID = 1;
+std::list<Object::Ptr<>> Object::m_destroyQueue;
+std::atomic_ullong Object::m_lastID = 1;
 
 Object::Object()
 {
-    _id = _lastID++; //! could become an issue if lots of creation and deletion happens
+    m_id = m_lastID++; //! could become an issue if lots of creation and deletion happens
     ObjectManager::addObject(this);
 }
 
-Object::Object(unsigned long long id) : _id(id) {}
+Object::Object(unsigned long long id) : m_id(id) {}
 
 void Object::setID(unsigned long long id)
 {
-    _id = id;
+    m_id = id;
 }
 
 Object::~Object()
 {
     // this is not a real object
-    if (_id == 0)
+    if (m_id == 0)
         return;
 
     ObjectManager::removeObject(this);
     
-    if (_parent != nullptr)
+    if (m_parent != nullptr)
     {
-        _parent->_removeChild(this);
+        m_parent->_removeChild(this);
     }
     
-    auto child = _children.begin();
-    while (child != _children.end())
+    auto child = m_children.begin();
+    while (child != m_children.end())
     {
         auto temp = child++;
         (*temp)->_destroy();
@@ -53,8 +53,8 @@ void Object::destroy()
 
 void Object::setEnabled(bool enabled)
 {
-    _enabled = enabled;
-    if (_enabled)
+    m_enabled = enabled;
+    if (m_enabled)
     {
         _onEnabled.invoke();
         onEnabled.invoke();
@@ -68,12 +68,12 @@ void Object::setEnabled(bool enabled)
 
 bool Object::isEnabled() const
 {
-    return _enabled;
+    return m_enabled;
 }
 
 unsigned long int Object::getID() const
 {
-    return _id;
+    return m_id;
 }
 
 Object::Ptr<> Object::getPtr()
@@ -86,12 +86,12 @@ void Object::setParent(Object* parent)
     if (parent == this)
         return;
 
-    if (_parent != nullptr)
+    if (m_parent != nullptr)
     {
-        _parent->_removeChild(this);
+        m_parent->_removeChild(this);
     }
 
-    _parent = parent;
+    m_parent = parent;
     // if not valid have no parent
     if (parent != nullptr)
     {
@@ -108,28 +108,28 @@ void Object::setParent(Object* parent)
 
 Object::Ptr<> Object::getParent()
 {
-    return _parent;
+    return m_parent;
 }
 
 b2Vec2 Object::getLocalVector(const b2Vec2& vec) const
 {
-    return b2MulT(_transform.q, vec);
+    return b2MulT(m_transform.q, vec);
 }
 
 b2Vec2 Object::getGlobalVector(const b2Vec2& vec) const
 {
-    return b2Mul(_transform.q, vec);
+    return b2Mul(m_transform.q, vec);
 }
 
 void Object::rotateAround(const b2Vec2& center, const float& rot)
 {
-    b2Vec2 posChange = rotateAround(_transform.p, center, rot) - _transform.p;
-    _transform.p += posChange;
+    b2Vec2 posChange = rotateAround(m_transform.p, center, rot) - m_transform.p;
+    m_transform.p += posChange;
 
-    for (auto child: _children)
+    for (auto child: m_children)
     {
         child->move(posChange);
-        child->rotateAround(_transform.p, rot);
+        child->rotateAround(m_transform.p, rot);
     }
 }
 
@@ -143,37 +143,37 @@ b2Vec2 Object::rotateAround(const b2Vec2& vec, const b2Vec2& center, const float
 
 void Object::setPosition(const b2Vec2& position)
 {   
-    b2Vec2 posChange = position - _transform.p;
+    b2Vec2 posChange = position - m_transform.p;
 
-    for (auto child: _children)
+    for (auto child: m_children)
     {
         child->move(posChange);
     }
 
-    _transform.p = position;
+    m_transform.p = position;
 }
 
 b2Vec2 Object::getPosition() const
 {   
-    return _transform.p;
+    return m_transform.p;
 }
 
 void Object::setRotation(const float& rotation)
 {
-    float rotChange = rotation - _transform.q.GetAngle();
+    float rotChange = rotation - m_transform.q.GetAngle();
 
-    for (auto child: _children)
+    for (auto child: m_children)
     {
-        child->rotateAround(_transform.p, rotChange);
+        child->rotateAround(m_transform.p, rotChange);
         child->rotate(rotChange);
     }
 
-    _transform.q.Set(rotation);
+    m_transform.q.Set(rotation);
 }
 
 float Object::getRotation() const
 {
-    return _transform.q.GetAngle();
+    return m_transform.q.GetAngle();
 }
 
 void Object::setTransform(const b2Transform& transform)
@@ -184,7 +184,7 @@ void Object::setTransform(const b2Transform& transform)
 
 b2Transform Object::getTransform() const
 {
-    return _transform;
+    return m_transform;
 }
 
 bool Object::canSetTransform() const
@@ -194,9 +194,9 @@ bool Object::canSetTransform() const
 
 void Object::move(const b2Vec2& move)
 {
-    _transform.p += move;
+    m_transform.p += move;
 
-    for (auto child: _children)
+    for (auto child: m_children)
     {
         child->move(move);
     }
@@ -204,9 +204,9 @@ void Object::move(const b2Vec2& move)
 
 void Object::rotate(const float& rot)
 {
-    _transform.q.Set(_transform.q.GetAngle() + rot);
+    m_transform.q.Set(m_transform.q.GetAngle() + rot);
 
-    for (auto child: _children)
+    for (auto child: m_children)
     {
         child->rotate(rot);
     }
@@ -214,9 +214,9 @@ void Object::rotate(const float& rot)
 
 void Object::setLocalPosition(const b2Vec2& position)
 {
-    if (_parent)
+    if (m_parent)
     {
-        this->setPosition(_parent->getPosition() + position);
+        this->setPosition(m_parent->getPosition() + position);
     }
     else
     {
@@ -226,18 +226,18 @@ void Object::setLocalPosition(const b2Vec2& position)
 
 b2Vec2 Object::getLocalPosition() const
 {
-    if (_parent)
+    if (m_parent)
     {
-        return this->getPosition() - _parent->getPosition();
+        return this->getPosition() - m_parent->getPosition();
     }
     return this->getPosition();
 }
 
 void Object::setLocalRotation(const float& rotation)
 {
-    if (_parent)
+    if (m_parent)
     {
-        this->setRotation(_parent->getRotation() + rotation);
+        this->setRotation(m_parent->getRotation() + rotation);
     }
     else
     {
@@ -247,31 +247,31 @@ void Object::setLocalRotation(const float& rotation)
 
 float Object::getLocalRotation() const
 {
-    if (_parent)
+    if (m_parent)
     {
-        return this->getRotation() - _parent->getRotation();
+        return this->getRotation() - m_parent->getRotation();
     }
     return this->getRotation();
 }
 
 b2Rot Object::getRotation_b2() const
 {
-    return _transform.q;
+    return m_transform.q;
 }
 
 void Object::_addChild(Object* object)
 {
     if (object == nullptr) return;
-    _children.push_back(object);
+    m_children.push_back(object);
 }
 
 void Object::_removeChild(Object* object)
 {
     if (object == nullptr) return;
-    _children.remove_if([object](const Object* obj){ return obj == object; });
+    m_children.remove_if([object](const Object* obj){ return obj == object; });
 }
 
 void Object::_addToDestroyQueue()
 {
-    _destroyQueue.emplace_back(this);
+    m_destroyQueue.emplace_back(this);
 }

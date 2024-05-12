@@ -1,5 +1,8 @@
+#include <atomic>
 #include "TestHelper.hpp"
+#include <thread>
 #include "TGUI/DefaultFont.hpp"
+#include "Utils/TerminatingFunction.hpp"
 
 std::string TestHelper::m_name = "Unknown";
 funcHelper::func<> TestHelper::m_test = {[](){}};
@@ -55,7 +58,7 @@ void TestHelper::initTest(const std::string& name, const std::string& xName,
     m_yData.resize(iterations);
 }
 
-std::string TestHelper::runTest(const TestHelper::FileExists& fileExists, const std::string& suffix, std::string folderPath)
+std::string TestHelper::runTest(const TestHelper::FileExists& fileExists, const std::string& suffix, std::string folderPath, const float& inf)
 {
     if (!std::filesystem::is_directory(folderPath))
     {
@@ -206,7 +209,7 @@ std::string TestHelper::runTest(const TestHelper::FileExists& fileExists, const 
             if (iter >= m_iterations)
             {
                 m_currentTest++;
-                if (m_currentTest > m_repetitions)
+                if (m_currentTest >= m_repetitions)
                     break;
                 iter = 0;
                 m_resetTest.invoke();
@@ -249,11 +252,12 @@ std::string TestHelper::runTest(const TestHelper::FileExists& fileExists, const 
     window.close();
 
     // finding the average of the data collected
-    if (m_repetitions != 1)
-        for (size_t i: m_yData)
-        {
-            m_yData[i] /= m_repetitions;
-        }
+    for (size_t i: m_yData)
+    {
+        m_yData[i] /= m_repetitions;
+        if (abs(m_yData[i]) == std::numeric_limits<float>::infinity())
+            m_yData[i] = inf;
+    }
 
     size_t temp = 0;
     data.setFilePath(folderPath + m_name + "Test" + suffix + ".ini");
@@ -301,15 +305,33 @@ void TestHelper::graphData(const std::string& folder, const std::string& suffix)
     if (folder != "" && !std::filesystem::is_directory(folder))
         return;
 
-    auto screenMode = sf::VideoMode::getDesktopMode();
-    sf::RenderWindow window(screenMode, "Test: " + m_name, sf::Style::Fullscreen);
-    tgui::Gui gui{window};
-
     std::list<std::string> files;
     for (const auto& entry: std::filesystem::directory_iterator(folder == "" ? std::filesystem::current_path() : folder))
     {
         if (entry.path().extension() == ".ini" && entry.path().filename().generic_string().ends_with(suffix))
             files.push_back(entry.path().filename().generic_string());
+    }
+
+    TestHelper::graphData(files);
+}
+
+void TestHelper::graphData(const std::list<std::string>& files)
+{
+    auto screenMode = sf::VideoMode::getDesktopMode();
+    sf::RenderWindow window(screenMode, "Test: " + m_name, sf::Style::Fullscreen);
+    tgui::Gui gui{window};
+    gui.setTextSize(window.getSize().x/100);
+
+    std::list<std::string> themePaths = {"Assets/themes/Dark.txt", "themes/Dark.txt",
+                                         "Assets/themes/Black.txt", "themes/Black.txt"};
+
+    for (auto path: themePaths)
+    {
+        if (std::filesystem::exists(path))
+        {
+            tgui::Theme::setDefault(path);
+            break;
+        }
     }
 
     auto Next = tgui::Button::create("Next");
@@ -318,23 +340,39 @@ void TestHelper::graphData(const std::string& folder, const std::string& suffix)
     auto childWindow = tgui::ChildWindow::create("Navigation", tgui::ChildWindow::TitleButton::None);
     childWindow->setResizable(false);
     gui.add(childWindow);
-    childWindow->setSize({"20%","10%"});
+    childWindow->setSize({"20%","15%"});
     childWindow->setPosition({"30%", "5%"});
     childWindow->add(Next);
     childWindow->add(Last);
-    Next->setSize("20%", "100%");
+    Next->setSize("20%", "66%");
     Next->setPosition("80%",0);
-    Last->setSize("20%", "100%");
+    Last->setSize("20%", "66%");
     Last->setPosition(0,0);
     childWindow->add(label);
-    label->setSize({"60%", "100%"});
+    label->setSize({"60%", "66%"});
     label->setMaximumTextWidth(label->getSize().x);
     label->setPosition({"20%", 0});
     label->setHorizontalAlignment(tgui::Label::HorizontalAlignment::Center);
     label->setVerticalAlignment(tgui::Label::VerticalAlignment::Center);
+    auto filesBox = tgui::ComboBox::create();
+    childWindow->add(filesBox);
+    filesBox->setSize({"100%", "34%"});
+    filesBox->setPosition({0, "66%"});
+    for (auto path: files)
+    {
+        filesBox->addItem(path, path);
+    }
 
-    std::list<std::string>::iterator currentFile = files.begin();
+    std::list<std::string>::const_iterator currentFile = files.begin();
 
+    enum graphState 
+    {
+        Updating = 0,
+        Finished = 1,
+        Failed = 2
+    };
+    std::atomic<graphState> state = graphState::Finished;
+    std::thread* graphThread = nullptr;
     Graph graph;
     sf::Font font;
     font.loadFromMemory(static_cast<const unsigned char*>(defaultFontBytes), sizeof(defaultFontBytes));
@@ -350,33 +388,67 @@ void TestHelper::graphData(const std::string& folder, const std::string& suffix)
         temp.setFilePath(*currentFile);
         if (temp.LoadData())
             makeGraph(graph, temp);
+        filesBox->setSelectedItem(*currentFile);
     }
 
+    auto updateGraph = [&graph, &state, label, &graphThread, filesBox, Next, Last](std::string path){         
+        state = graphState::Updating;
+
+        filesBox->setEnabled(false);
+        Next->setEnabled(false);
+        Last->setEnabled(false);
+
+        auto id = TFunc::Add([label](TData* data){
+            data->setRunning();
+            std::string temp = "Loading";
+            for (int i = 0; i < (int)(data->totalTime*2)%3 + 1; i++)
+                temp += '.';
+            label->setText(temp);
+        });
+        graphThread = new std::thread([&graph, &state, path, id, filesBox, Next, Last](){ 
+            iniParser temp(path);
+            if (temp.LoadData() && makeGraph(graph, temp)) 
+                state = graphState::Finished; 
+            else 
+                state = graphState::Failed; 
+            TerminatingFunction::remove(id);
+        }); 
+    };
+
+    filesBox->onItemSelect([Next, Last, &currentFile, &files, &graph, label, &updateGraph](const tgui::String& item){
+        if (item != *currentFile)
+        {   
+            currentFile = std::find(files.begin(), files.end(), item.toStdString()); // there should be no item in the list that is not in the files list
+            label->setText(*currentFile);
+            Last->setEnabled(currentFile != files.begin());
+            Next->setEnabled(currentFile != --files.end());
+            updateGraph(*currentFile);
+        }
+    });
     Next->setEnabled(currentFile != --files.end());
-    Next->onClick([Last, Next, &currentFile, label, &files, &graph](){
+    Next->onClick([Last, Next, &currentFile, label, &files, &graph, filesBox, &updateGraph](){
         currentFile++;
         label->setText(*currentFile);
         Last->setEnabled(currentFile != files.begin());
         Next->setEnabled(currentFile != --files.end());
-        iniParser temp;
-        temp.setFilePath(*currentFile);
-        if (temp.LoadData())
-            makeGraph(graph, temp);
+        updateGraph(*currentFile);
+        filesBox->setSelectedItem(*currentFile);
     });
     Last->setEnabled(false);
-    Last->onClick([Last, Next, &currentFile, label, &files, &graph](){
+    Last->onClick([Last, Next, &currentFile, label, &files, &graph, filesBox, &updateGraph](){
         currentFile--;
         label->setText(*currentFile);
         Last->setEnabled(currentFile != files.begin());
         Next->setEnabled(currentFile != --files.end());
-        iniParser temp;
-        temp.setFilePath(*currentFile);
-        if (temp.LoadData())
-            makeGraph(graph, temp);
+        updateGraph(*currentFile);
+        filesBox->setSelectedItem(*currentFile);
     });
 
+    sf::Clock deltaClock;
+    float deltaTime = 0;
     while (window.isOpen())
     {
+        deltaTime = deltaClock.restart().asSeconds();
         window.clear();
 
         sf::Event event;
@@ -387,8 +459,21 @@ void TestHelper::graphData(const std::string& folder, const std::string& suffix)
 
             gui.handleEvent(event);
         }
+        TerminatingFunction::UpdateFunctions(deltaTime);
 
         window.draw(graph);
+        if (graphThread && state != graphState::Updating)
+        {
+            if (state == graphState::Finished)
+                label->setText(*currentFile);
+            else if (state == graphState::Failed)
+                label->setText("Failed to Graph");
+            graphThread->join();
+            graphThread = nullptr;
+            filesBox->setEnabled(true);
+            Next->setEnabled(true);
+            Last->setEnabled(true);
+        }
 
         // draw for tgui
         gui.draw();
@@ -398,10 +483,10 @@ void TestHelper::graphData(const std::string& folder, const std::string& suffix)
     window.close();
 }
 
-void TestHelper::makeGraph(Graph& graph, const iniParser& data, const float& thickness)
+bool TestHelper::makeGraph(Graph& graph, const iniParser& data, const float& thickness)
 {
     if (data.getValue("General", "X") == "\0")
-        return;
+        return false;
 
     graph.clearDataSets();
     graph.setXLable(data.getValue("General", "XLabel"));
@@ -422,4 +507,5 @@ void TestHelper::makeGraph(Graph& graph, const iniParser& data, const float& thi
         break;
     }
     graph.Update();
+    return true;
 }

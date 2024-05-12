@@ -2,8 +2,6 @@
 #include "ObjectManager.hpp"
 
 std::unordered_set<UpdateInterface*> UpdateManager::m_objects;
-std::unordered_set<UpdateInterface*>::iterator UpdateManager::m_iterator;
-std::mutex UpdateManager::m_iteratorLock;
 
 void UpdateManager::addUpdateObject(UpdateInterface* obj)
 {
@@ -15,53 +13,6 @@ void UpdateManager::removeUpdateObject(UpdateInterface* obj)
     m_objects.erase(obj);
 }
 
-// Different ways to try
-// - give each thread a range of objects to update (could be bad if all the objects in one thread have long updates)
-// ! the more threads there are the longer smaller updates are
-//* faster large updates
-//* only 2 loops through the list no matter the # of threads
-    // - give each thread a range then allow them to continue if done early (would be difficult to implement properly)
-    //! requires more memory for each object (probably not worth the performance boost)
-// - give each object a atomic<bool> for if it was updated this frame (would have to reset the var after each update)
-//! probably bad option (# of threads loops through the objects set no matter what)
-void UpdateManager::Update(float deltaTime, int numThreads, BS::thread_pool& pool)
-{
-    m_iterator = m_objects.begin();
-
-    if (numThreads != 0)
-    {
-        std::list<std::future<void>> threads;
-
-        for (int i = 0; i < numThreads; i++)
-        {
-            threads.emplace_back(pool.submit_task([deltaTime]{ _update(deltaTime); }));
-        }
-
-        for (auto& thread: threads)
-        {
-            thread.wait();
-        }
-
-        threads.clear();
-    }
-    else
-    {
-        _update(deltaTime);
-    }
-
-    // std::unordered_set<UpdateInterface*>::iterator i = m_objects.begin();
-    // while (i != m_objects.end())
-    // {
-    //     // in the case that the obj is destroyed during call
-    //     UpdateInterface* temp = *i;
-    //     i++;
-    //     if (temp->isEnabled())
-    //         temp->Update(deltaTime);
-    // }
-
-    ObjectManager::ClearDestroyQueue();
-}
-
 std::unordered_set<UpdateInterface*>::iterator getIterator(std::unordered_set<UpdateInterface*>::iterator start, size_t n)
 {
     for (size_t i = 0; i < n; i++)
@@ -71,68 +22,117 @@ std::unordered_set<UpdateInterface*>::iterator getIterator(std::unordered_set<Up
     return start;
 }
 
-void UpdateManager::Update2(float deltaTime, int numThreads, BS::thread_pool& pool)
+void UpdateManager::Update(float deltaTime, BS::thread_pool& pool)
 {
-    if (numThreads != 0)
+    std::list<std::future<void>> threads;
+
+    size_t partitionSize = m_objects.size()/pool.get_thread_count();
+    size_t extra = m_objects.size()%pool.get_thread_count();
+    size_t temp = 0;
+    std::unordered_set<UpdateInterface*>::iterator current = m_objects.begin();
+    std::unordered_set<UpdateInterface*>::iterator next;
+    for (int i = 0; i < pool.get_thread_count(); i++)
     {
-        std::list<std::future<void>> threads;
-
-        size_t partitionSize = m_objects.size()/numThreads;
-        size_t extra = m_objects.size()%numThreads;
-        size_t temp = 0;
-        std::unordered_set<UpdateInterface*>::iterator current = m_objects.begin();
-        std::unordered_set<UpdateInterface*>::iterator next;
-        for (int i = 0; i < numThreads; i++)
-        {
-            temp = (extra > 0 ? 1 : 0);
-            next = getIterator(current, partitionSize + temp);
-            threads.emplace_back(pool.submit_task([deltaTime, current, next]{ _update2(deltaTime, current, next); }));
-            current = next;
-            extra -= temp;
-        }
-
-        for (auto& thread: threads)
-        {
-            thread.wait();
-        }
-
-        threads.clear();
+        temp = (extra > 0 ? 1 : 0);
+        next = getIterator(current, partitionSize + temp);
+        threads.emplace_back(pool.submit_task([deltaTime, current, next]{ _update(deltaTime, current, next); }));
+        current = next;
+        extra -= temp;
     }
-    else
+
+    for (auto& thread: threads)
     {
-        _update2(deltaTime, m_objects.begin(), m_objects.end());
+        thread.wait();
     }
+
+    threads.clear();
 
     ObjectManager::ClearDestroyQueue();
 }
 
-void UpdateManager::_update(float deltaTime)
+void UpdateManager::LateUpdate(float deltaTime, BS::thread_pool& pool)
 {
-    m_iteratorLock.lock();
-    if (m_iterator == m_objects.end())
-    {
-        m_iteratorLock.unlock();
-        return;
-    }
-    std::unordered_set<UpdateInterface*>::iterator i = m_iterator++;
-    m_iteratorLock.unlock();
+    std::list<std::future<void>> threads;
 
-    while (true)
+    size_t partitionSize = m_objects.size()/pool.get_thread_count();
+    size_t extra = m_objects.size()%pool.get_thread_count();
+    size_t temp = 0;
+    std::unordered_set<UpdateInterface*>::iterator current = m_objects.begin();
+    std::unordered_set<UpdateInterface*>::iterator next;
+    for (int i = 0; i < pool.get_thread_count(); i++)
     {
-        if ((*i)->isEnabled())
-            (*i)->Update(deltaTime);
-        m_iteratorLock.lock();
-        if (m_iterator == m_objects.end())
-        {
-            m_iteratorLock.unlock();
-            return;
-        }
-        i = m_iterator++;
-        m_iteratorLock.unlock();
+        temp = (extra > 0 ? 1 : 0);
+        next = getIterator(current, partitionSize + temp);
+        threads.emplace_back(pool.submit_task([deltaTime, current, next]{ _lateUpdate(deltaTime, current, next); }));
+        current = next;
+        extra -= temp;
     }
+
+    for (auto& thread: threads)
+    {
+        thread.wait();
+    }
+
+    threads.clear();
+
+    ObjectManager::ClearDestroyQueue();
 }
 
-void UpdateManager::_update2(float deltaTime, std::unordered_set<UpdateInterface*>::iterator begin, std::unordered_set<UpdateInterface*>::iterator end)
+void UpdateManager::FixedUpdate(BS::thread_pool& pool)
+{
+    std::list<std::future<void>> threads;
+
+    size_t partitionSize = m_objects.size()/pool.get_thread_count();
+    size_t extra = m_objects.size()%pool.get_thread_count();
+    size_t temp = 0;
+    std::unordered_set<UpdateInterface*>::iterator current = m_objects.begin();
+    std::unordered_set<UpdateInterface*>::iterator next;
+    for (int i = 0; i < pool.get_thread_count(); i++)
+    {
+        temp = (extra > 0 ? 1 : 0);
+        next = getIterator(current, partitionSize + temp);
+        threads.emplace_back(pool.submit_task([current, next]{ _fixedUpdate(current, next); }));
+        current = next;
+        extra -= temp;
+    }
+
+    for (auto& thread: threads)
+    {
+        thread.wait();
+    }
+
+    threads.clear();
+
+    ObjectManager::ClearDestroyQueue();
+}
+
+void UpdateManager::Start(BS::thread_pool& pool)
+{
+    std::list<std::future<void>> threads;
+
+    size_t partitionSize = m_objects.size()/pool.get_thread_count();
+    size_t extra = m_objects.size()%pool.get_thread_count();
+    size_t temp = 0;
+    std::unordered_set<UpdateInterface*>::iterator current = m_objects.begin();
+    std::unordered_set<UpdateInterface*>::iterator next;
+    for (int i = 0; i < pool.get_thread_count(); i++)
+    {
+        temp = (extra > 0 ? 1 : 0);
+        next = getIterator(current, partitionSize + temp);
+        threads.emplace_back(pool.submit_task([current, next]{ _start(current, next); }));
+        current = next;
+        extra -= temp;
+    }
+
+    for (auto& thread: threads)
+    {
+        thread.wait();
+    }
+
+    threads.clear();
+}
+
+void UpdateManager::_update(float deltaTime, std::unordered_set<UpdateInterface*>::iterator begin, std::unordered_set<UpdateInterface*>::iterator end)
 {
     while (begin != end)
     {
@@ -142,41 +142,32 @@ void UpdateManager::_update2(float deltaTime, std::unordered_set<UpdateInterface
     }
 }
 
-void UpdateManager::LateUpdate(float deltaTime)
+void UpdateManager::_lateUpdate(float deltaTime, std::unordered_set<UpdateInterface*>::iterator begin, std::unordered_set<UpdateInterface*>::iterator end)
 {
-    std::unordered_set<UpdateInterface*>::iterator i = m_objects.begin();
-    while (i != m_objects.end())
+    while (begin != end)
     {
-        // in the case that the obj is destroyed during call
-        UpdateInterface* temp = *i;
-        i++;
-        if (temp->isEnabled())
-            temp->LateUpdate(deltaTime);
+        if ((*begin)->isEnabled())
+            (*begin)->LateUpdate(deltaTime);
+        begin++;
     }
-
-    ObjectManager::ClearDestroyQueue();
 }
 
-void UpdateManager::FixedUpdate()
+void UpdateManager::_fixedUpdate(std::unordered_set<UpdateInterface*>::iterator begin, std::unordered_set<UpdateInterface*>::iterator end)
 {
-    std::unordered_set<UpdateInterface*>::iterator i = m_objects.begin();
-    while (i != m_objects.end())
+    while (begin != end)
     {
-        // in the case that the obj is destroyed during call
-        UpdateInterface* temp = *i;
-        i++;
-        if (temp->isEnabled())
-            temp->FixedUpdate();
+        if ((*begin)->isEnabled())
+            (*begin)->FixedUpdate();
+        begin++;
     }
-
-    ObjectManager::ClearDestroyQueue();
 }
 
-void UpdateManager::Start()
+void UpdateManager::_start(std::unordered_set<UpdateInterface*>::iterator begin, std::unordered_set<UpdateInterface*>::iterator end)
 {
-    for (UpdateInterface* obj: m_objects)
+    while (begin != end)
     {
-        obj->Start();
+        (*begin)->Start();
+        begin++;
     }
 }
 

@@ -50,17 +50,22 @@ public:
     /// @param fileExists an enum to decide what happens if the file already exists
     /// @param suffix the suffix that will be added to the file name (added after number add if file name had copies)
     /// @param folderPath the folder to put the files in
+    /// @param inf the value that infinity and -infinity values will be converted to (graph will break otherwise)
     /// @returns the name of the file that was made (if no file was made returns "")
-    static std::string runTest(const TestHelper::FileExists& fileExists = TestHelper::MakeNew, const std::string& suffix = "", std::string folderPath = "");
+    static std::string runTest(const TestHelper::FileExists& fileExists = TestHelper::MakeNew, const std::string& suffix = "", std::string folderPath = "", const float& inf = 0);
     static void setXName(const std::string& name);
     static std::string getXName();
     /// @brief opens a window that attempts to graph all .ini files in the given folder
     /// @param folder the folder where the ini files are stored (put "" for the current folder)
     /// @param suffix the required suffix for the file to have (anything before the .ini)
+    /// @note creates a thread when ever loading a graph
     static void graphData(const std::string& folder = "", const std::string& suffix = "");
+    /// @brief opens a window that attempts to graph all .ini files in the given folder
+    /// @param files the list of paths to files that are to be graphed
+    static void graphData(const std::list<std::string>& files);
 
 protected:
-    static void makeGraph(Graph& graph, const iniParser& data, const float& thickness = 5);
+    static bool makeGraph(Graph& graph, const iniParser& data, const float& thickness = 5);
 
 private:
     inline TestHelper() = default;

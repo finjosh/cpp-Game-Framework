@@ -61,18 +61,12 @@ int main()
 {
     BS::thread_pool pool;
 
-    TestHelper::initTest("2nd Update - Normal", "# of Objects", {[&pool](){ UpdateManager::Update2(0,0,pool); }}, {[](){ new EmptyUpdateObject(); }}, 10001, 0, {[](){ ObjectManager::destroyAllObjects(); }}, 10);
-    TestHelper::runTest(TestHelper::FileExists::DoNothing); 
-    for (size_t i = 1; i <= pool.get_thread_count(); i++)
-    {
-        TestHelper::initTest("2nd Update - " + std::to_string(i) + " Threads", "# of Objects", {[&pool, i](){ UpdateManager::Update2(0,i,pool); }}, {[](){ new EmptyUpdateObject(); }}, 10001, 0, {[](){ ObjectManager::destroyAllObjects(); }}, 10);
-        TestHelper::runTest(TestHelper::FileExists::DoNothing);
-    }
-    TestHelper::initTest(std::to_string(16) + " Threads", "# of Objects", {[&pool](){ UpdateManager::Update2(0,16,pool); }}, {[](){ new EmptyUpdateObject(); }}, 100001, 0, {[](){ ObjectManager::destroyAllObjects(); }}, 10);
-    TestHelper::runTest(TestHelper::FileExists::MakeNew);
+    // TestHelper::initTest("Normal Enable Check (all enabled)", "# of Objects", {[&pool](){ UpdateManager::Update(0,pool); }}, {[](){ new EmptyUpdateObject(); }}, 100001, 0);
+    // // , {[](){ ObjectManager::destroyAllObjects(); }}, 10
+    // TestHelper::runTest(TestHelper::FileExists::DoNothing); 
     
-    // TODO add a searching function, list of all files that can be shown, the ability to zoom into a specific section of the data (from x0 to x1 OR from y0 to y1)
-    TestHelper::graphData(); // TODO be able to give a list of files 
+    // TODO add a searching function, the ability to zoom into a specific section of the data (from x0 to x1 OR from y0 to y1)
+    TestHelper::graphData();
 
     // // setup for sfml and tgui
     // sf::RenderWindow window(sf::VideoMode::getDesktopMode(), "Game Framework", sf::Style::Fullscreen);
@@ -96,32 +90,13 @@ int main()
     // addThemeCommands();
     // // create the UI for the TFuncDisplay
     // TFuncDisplay::init(gui);
-
     // //! ---------------------------------------------------
 
-    // auto fpsLabel = tgui::Label::create("FPS");
-    // gui.add(fpsLabel);
-    // auto objectsLabel = tgui::Label::create("Objects");
-    // objectsLabel->setPosition({0,25});
-    // gui.add(objectsLabel);
-
-    // std::vector<double> totalTime;
-    // totalTime.resize(30000);
-    // std::vector<size_t> numObjects;
-    // numObjects.resize(30000);
-    // timer::Stopwatch timer;
-    // int tests = 10;
-    // int counter = 0;
-    // auto testLabel = tgui::Label::create("Test: " + std::to_string(counter+1) + "/" + std::to_string(tests));
-    // testLabel->setPosition({0,50});
-    // gui.add(testLabel);
-
-    // int fps = 0;
-    // float secondTimer = 0;
+    // new Wall({0,0}, {100,10});
 
     // sf::Clock deltaClock;
     // float fixedUpdate = 0;
-    // UpdateManager::Start();
+    // UpdateManager::Start(pool);
     // while (window.isOpen())
     // {
     //     EventHelper::Event::ThreadSafe::update();
@@ -129,15 +104,7 @@ int main()
     //     // updating the delta time var
     //     sf::Time deltaTime = deltaClock.restart();
     //     fixedUpdate += deltaTime.asSeconds();
-    //     secondTimer += deltaTime.asSeconds();
-    //     if (secondTimer >= 1)
-    //     {
-    //         fpsLabel->setText("FPS: " + std::to_string(fps));
-    //         fps = 0;
-    //         secondTimer = 0;
-    //     }
-    //     fps++;
-    //     objectsLabel->setText("Objects: " + std::to_string(ObjectManager::getNumberOfObjects()));
+
     //     sf::Event event;
     //     while (window.pollEvent(event))
     //     {
@@ -151,16 +118,13 @@ int main()
     //         Command::Prompt::UpdateEvent(event);
     //         //! ----------------------------------------------------------
     //     }
-    //     timer.start();
-    //     UpdateManager::Update(deltaTime.asSeconds());
-    //     auto temp = timer.lap<timer::nanoseconds>();
-    //     totalTime[UpdateManager::getNumberOfObjects()] += temp/10000000.0;
-    //     numObjects[UpdateManager::getNumberOfObjects()] = UpdateManager::getNumberOfObjects();
+    //     UpdateManager::Update(deltaTime.asSeconds(), pool);
     //     if (fixedUpdate >= 0.2)
     //     {
+    //         UpdateManager::FixedUpdate(pool);
     //         fixedUpdate = 0;
     //     }
-    //     UpdateManager::LateUpdate(deltaTime.asSeconds());
+    //     UpdateManager::LateUpdate(deltaTime.asSeconds(), pool);
     //     //! Updates all the vars being displayed
     //     VarDisplay::Update();
     //     //! ------------------------------=-----
@@ -177,19 +141,6 @@ int main()
 
     //     //* Write code here
 
-    //     if (UpdateManager::getNumberOfObjects() >= 30000)
-    //     {
-    //         counter++;
-    //         if (counter >= tests)
-    //             break;
-
-    //         testLabel->setText("Test: " + std::to_string(counter+1) + "/" + std::to_string(tests));
-
-    //         ObjectManager::destroyAllObjects();
-    //     }
-
-    //     new EmptyUpdateObject();
-
     //     // ---------------
 
     //     DrawableManager::draw(window);
@@ -199,22 +150,6 @@ int main()
     //     // display for sfml window
     //     window.display();
     // }
-
-    // iniParser saveData;
-    // saveData.setFilePath("data.ini");
-    // if (!saveData.isOpen())
-    // {
-    //     saveData.createFile("data.ini");
-    //     saveData.setFilePath("data.ini");
-    // }
-    // saveData.overrideData();
-    // saveData.addValue("General", "Sizes", StringHelper::fromVector<size_t>(numObjects));
-    // for (size_t i = 0; i < totalTime.size(); i++)
-    // {
-    //     totalTime[i] /= tests;
-    // }
-    // saveData.addValue("Normal Update", "Times", StringHelper::fromVector<double>(totalTime));
-    // saveData.SaveData();
 
     // //! Required so that VarDisplay and CommandPrompt release all data
     // VarDisplay::close();

@@ -309,17 +309,17 @@ private:
     void _addChild(Object* object);
     void _removeChild(Object* object);
 
-    std::atomic_bool _enabled = true;
-    size_t _id = 0;
+    std::atomic_bool m_enabled = true;
+    size_t m_id = 0;
 
     // TODO make a renderer that uses this transform
-    b2Transform _transform = b2Transform(b2Vec2(0,0), b2Rot(0));
+    b2Transform m_transform = b2Transform(b2Vec2(0,0), b2Rot(0));
 
-    Object* _parent = nullptr;
-    std::list<Object*> _children;
+    Object* m_parent = nullptr;
+    std::list<Object*> m_children;
 
-    static std::list<Object::Ptr<>> _destroyQueue;
-    static std::atomic_ullong _lastID;
+    static std::list<Object::Ptr<>> m_destroyQueue;
+    static std::atomic_ullong m_lastID;
 
     friend ObjectManager;
 };
