@@ -108,20 +108,25 @@ public:
     /// @param impulse the impulse data
     inline virtual void PostSolve(b2Contact* contact, const b2ContactImpulse* impulse) {};
     /// @brief called every frame until the two objects are no longer colliding
+    /// @note this will also be called on start of contact
     inline virtual void OnColliding(CollisionData collisionData) {};
 
-    bool canSetTransform() const override;
-
     /// @brief dont use this during a box2d callback (PreSolve and PostSolve)
+    /// @note does not wake the body
     void setPosition(const b2Vec2& position) override; // TODO find a better way to do this so there is no ambiguity when using this function
     /// @brief dont use this during a box2d callback (PreSolve and PostSolve)
+    /// @note does not wake the body
     void setRotation(const float& rotation) override; // TODO find a better way to do this so there is no ambiguity when using this function
     /// @brief dont use this during a box2d callback (PreSolve and PostSolve)
+    /// @note does not wake the body
     void setTransform(const b2Transform& transform) override; // TODO find a better way to do this so there is no ambiguity when using this function
     /// @brief dont use this during a box2d callback (PreSolve and PostSolve)
+    /// @note does not wake the body
     void move(const b2Vec2& move) override; // TODO find a better way to do this so there is no ambiguity when using this function
     /// @brief dont use this during a box2d callback (PreSolve and PostSolve)
+    /// @note does not wake the body
     void rotate(const float& rot) override; // TODO find a better way to do this so there is no ambiguity when using this function
+    void setAwake(const bool& awake = true);
 
 protected:
     /// @brief creates a body in the world with the default body def parameters
@@ -131,6 +136,9 @@ protected:
     void initCollider(const b2Vec2& pos, const b2Rot& rot = b2Rot(0));
     /// @brief create a body in the world with the given body def
     void initCollider(const b2BodyDef& bodyDef);
+
+    /// @brief updates the object transform to this colliders body transform
+    void _update();
 
     friend CollisionManager;
 

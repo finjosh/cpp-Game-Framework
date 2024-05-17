@@ -121,9 +121,10 @@ void Collider::updatePhysicsState()
     m_body->SetEnabled(m_enabled && Object::isEnabled());
 }
 
-bool Collider::canSetTransform() const
+void Collider::_update()
 {
-    return false;
+    if (m_body != nullptr)
+        Object::setTransform(m_body->GetTransform());
 }
 
 void Collider::setPosition(const b2Vec2& position) 
@@ -169,6 +170,11 @@ void Collider::rotate(const float& rot)
         m_body->SetTransform(m_body->GetPosition(), m_body->GetAngle() + rot);
     }
     Object::rotate(rot);
+}
+
+void Collider::setAwake(const bool& awake)
+{
+    m_body->SetAwake(awake);
 }
 
 //* Collision Data

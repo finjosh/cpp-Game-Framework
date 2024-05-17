@@ -87,11 +87,13 @@ public:
         {
             Collider::move({10*deltaTime,0});
         }
+        Collider::setAwake(true);
     }
 
     inline virtual void OnColliding(CollisionData data) override
     {
         Command::Prompt::print("Colliding");
+        Command::Prompt::print(std::to_string(Object::getPosition().x) + ", " + std::to_string(Object::getPosition().y));
     }
 
     inline virtual void Draw(sf::RenderWindow& window) override
@@ -144,7 +146,7 @@ int main()
     TFuncDisplay::init(gui);
     //! ---------------------------------------------------
 
-    new Wall({0,0}, {100,10});
+    new Wall({25,25}, {100,10});
     new Player();
 
     sf::Clock deltaClock;

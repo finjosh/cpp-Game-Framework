@@ -187,11 +187,6 @@ b2Transform Object::getTransform() const
     return m_transform;
 }
 
-bool Object::canSetTransform() const
-{
-    return true;
-}
-
 void Object::move(const b2Vec2& move)
 {
     m_transform.p += move;

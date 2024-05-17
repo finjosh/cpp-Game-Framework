@@ -25,7 +25,7 @@ void CollisionManager::BeginContact(b2Contact* contact)
         // B->BeginContact({A, contact->GetFixtureB(), contact->GetFixtureA()});
     }
 }
-
+#include "Utils/Debug/CommandPrompt.hpp"
 void CollisionManager::EndContact(b2Contact* contact)
 {
     Collider* A = static_cast<Collider*>((void*)contact->GetFixtureA()->GetBody()->GetUserData().pointer);
@@ -33,10 +33,12 @@ void CollisionManager::EndContact(b2Contact* contact)
     // TODO fix this
     if (A != nullptr)
     {
+        Command::Prompt::print(std::to_string(A->m_currentCollisions.find({B, contact->GetFixtureA(), contact->GetFixtureB()}) != A->m_currentCollisions.end()));
         A->m_currentCollisions.erase({B, contact->GetFixtureA(), contact->GetFixtureB()});
     }
     if (B != nullptr)
     {
+        Command::Prompt::print(std::to_string(B->m_currentCollisions.find({A, contact->GetFixtureB(), contact->GetFixtureA()}) != B->m_currentCollisions.end()));
         B->m_currentCollisions.erase({A, contact->GetFixtureB(), contact->GetFixtureA()});
     }
     if (A == nullptr || B == nullptr) return;
@@ -102,6 +104,7 @@ void CollisionManager::Update()
 
     for (auto obj: m_objects)
     {
+        obj->_update();
         for (auto collision: obj->m_currentCollisions) // TODO implement this feature better
         {
             obj->OnColliding(collision);

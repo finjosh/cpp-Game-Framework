@@ -274,10 +274,6 @@ public:
     float getLocalRotation() const;
     virtual void setTransform(const b2Transform& transform);
     b2Transform getTransform() const;
-    /// @brief if there is another class that overrides the transform you should 1. not override it 2. not set transforms
-    /// @note the transform includes the position and rotation functions
-    /// @returns true if you can set transform, position, or rotation
-    virtual bool canSetTransform() const;
     virtual void move(const b2Vec2& move);
     /// @param rot in radians
     virtual void rotate(const float& rot);
