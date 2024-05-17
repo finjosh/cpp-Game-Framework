@@ -3,6 +3,7 @@
 #include <thread>
 #include "TGUI/DefaultFont.hpp"
 #include "Utils/TerminatingFunction.hpp"
+#include "Utils/TGUICommon.hpp"
 
 std::string TestHelper::m_name = "Unknown";
 funcHelper::func<> TestHelper::m_test = {[](){}};
@@ -338,6 +339,8 @@ void TestHelper::graphData(const std::list<std::string>& files)
     auto Last = tgui::Button::create("Last");
     auto label = tgui::Label::create("No files available");
     auto childWindow = tgui::ChildWindow::create("Navigation", tgui::ChildWindow::TitleButton::None);
+    tguiCommon::ChildWindow windowData;
+    windowData.setMinimize_Maximize(childWindow);
     childWindow->setResizable(false);
     gui.add(childWindow);
     childWindow->setSize({"20%","15%"});
@@ -361,7 +364,7 @@ void TestHelper::graphData(const std::list<std::string>& files)
     for (auto path: files)
     {
         filesBox->addItem(path, path);
-    }
+    }    
 
     std::list<std::string>::const_iterator currentFile = files.begin();
 

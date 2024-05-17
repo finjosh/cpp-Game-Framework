@@ -30,9 +30,9 @@ protected:
     friend Collider;
 
 private:
-    static std::unordered_set<Collider*> _objects;
-    static std::list<std::pair<Collider*, CollisionData>> _beginContact; // TODO optimize this
-    static std::list<std::pair<Collider*, CollisionData>> _endContact; // TODO optimize this
+    static std::unordered_set<Collider*> m_objects;
+    static std::list<std::pair<Collider*, CollisionData>> m_beginContact; // TODO optimize this
+    static std::list<std::pair<Collider*, CollisionData>> m_endContact; // TODO optimize this
 };
 
 #endif

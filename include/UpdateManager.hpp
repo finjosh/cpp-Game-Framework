@@ -22,6 +22,28 @@ public:
     static void FixedUpdate(BS::thread_pool& pool);
     /// @brief called just before opening the window
     static void Start(BS::thread_pool& pool);
+
+    /// @note use this for single threaded updates
+    static inline void Update(float deltaTime)
+    {
+        _update(deltaTime, m_objects.begin(), m_objects.end());
+    }
+    /// @note use this for single threaded updates
+    static inline void LateUpdate(float deltaTime)
+    {
+        _lateUpdate(deltaTime, m_objects.begin(), m_objects.end());
+    }
+    /// @note use this for single threaded updates
+    static inline void FixedUpdate()
+    {
+        _fixedUpdate(m_objects.begin(), m_objects.end());
+    }
+    /// @note use this for single threaded updates
+    static inline void Start()
+    {
+        _start(m_objects.begin(), m_objects.end());
+    }
+
     static size_t getNumberOfObjects();
 
 protected:

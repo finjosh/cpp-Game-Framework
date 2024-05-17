@@ -20,6 +20,7 @@ class ObjectManager;
 #define PI b2_pi
 
 /// @note the pure virtual "destroy" function must only handle the destruction of the derived object
+/// @warning no thread safe if not acceded through a pointer or Object::Ptr
 class Object
 {
 public:
@@ -277,9 +278,9 @@ public:
     /// @note the transform includes the position and rotation functions
     /// @returns true if you can set transform, position, or rotation
     virtual bool canSetTransform() const;
-    void move(const b2Vec2& move);
+    virtual void move(const b2Vec2& move);
     /// @param rot in radians
-    void rotate(const float& rot);
+    virtual void rotate(const float& rot);
 
 protected:
     inline virtual void OnEnable() {};

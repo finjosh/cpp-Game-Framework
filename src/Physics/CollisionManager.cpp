@@ -2,9 +2,9 @@
 #include "Physics/Collider.hpp"
 #include "ObjectManager.hpp"
 
-std::unordered_set<Collider*> CollisionManager::_objects;
-std::list<std::pair<Collider*, CollisionData>> CollisionManager::_beginContact;
-std::list<std::pair<Collider*, CollisionData>> CollisionManager::_endContact;
+std::unordered_set<Collider*> CollisionManager::m_objects;
+std::list<std::pair<Collider*, CollisionData>> CollisionManager::m_beginContact;
+std::list<std::pair<Collider*, CollisionData>> CollisionManager::m_endContact;
 
 void CollisionManager::BeginContact(b2Contact* contact)
 {
@@ -12,12 +12,16 @@ void CollisionManager::BeginContact(b2Contact* contact)
     Collider* B = static_cast<Collider*>((void*)contact->GetFixtureB()->GetBody()->GetUserData().pointer);
     if (A != nullptr)
     {
-        _beginContact.push_back({A, {B, contact->GetFixtureA(), contact->GetFixtureB()}});
+        CollisionData data = {B, contact->GetFixtureA(), contact->GetFixtureB()};
+        m_beginContact.push_back({A, data}); // TODO redo this storage
+        A->m_currentCollisions.insert(data);
         // A->BeginContact({B, contact->GetFixtureA(), contact->GetFixtureB()});
     }
     if (B != nullptr)
     {
-        _beginContact.push_back({B, {A, contact->GetFixtureB(), contact->GetFixtureA()}});
+        CollisionData data = {A, contact->GetFixtureB(), contact->GetFixtureA()};
+        m_beginContact.push_back({B, data}); // TODO redo this storage
+        B->m_currentCollisions.insert(data);
         // B->BeginContact({A, contact->GetFixtureB(), contact->GetFixtureA()});
     }
 }
@@ -27,15 +31,23 @@ void CollisionManager::EndContact(b2Contact* contact)
     Collider* A = static_cast<Collider*>((void*)contact->GetFixtureA()->GetBody()->GetUserData().pointer);
     Collider* B = static_cast<Collider*>((void*)contact->GetFixtureB()->GetBody()->GetUserData().pointer);
     // TODO fix this
+    if (A != nullptr)
+    {
+        A->m_currentCollisions.erase({B, contact->GetFixtureA(), contact->GetFixtureB()});
+    }
+    if (B != nullptr)
+    {
+        B->m_currentCollisions.erase({A, contact->GetFixtureB(), contact->GetFixtureA()});
+    }
     if (A == nullptr || B == nullptr) return;
     // if (A != nullptr)
     // {
-        _endContact.push_back({A, {B, contact->GetFixtureA(), contact->GetFixtureB()}});
+        m_endContact.push_back({A, {B, contact->GetFixtureA(), contact->GetFixtureB()}});
         // A->EndContact({B, contact->GetFixtureA(), contact->GetFixtureB()});
     // }
     // if (B != nullptr)
     // {
-        _endContact.push_back({B, {A, contact->GetFixtureB(), contact->GetFixtureA()}});
+        m_endContact.push_back({B, {A, contact->GetFixtureB(), contact->GetFixtureA()}});
         // B->EndContact({A, contact->GetFixtureB(), contact->GetFixtureA()});
     // }
 }
@@ -74,33 +86,35 @@ void CollisionManager::PostSolve(b2Contact* contact, const b2ContactImpulse* imp
 
 void CollisionManager::Update()
 {
-    for (auto data: _beginContact)
+    for (auto data: m_beginContact)
     {
         data.first->BeginContact(data.second);
     }
-    _beginContact.clear();
+    m_beginContact.clear();
 
-    // TODO fix bug where box2d calls end contact after the body is destroyed and then this crashes
-    for (auto data: _endContact)
+    for (auto data: m_endContact)
     {
         data.first->EndContact(data.second);
     }
-    _endContact.clear();
+    m_endContact.clear();
 
     ObjectManager::ClearDestroyQueue();
 
-    for (auto obj: _objects)
+    for (auto obj: m_objects)
     {
-        obj->_update();
+        for (auto collision: obj->m_currentCollisions) // TODO implement this feature better
+        {
+            obj->OnColliding(collision);
+        }
     }
 }
 
 void CollisionManager::addCollider(Collider* Collider)
 {
-    _objects.insert({Collider});
+    m_objects.insert({Collider});
 }
 
 void CollisionManager::removeCollider(Collider* collider)
 {
-    _objects.erase({collider});
+    m_objects.erase({collider});
 }

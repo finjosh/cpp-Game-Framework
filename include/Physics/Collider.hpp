@@ -3,6 +3,8 @@
 
 #pragma once
 
+#include <set>
+
 #include "box2d/box2d.h"
 
 #include "Physics/WorldHandler.hpp"
@@ -24,10 +26,15 @@ public:
     /// @returns the fixture from the other object that collided
     b2Fixture* getFixtureB();
 
+    bool operator < (const CollisionData& data) const;
+    bool operator > (const CollisionData& data) const;
+    bool operator == (const CollisionData& data) const;
+    bool operator != (const CollisionData& data) const;
+
 private:
-    Collider* _collider;
-    b2Fixture* _thisFixture;
-    b2Fixture* _otherFixture;
+    Collider* m_collider;
+    b2Fixture* m_thisFixture;
+    b2Fixture* m_otherFixture;
 };
 
 // TODO make an onColliding function for while a body is actively colliding with this 
@@ -100,15 +107,21 @@ public:
     /// @param contact the contact data
     /// @param impulse the impulse data
     inline virtual void PostSolve(b2Contact* contact, const b2ContactImpulse* impulse) {};
+    /// @brief called every frame until the two objects are no longer colliding
+    inline virtual void OnColliding(CollisionData collisionData) {};
 
     bool canSetTransform() const override;
 
     /// @brief dont use this during a box2d callback (PreSolve and PostSolve)
-    void setPosition(const b2Vec2& position) override;
+    void setPosition(const b2Vec2& position) override; // TODO find a better way to do this so there is no ambiguity when using this function
     /// @brief dont use this during a box2d callback (PreSolve and PostSolve)
-    void setRotation(const float& rotation) override;
+    void setRotation(const float& rotation) override; // TODO find a better way to do this so there is no ambiguity when using this function
     /// @brief dont use this during a box2d callback (PreSolve and PostSolve)
-    void setTransform(const b2Transform& transform) override;
+    void setTransform(const b2Transform& transform) override; // TODO find a better way to do this so there is no ambiguity when using this function
+    /// @brief dont use this during a box2d callback (PreSolve and PostSolve)
+    void move(const b2Vec2& move) override; // TODO find a better way to do this so there is no ambiguity when using this function
+    /// @brief dont use this during a box2d callback (PreSolve and PostSolve)
+    void rotate(const float& rot) override; // TODO find a better way to do this so there is no ambiguity when using this function
 
 protected:
     /// @brief creates a body in the world with the default body def parameters
@@ -119,18 +132,17 @@ protected:
     /// @brief create a body in the world with the given body def
     void initCollider(const b2BodyDef& bodyDef);
 
-    /// @brief only use this if you know what you are doing
-    void _update();
-
     friend CollisionManager;
 
 private:
     /// @brief updates the body state (enabled or not)
     void updatePhysicsState();
 
-    b2Body* _body;
+    b2Body* m_body;
     /// @brief if true follows object else physics are disabled no matter object state
-    bool _enabled = true;
+    bool m_enabled = true;
+    /// @note stores all the current contacts that are ongoing
+    std::set<CollisionData> m_currentCollisions;
 };
 
 namespace std {

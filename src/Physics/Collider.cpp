@@ -13,10 +13,10 @@ Collider::Collider()
 
 Collider::~Collider()
 {
-    if (_body != nullptr)
+    if (m_body != nullptr)
     {
-        _body->GetUserData().pointer = (uintptr_t)nullptr; // removing the ptr from the body as box2d calls end contact with the user data
-        WorldHandler::getWorld().DestroyBody(_body);
+        m_body->GetUserData().pointer = (uintptr_t)nullptr; // removing the ptr from the body as box2d calls end contact with the user data
+        WorldHandler::getWorld().DestroyBody(m_body);
     }
 
     CollisionManager::removeCollider(this);
@@ -24,37 +24,37 @@ Collider::~Collider()
 
 b2Body* Collider::operator->()
 {
-    return _body;
+    return m_body;
 }
 
 const b2Body* Collider::operator->() const
 {
-    return _body;
+    return m_body;
 }
 
 b2Body* Collider::operator*()
 {
-    return _body;
+    return m_body;
 }
 
 const b2Body* Collider::operator*() const
 {
-    return _body;
+    return m_body;
 }
 
 b2Body* Collider::getBody()
 {
-    return _body;
+    return m_body;
 }
 
 const b2Body* Collider::getBody() const
 {
-    return _body;
+    return m_body;
 }
 
 b2Fixture* Collider::createFixture(const b2FixtureDef& fixture)
 {
-    return _body->CreateFixture(&fixture);
+    return m_body->CreateFixture(&fixture);
 }
 
 b2Fixture* Collider::createFixture(const b2Shape& shape, const float& density, const float& friction, 
@@ -67,7 +67,7 @@ b2Fixture* Collider::createFixture(const b2Shape& shape, const float& density, c
     def.restitutionThreshold = restitutionThreshold;
     def.filter = filter;
     def.shape = &shape;
-    return _body->CreateFixture(&def);
+    return m_body->CreateFixture(&def);
 }
 
 b2Fixture* Collider::createFixtureSensor(const b2Shape& shape, const float& density, const b2Filter& filter)
@@ -77,7 +77,7 @@ b2Fixture* Collider::createFixtureSensor(const b2Shape& shape, const float& dens
     def.density = density;
     def.filter = filter;
     def.shape = &shape;
-    return _body->CreateFixture(&def);
+    return m_body->CreateFixture(&def);
 }
 
 void Collider::initCollider(const b2Vec2& pos, const b2Rot& rot)
@@ -96,34 +96,29 @@ void Collider::initCollider(const float& x, const float& y, const float& rot)
 
 void Collider::initCollider(const b2BodyDef& bodyDef)
 {
-    _body = WorldHandler::getWorld().CreateBody(&bodyDef);
-    _body->GetUserData().pointer = (uintptr_t)this;
-    _update();
+    m_body = WorldHandler::getWorld().CreateBody(&bodyDef);
+    m_body->GetUserData().pointer = (uintptr_t)this;
+    Object::setTransform(m_body->GetTransform());
 }
 
 void Collider::setPhysicsEnabled(const bool& enabled)
 {
-    _enabled = enabled;
+    m_enabled = enabled;
 
-    if (_body == nullptr)
+    if (m_body == nullptr)
         return;
 
-    _body->SetEnabled(_enabled && Object::isEnabled());
+    m_body->SetEnabled(m_enabled && Object::isEnabled());
 }
 
 bool Collider::isPhysicsEnabled() const
 {
-    return _enabled && Object::isEnabled();
+    return m_enabled && Object::isEnabled();
 }
 
 void Collider::updatePhysicsState()
 {
-    _body->SetEnabled(_enabled && Object::isEnabled());
-}
-
-void Collider::_update()
-{
-    Object::setTransform(_body->GetTransform());
+    m_body->SetEnabled(m_enabled && Object::isEnabled());
 }
 
 bool Collider::canSetTransform() const
@@ -131,45 +126,86 @@ bool Collider::canSetTransform() const
     return false;
 }
 
-//* Collision Data
-
-CollisionData::CollisionData(Collider* collider, b2Fixture* thisFixture, b2Fixture* otherFixture) : _collider(collider), _thisFixture(thisFixture), _otherFixture(otherFixture) {}
-
-Collider* CollisionData::getCollider()
-{
-    return _collider;
-}
-
-b2Fixture* CollisionData::getFixtureA()
-{
-    return _thisFixture;
-}
-
-b2Fixture* CollisionData::getFixtureB()
-{
-    return _otherFixture;
-}
-
 void Collider::setPosition(const b2Vec2& position) 
 {
-    if (this->_body != nullptr)
+    if (m_body != nullptr)
     {
-        this->_body->SetTransform(position, this->_body->GetAngle());
+        m_body->SetTransform(position, m_body->GetAngle());
     }
+    Object::setPosition(position);
 }
 
 void Collider::setRotation(const float& rotation) 
 {
-    if (this->_body != nullptr)
+    if (m_body != nullptr)
     {
-        this->_body->SetTransform(this->_body->GetPosition(), rotation);
+        m_body->SetTransform(m_body->GetPosition(), rotation);
     }
+    Object::setRotation(rotation);
 }
 
 void Collider::setTransform(const b2Transform& transform) 
 {
-    if (this->_body != nullptr)
+    if (m_body != nullptr)
     {
-        this->_body->SetTransform(transform.p, transform.q.GetAngle());
+        m_body->SetTransform(transform.p, transform.q.GetAngle());
     }
+    Object::setTransform(transform);
+}
+
+void Collider::move(const b2Vec2& move)
+{
+    if (m_body != nullptr)
+    {
+        m_body->SetTransform(m_body->GetPosition() + move, m_body->GetAngle());
+    }
+    Object::move(move);
+}
+
+void Collider::rotate(const float& rot)
+{
+    if (m_body != nullptr)
+    {
+        m_body->SetTransform(m_body->GetPosition(), m_body->GetAngle() + rot);
+    }
+    Object::rotate(rot);
+}
+
+//* Collision Data
+
+CollisionData::CollisionData(Collider* collider, b2Fixture* thisFixture, b2Fixture* otherFixture) : m_collider(collider), m_thisFixture(thisFixture), m_otherFixture(otherFixture) {}
+
+Collider* CollisionData::getCollider()
+{
+    return m_collider;
+}
+
+b2Fixture* CollisionData::getFixtureA()
+{
+    return m_thisFixture;
+}
+
+b2Fixture* CollisionData::getFixtureB()
+{
+    return m_otherFixture;
+}
+
+bool CollisionData::operator < (const CollisionData& data) const
+{
+    return data.m_collider > this->m_collider && data.m_otherFixture > this->m_otherFixture && data.m_thisFixture > this->m_thisFixture;
+}
+
+bool CollisionData::operator > (const CollisionData& data) const
+{
+    return data.m_collider < this->m_collider && data.m_otherFixture < this->m_otherFixture && data.m_thisFixture < this->m_thisFixture;
+}
+
+bool CollisionData::operator == (const CollisionData& data) const
+{
+    return data.m_collider == this->m_collider && data.m_otherFixture == this->m_otherFixture && data.m_thisFixture == this->m_thisFixture;
+}
+
+bool CollisionData::operator != (const CollisionData& data) const
+{
+    return !(*this == data);
 }
