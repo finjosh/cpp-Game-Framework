@@ -27,6 +27,8 @@ protected:
     static Object::Ptr<> addObject(Object* object);
     static void removeObject(Object* object);
 
+    static void addToDestroyQueue(Object* object);
+
     friend Object;
 
 private:
@@ -44,6 +46,10 @@ private:
     /// @brief if the comp class is deleted the object will be removed with the id
     static _objectCompClass m_compClass;
     static std::unordered_set<Object*> m_objects;
+
+    static std::list<Object::Ptr<>> m_destroyQueue0;
+    static std::list<Object::Ptr<>> m_destroyQueue1;
+    static bool m_nextQueue;
 };
 
 #endif

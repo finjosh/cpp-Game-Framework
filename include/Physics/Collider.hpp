@@ -37,10 +37,8 @@ private:
     b2Fixture* m_otherFixture;
 };
 
-// TODO make an onColliding function for while a body is actively colliding with this 
 // TODO completely hide all body functions unless they are needed
 // TODO refactor for easier to use code
-// TODO find a way to deal with box2d on end collision and this being destroyed before that is called (dont destroy objects that have colliders till the end contact is called?)
 /// @note do not use body user data as that stores this collider
 class Collider : public virtual Object
 {
@@ -112,19 +110,19 @@ public:
     inline virtual void OnColliding(CollisionData collisionData) {};
 
     /// @brief dont use this during a box2d callback (PreSolve and PostSolve)
-    /// @note does not wake the body
+    /// @note does not wake the body (i.e. no physics will be updated when body is asleep)
     void setPosition(const b2Vec2& position) override; // TODO find a better way to do this so there is no ambiguity when using this function
     /// @brief dont use this during a box2d callback (PreSolve and PostSolve)
-    /// @note does not wake the body
+    /// @note does not wake the body (i.e. no physics will be updated when body is asleep)
     void setRotation(const float& rotation) override; // TODO find a better way to do this so there is no ambiguity when using this function
     /// @brief dont use this during a box2d callback (PreSolve and PostSolve)
-    /// @note does not wake the body
+    /// @note does not wake the body (i.e. no physics will be updated when body is asleep)
     void setTransform(const b2Transform& transform) override; // TODO find a better way to do this so there is no ambiguity when using this function
     /// @brief dont use this during a box2d callback (PreSolve and PostSolve)
-    /// @note does not wake the body
+    /// @note does not wake the body (i.e. no physics will be updated when body is asleep)
     void move(const b2Vec2& move) override; // TODO find a better way to do this so there is no ambiguity when using this function
     /// @brief dont use this during a box2d callback (PreSolve and PostSolve)
-    /// @note does not wake the body
+    /// @note does not wake the body (i.e. no physics will be updated when body is asleep)
     void rotate(const float& rot) override; // TODO find a better way to do this so there is no ambiguity when using this function
     void setAwake(const bool& awake = true);
 
@@ -139,6 +137,9 @@ protected:
 
     /// @brief updates the object transform to this colliders body transform
     void _update();
+
+    /// @brief removes the current body from physics
+    void destroyBody();
 
     friend CollisionManager;
 

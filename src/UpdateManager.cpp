@@ -46,8 +46,6 @@ void UpdateManager::Update(float deltaTime, BS::thread_pool& pool)
     }
 
     threads.clear();
-
-    ObjectManager::ClearDestroyQueue();
 }
 
 void UpdateManager::LateUpdate(float deltaTime, BS::thread_pool& pool)
@@ -74,8 +72,6 @@ void UpdateManager::LateUpdate(float deltaTime, BS::thread_pool& pool)
     }
 
     threads.clear();
-
-    ObjectManager::ClearDestroyQueue();
 }
 
 void UpdateManager::FixedUpdate(BS::thread_pool& pool)
@@ -102,8 +98,6 @@ void UpdateManager::FixedUpdate(BS::thread_pool& pool)
     }
 
     threads.clear();
-
-    ObjectManager::ClearDestroyQueue();
 }
 
 void UpdateManager::Start(BS::thread_pool& pool)

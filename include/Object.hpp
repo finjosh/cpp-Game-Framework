@@ -15,7 +15,7 @@ class ObjectManager;
 
 /// @brief dont use this unless you know what you are doing
 /// @note this anything after this will be public unless specifying scope
-#define createDestroy() private: inline virtual void _destroy() override { delete(this); } public:
+#define createDestroy() private: inline virtual void m_destroy() override { delete(this); } public:
 
 #define PI b2_pi
 
@@ -42,40 +42,40 @@ public:
         {
             if (this->isValid())
             {
-                _ptr->_onDestroy.disconnect(_eventID);
+                m_ptr->m_onDestroy.disconnect(m_eventID);
             }
             this->removePtr();
         }
         
         inline T* operator->()
         {
-            return _ptr;
+            return m_ptr;
         }
         
         inline const T* operator->() const
         {
-            return _ptr;
+            return m_ptr;
         }
         
         inline T* operator*()
         {
-            return _ptr;
+            return m_ptr;
         }
         
         inline const T* operator*() const
         {
-            return _ptr;
+            return m_ptr;
         }
         
         inline Object::Ptr<T>& operator=(const Object::Ptr<T>& Ptr)
         {
-            this->set(Ptr._ptr);
+            this->set(Ptr.m_ptr);
             return *this;
         }
 
         inline Object::Ptr<T>& operator=(const T* Ptr)
         {
-            this->set(Ptr._ptr);
+            this->set(Ptr.m_ptr);
             return *this;
         }
         
@@ -127,19 +127,19 @@ public:
         
         inline T* get()
         {
-            return _ptr;
+            return m_ptr;
         }
         
         /// @brief if there is no ptr returns nullptr
         /// @returns obj or nullptr if no obj
         inline const T* get() const
         {
-            return _ptr;
+            return m_ptr;
         }
         
         inline bool isValid() const
         {
-            return (_ptr != nullptr);
+            return (m_ptr != nullptr);
         }
         
         /// @brief assigns which obj is stored in this ptr
@@ -148,14 +148,14 @@ public:
         {
             if (this->isValid())
             {
-                _ptr->_onDestroy.disconnect(_eventID);
+                m_ptr->m_onDestroy.disconnect(m_eventID);
             }
             this->removePtr();
 
             if (rawPtr != nullptr)
             {
-                _ptr = rawPtr;    
-                _eventID = _ptr->_onDestroy(Object::Ptr<T>::removePtr, this);
+                m_ptr = rawPtr;    
+                m_eventID = m_ptr->m_onDestroy(Object::Ptr<T>::removePtr, this);
             }
         }
         
@@ -163,27 +163,24 @@ public:
         /// @returns the id of the base Object class
         inline size_t getID() const
         {
-            return (this->_ptr == nullptr ? 0 : this->_ptr->getID());
+            return (this->m_ptr == nullptr ? 0 : this->m_ptr->getID());
         }
 
     protected:
         inline void removePtr()
         {
-            _ptr = nullptr;
-            _eventID = 0;
+            m_ptr = nullptr;
+            m_eventID = 0;
         }
 
     private:
         inline Ptr(const Ptr& ptr) = default;
 
-        T* _ptr = nullptr;
-        size_t _eventID = 0;
+        T* m_ptr = nullptr;
+        size_t m_eventID = 0;
     };
 
     Object();
-    /// @brief Create an object as a child
-    /// @note this will be faster than creating an object and setting it as a child
-    Object(Object::Ptr<> parent);
     ~Object();
 
     void setEnabled(bool enabled = true);
@@ -192,9 +189,10 @@ public:
     unsigned long int getID() const;
     Object::Ptr<> getPtr();
 
-    /// @brief if nullptr then no parent
-    void setParent(Object* parent);
-    /// @brief if invalid then no parent
+    /// @note set parent to nullptr if you dont want a parent
+    /// @param parent the wanted parent
+    void setParent(Object::Ptr<>& parent);
+    /// @returns an invalid ptr if no parent
     Object::Ptr<> getParent();
 
     /// @note if derived class, use the virtual function
@@ -282,29 +280,32 @@ protected:
     inline virtual void OnEnable() {};
     inline virtual void OnDisable() {};
     /// @warning do NOT disconnect all EVER
-    EventHelper::Event _onEnabled;
+    EventHelper::Event m_onEnabled;
     /// @warning do NOT disconnect all EVER
-    EventHelper::Event _onDisabled;
+    EventHelper::Event m_onDisabled;
     /// @warning do NOT disconnect all EVER
-    EventHelper::Event _onDestroy;
+    EventHelper::Event m_onDestroy;
     /// @warning do NOT disconnect all EVER
-    EventHelper::Event _onParentSet;
+    EventHelper::Event m_onParentSet;
     /// @warning do NOT disconnect all EVER
-    EventHelper::Event _onParentRemoved;
+    EventHelper::Event m_onParentRemoved;
+    /// @brief called when added to destroy queue
+    /// @warning do NOT disconnect all EVER
+    EventHelper::Event m_onDestroyQueue;
     /// @brief adds this object to the destroy queue
     /// @note same as using destroy
-    void _addToDestroyQueue();
+    void m_addToDestroyQueue();
 
 private:
     /// @brief this should actually delete the object
-    virtual void _destroy() = 0;
+    virtual void m_destroy() = 0;
     /// @warning only use this if you know what you are doing
     Object(unsigned long long id);
     /// @warning only use this if you know what you are doing
     void setID(unsigned long long id);
 
-    void _addChild(Object* object);
-    void _removeChild(Object* object);
+    void m_addChild(Object* object);
+    void m_removeChild(Object* object);
 
     std::atomic_bool m_enabled = true;
     size_t m_id = 0;
@@ -315,7 +316,6 @@ private:
     Object* m_parent = nullptr;
     std::list<Object*> m_children;
 
-    static std::list<Object::Ptr<>> m_destroyQueue;
     static std::atomic_ullong m_lastID;
 
     friend ObjectManager;

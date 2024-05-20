@@ -20,41 +20,19 @@
 #include "TestHelper.hpp"
 //! -------
 
+#include "Graphics/Rect.hpp"
+
 using namespace std;
-using namespace sf;
 
 void addThemeCommands();
 
-class Wall : public virtual Object, public Collider, public DrawableObject, public sf::RectangleShape
+class Player : public virtual Object, public Collider, public Rect, public UpdateInterface
 {
 public:
-    inline Wall(const b2Vec2& pos, const b2Vec2& size)
-    {
-        b2PolygonShape b2shape;
-        b2shape.SetAsBox(size.x/2, size.y/2);
+    std::string name = " sdkofjgjdof";
 
-        Collider::initCollider(pos.x,pos.y);
-        Collider::createFixture(b2shape, 1, 0.25);
-        Collider::getBody()->SetType(b2BodyType::b2_staticBody);
+    // using Collider::setPosition;
 
-        RectangleShape::setSize({size.x*PIXELS_PER_METER,size.y*PIXELS_PER_METER});
-        RectangleShape::setOrigin(size.x/2*PIXELS_PER_METER,size.y/2*PIXELS_PER_METER);
-        RectangleShape::setFillColor(sf::Color::Red);
-    }
-
-    inline virtual void Draw(sf::RenderWindow& window) override
-    {
-        RectangleShape::setPosition(Object::getPosition().x*PIXELS_PER_METER, Object::getPosition().y*PIXELS_PER_METER);
-        RectangleShape::setRotation(Object::getRotation()*180/PI);
-        window.draw(*this);
-    }
-
-    createDestroy();
-};
-
-class Player : public virtual Object, public Collider, public DrawableObject, public UpdateInterface, public sf::RectangleShape
-{
-public:
     inline Player()
     {
         b2PolygonShape b2shape;
@@ -64,9 +42,9 @@ public:
         Collider::createFixture(b2shape, 1, 0.25);
         Collider::getBody()->SetType(b2BodyType::b2_dynamicBody);
 
-        RectangleShape::setSize({10*PIXELS_PER_METER,10*PIXELS_PER_METER});
-        RectangleShape::setOrigin(5*PIXELS_PER_METER,5*PIXELS_PER_METER);
-        RectangleShape::setFillColor(sf::Color::White);
+        Rect::setSize({10*PIXELS_PER_METER,10*PIXELS_PER_METER});
+        Rect::setOrigin(5*PIXELS_PER_METER,5*PIXELS_PER_METER);
+        Rect::setFillColor(sf::Color::White);
     }
 
     inline virtual void Update(const float& deltaTime) override
@@ -96,11 +74,48 @@ public:
         Command::Prompt::print(std::to_string(Object::getPosition().x) + ", " + std::to_string(Object::getPosition().y));
     }
 
+    createDestroy();
+};
+
+class Wall : public virtual Object, public Collider, public DrawableObject, public sf::RectangleShape
+{
+public:
+    inline Wall(const b2Vec2& pos, const b2Vec2& size)
+    {
+        b2PolygonShape b2shape;
+        b2shape.SetAsBox(size.x/2, size.y/2);
+
+        Collider::initCollider(pos.x,pos.y);
+        Collider::createFixture(b2shape, 1, 0.25);
+        Collider::getBody()->SetType(b2BodyType::b2_staticBody);
+
+        RectangleShape::setSize({size.x*PIXELS_PER_METER,size.y*PIXELS_PER_METER});
+        RectangleShape::setOrigin(size.x/2*PIXELS_PER_METER,size.y/2*PIXELS_PER_METER);
+        RectangleShape::setFillColor(sf::Color::Red);
+    }
+
     inline virtual void Draw(sf::RenderWindow& window) override
     {
         RectangleShape::setPosition(Object::getPosition().x*PIXELS_PER_METER, Object::getPosition().y*PIXELS_PER_METER);
         RectangleShape::setRotation(Object::getRotation()*180/PI);
         window.draw(*this);
+    }
+
+    inline void BeginContact(CollisionData data) override
+    {
+        if (Object::Ptr<Player> player = data.getCollider()->cast<Player>())
+        {
+            data.getCollider()->destroy();
+            Command::Prompt::print("Begin Contact with player: " + player->name);
+        }
+    }
+
+    inline void EndContact(CollisionData data) override
+    {
+        if (Object::Ptr<Player> player = data.getCollider()->cast<Player>())
+        {
+            Command::Prompt::print("End contact with player: " + player->name);
+        }
     }
 
     createDestroy();
@@ -115,9 +130,9 @@ int main()
 {
     // BS::thread_pool pool;
 
-    // TestHelper::initTest("Normal Enable Check (all enabled)", "# of Objects", {[&pool](){ UpdateManager::Update(0,pool); }}, {[](){ new EmptyUpdateObject(); }}, 100001, 0);
+    // TestHelper::initTest("Normal Enable Check (all enabled)", "# of Objects", {[](){ UpdateManager::Update(0); }}, {[](){ new EmptyUpdateObject(); }}, 100001, 0);
     // // , {[](){ ObjectManager::destroyAllObjects(); }}, 10
-    // TestHelper::runTest(TestHelper::FileExists::DoNothing); 
+    // TestHelper::runTest(TestHelper::FileExists::MakeNew); 
     
     // TODO the ability to zoom into a specific section of the data (from x0 to x1 OR from y0 to y1)
     // TestHelper::graphData();
@@ -148,6 +163,9 @@ int main()
 
     new Wall({25,25}, {100,10});
     new Player();
+    auto p = new Player();
+    p->setPosition({15,0});
+    p->name = "Something";
 
     sf::Clock deltaClock;
     float fixedUpdate = 0;
@@ -173,6 +191,7 @@ int main()
             Command::Prompt::UpdateEvent(event);
             //! ----------------------------------------------------------
         }
+
         UpdateManager::Update(deltaTime.asSeconds());
         if (fixedUpdate >= 0.2)
         {
@@ -200,6 +219,8 @@ int main()
 
         DrawableManager::draw(window);
 
+        ObjectManager::ClearDestroyQueue();
+
         // draw for tgui
         gui.draw();
         // display for sfml window
@@ -222,11 +243,11 @@ void addThemeCommands()
     Command::Handler::addCommand(Command::command{"setTheme", "Function used to set the theme of the UI (The previous outputs in the command prompt will not get updated color)", 
         {Command::print, "Trying calling one of the sub commands"},
         std::list<Command::command>{
-            Command::command{"default", "(Currently does not work, coming soon) Sets the theme back to default", {[](){ 
-                tgui::Theme::setDefault(""); //! This does not work due to a tgui issue
-                // Note that command color does not update with theme so you have to set the default color
-                Command::color::setDefaultColor({0,0,0,255}); // black
-            }}},
+            // Command::command{"default", "(Currently does not work, coming soon) Sets the theme back to default", {[](){ 
+            //     tgui::Theme::setDefault(""); //! This does not work due to a tgui issue
+            //     // Note that command color does not update with theme so you have to set the default color
+            //     Command::color::setDefaultColor({0,0,0,255}); // black
+            // }}},
             // Dark theme is a custom theme made by me 
             // It can be found here: https://github.com/finjosh/TGUI-DarkTheme
             Command::command{"dark", "Sets the them to the dark theme", {[](){ 

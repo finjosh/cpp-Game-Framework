@@ -11,8 +11,8 @@ bool _drawableComp::operator() (const DrawableObject* lhs, const DrawableObject*
 
 DrawableObject::DrawableObject(const int& layer) : _layer(layer)
 {
-    _onParentRemoved(&DrawableObject::_removeParent, this);
-    _onParentSet(&DrawableObject::_setParent, this);
+    m_onParentRemoved(&DrawableObject::_removeParent, this);
+    m_onParentSet(&DrawableObject::_setParent, this);
 
     DrawableManager::addDrawable(this);
 }
@@ -60,7 +60,10 @@ void DrawableObject::_removeParent()
     _drawableParent = nullptr;
 }
 
-void DrawableObject::_draw(sf::RenderWindow& window)
+// TODO take in the parent position (either regular or interpolated)
+// TODO make objects children store local instead of global position?
+// TODO update all object functions to work with local instead of global?
+void DrawableObject::_draw(sf::RenderWindow& window) 
 {
     this->Draw(window);
     for (auto child: _drawableChildren)

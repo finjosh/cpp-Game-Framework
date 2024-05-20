@@ -3,8 +3,9 @@
 
 Collider::Collider()
 {
-    Object::_onDisabled(&Collider::updatePhysicsState, this);
-    Object::_onEnabled(&Collider::updatePhysicsState, this);
+    Object::m_onDisabled(&Collider::updatePhysicsState, this);
+    Object::m_onEnabled(&Collider::updatePhysicsState, this);
+    Object::m_onDestroyQueue(&Collider::destroyBody, this);
     // Object::_onParentRemoved(&CollisionManager::addCollider, this);
     // Object::_onParentSet(&CollisionManager::removeCollider, this);
 
@@ -15,10 +16,14 @@ Collider::~Collider()
 {
     if (m_body != nullptr)
     {
-        m_body->GetUserData().pointer = (uintptr_t)nullptr; // removing the ptr from the body as box2d calls end contact with the user data
         WorldHandler::getWorld().DestroyBody(m_body);
     }
 
+    CollisionManager::removeCollider(this);
+}
+
+void Collider::destroyBody()
+{
     CollisionManager::removeCollider(this);
 }
 

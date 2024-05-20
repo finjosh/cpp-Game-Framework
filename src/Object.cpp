@@ -6,7 +6,6 @@ bool _objectComp::operator()(const Object* lhs, const Object* rhs) const
     return lhs->getID() < rhs->getID();
 }
 
-std::list<Object::Ptr<>> Object::m_destroyQueue;
 std::atomic_ullong Object::m_lastID = 1;
 
 Object::Object()
@@ -32,23 +31,27 @@ Object::~Object()
     
     if (m_parent != nullptr)
     {
-        m_parent->_removeChild(this);
+        m_parent->m_removeChild(this);
     }
     
     auto child = m_children.begin();
     while (child != m_children.end())
     {
         auto temp = child++;
-        (*temp)->_destroy();
+        (*temp)->m_destroy();
     }
 
-    _onDestroy.invoke();
-    onDestroy.invoke();
+    // m_onDestroy.invoke();
+    // onDestroy.invoke();
 }
 
 void Object::destroy()
 {
-    _addToDestroyQueue();
+    ObjectManager::addToDestroyQueue(this);
+    m_enabled = false; // dont want the event to be called
+    m_onDestroy.invoke();
+    m_onDestroyQueue.invoke();
+    onDestroy.invoke();
 }
 
 void Object::setEnabled(bool enabled)
@@ -56,12 +59,12 @@ void Object::setEnabled(bool enabled)
     m_enabled = enabled;
     if (m_enabled)
     {
-        _onEnabled.invoke();
+        m_onEnabled.invoke();
         onEnabled.invoke();
     }
     else
     {
-        _onDisabled.invoke();
+        m_onDisabled.invoke();
         onDisabled.invoke();
     }
 }
@@ -81,27 +84,27 @@ Object::Ptr<> Object::getPtr()
     return Object::Ptr<>(this);
 }
 
-void Object::setParent(Object* parent)
+void Object::setParent(Object::Ptr<>& parent)
 {
     if (parent == this)
         return;
 
     if (m_parent != nullptr)
     {
-        m_parent->_removeChild(this);
+        m_parent->m_removeChild(this);
     }
 
-    m_parent = parent;
+    m_parent = parent.get();
     // if not valid have no parent
     if (parent != nullptr)
     {
-        parent->_addChild(this);
-        _onParentSet.invoke();
+        parent->m_addChild(this);
+        m_onParentSet.invoke();
         onParentSet.invoke();
     }
     else
     {
-        _onParentRemoved.invoke();
+        m_onParentRemoved.invoke();
         onParentRemoved.invoke();
     }
 }
@@ -254,19 +257,14 @@ b2Rot Object::getRotation_b2() const
     return m_transform.q;
 }
 
-void Object::_addChild(Object* object)
+void Object::m_addChild(Object* object)
 {
     if (object == nullptr) return;
     m_children.push_back(object);
 }
 
-void Object::_removeChild(Object* object)
+void Object::m_removeChild(Object* object)
 {
     if (object == nullptr) return;
     m_children.remove_if([object](const Object* obj){ return obj == object; });
-}
-
-void Object::_addToDestroyQueue()
-{
-    m_destroyQueue.emplace_back(this);
 }

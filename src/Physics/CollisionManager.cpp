@@ -25,33 +25,17 @@ void CollisionManager::BeginContact(b2Contact* contact)
         // B->BeginContact({A, contact->GetFixtureB(), contact->GetFixtureA()});
     }
 }
-#include "Utils/Debug/CommandPrompt.hpp"
+
 void CollisionManager::EndContact(b2Contact* contact)
 {
     Collider* A = static_cast<Collider*>((void*)contact->GetFixtureA()->GetBody()->GetUserData().pointer);
     Collider* B = static_cast<Collider*>((void*)contact->GetFixtureB()->GetBody()->GetUserData().pointer);
-    // TODO fix this
-    if (A != nullptr)
-    {
-        Command::Prompt::print(std::to_string(A->m_currentCollisions.find({B, contact->GetFixtureA(), contact->GetFixtureB()}) != A->m_currentCollisions.end()));
-        A->m_currentCollisions.erase({B, contact->GetFixtureA(), contact->GetFixtureB()});
-    }
-    if (B != nullptr)
-    {
-        Command::Prompt::print(std::to_string(B->m_currentCollisions.find({A, contact->GetFixtureB(), contact->GetFixtureA()}) != B->m_currentCollisions.end()));
-        B->m_currentCollisions.erase({A, contact->GetFixtureB(), contact->GetFixtureA()});
-    }
-    if (A == nullptr || B == nullptr) return;
-    // if (A != nullptr)
-    // {
-        m_endContact.push_back({A, {B, contact->GetFixtureA(), contact->GetFixtureB()}});
-        // A->EndContact({B, contact->GetFixtureA(), contact->GetFixtureB()});
-    // }
-    // if (B != nullptr)
-    // {
-        m_endContact.push_back({B, {A, contact->GetFixtureB(), contact->GetFixtureA()}});
-        // B->EndContact({A, contact->GetFixtureB(), contact->GetFixtureA()});
-    // }
+
+    A->m_currentCollisions.erase({B, contact->GetFixtureA(), contact->GetFixtureB()});
+    B->m_currentCollisions.erase({A, contact->GetFixtureB(), contact->GetFixtureA()});
+
+    m_endContact.push_back({A, {B, contact->GetFixtureA(), contact->GetFixtureB()}});
+    m_endContact.push_back({B, {A, contact->GetFixtureB(), contact->GetFixtureA()}});
 }
 
 void CollisionManager::PreSolve(b2Contact* contact, const b2Manifold* oldManifold)
@@ -99,8 +83,6 @@ void CollisionManager::Update()
         data.first->EndContact(data.second);
     }
     m_endContact.clear();
-
-    ObjectManager::ClearDestroyQueue();
 
     for (auto obj: m_objects)
     {
