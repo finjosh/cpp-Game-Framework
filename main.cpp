@@ -29,18 +29,15 @@ void addThemeCommands();
 class Player : public virtual Object, public Collider, public Rect, public UpdateInterface
 {
 public:
-    std::string name = " sdkofjgjdof";
-
-    // using Collider::setPosition;
+    std::string name = "Random Name";
 
     inline Player()
     {
         b2PolygonShape b2shape;
         b2shape.SetAsBox(5,5);
 
-        Collider::initCollider(0,0);
+        Collider::initCollider();
         Collider::createFixture(b2shape, 1, 0.25);
-        Collider::getBody()->SetType(b2BodyType::b2_dynamicBody);
 
         Rect::setSize({10*PIXELS_PER_METER,10*PIXELS_PER_METER});
         Rect::setOrigin(5*PIXELS_PER_METER,5*PIXELS_PER_METER);
@@ -51,62 +48,56 @@ public:
     {
         if (sf::Keyboard::isKeyPressed(sf::Keyboard::Key::W))
         {
-            Collider::move({0,-10*deltaTime});
+            move({0,-10*deltaTime});
         }
         if (sf::Keyboard::isKeyPressed(sf::Keyboard::Key::A))
         {
-            Collider::move({-10*deltaTime,0});
+            move({-10*deltaTime,0});
         }
         if (sf::Keyboard::isKeyPressed(sf::Keyboard::Key::S))
         {
-            Collider::move({0,10*deltaTime});
+            move({0,10*deltaTime});
         }
         if (sf::Keyboard::isKeyPressed(sf::Keyboard::Key::D))
         {
-            Collider::move({10*deltaTime,0});
+            move({10*deltaTime,0});
         }
         Collider::setAwake(true);
     }
 
     inline virtual void OnColliding(CollisionData data) override
     {
-        Command::Prompt::print("Colliding");
-        Command::Prompt::print(std::to_string(Object::getPosition().x) + ", " + std::to_string(Object::getPosition().y));
+        Command::Prompt::print("Colliding: " + std::to_string(Object::getPosition().x) + ", " + std::to_string(Object::getPosition().y));
     }
 
     createDestroy();
 };
 
-class Wall : public virtual Object, public Collider, public DrawableObject, public sf::RectangleShape
+class Wall : public virtual Object, public Collider, public Rect
 {
 public:
     inline Wall(const b2Vec2& pos, const b2Vec2& size)
     {
+        setPosition(pos);
+
         b2PolygonShape b2shape;
         b2shape.SetAsBox(size.x/2, size.y/2);
 
-        Collider::initCollider(pos.x,pos.y);
+        Collider::initCollider();
         Collider::createFixture(b2shape, 1, 0.25);
         Collider::getBody()->SetType(b2BodyType::b2_staticBody);
 
-        RectangleShape::setSize({size.x*PIXELS_PER_METER,size.y*PIXELS_PER_METER});
-        RectangleShape::setOrigin(size.x/2*PIXELS_PER_METER,size.y/2*PIXELS_PER_METER);
-        RectangleShape::setFillColor(sf::Color::Red);
-    }
-
-    inline virtual void Draw(sf::RenderWindow& window) override
-    {
-        RectangleShape::setPosition(Object::getPosition().x*PIXELS_PER_METER, Object::getPosition().y*PIXELS_PER_METER);
-        RectangleShape::setRotation(Object::getRotation()*180/PI);
-        window.draw(*this);
+        Rect::setSize({size.x*PIXELS_PER_METER,size.y*PIXELS_PER_METER});
+        Rect::setOrigin(size.x/2*PIXELS_PER_METER,size.y/2*PIXELS_PER_METER);
+        Rect::setFillColor(sf::Color::Red);
     }
 
     inline void BeginContact(CollisionData data) override
     {
         if (Object::Ptr<Player> player = data.getCollider()->cast<Player>())
         {
-            data.getCollider()->destroy();
             Command::Prompt::print("Begin Contact with player: " + player->name);
+            data.getCollider()->destroy();
         }
     }
 
@@ -162,6 +153,7 @@ int main()
     //! ---------------------------------------------------
 
     new Wall({25,25}, {100,10});
+    /// @brief create a body in the world with the default body def parameters
     new Player();
     auto p = new Player();
     p->setPosition({15,0});

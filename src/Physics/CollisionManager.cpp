@@ -10,20 +10,14 @@ void CollisionManager::BeginContact(b2Contact* contact)
 {
     Collider* A = static_cast<Collider*>((void*)contact->GetFixtureA()->GetBody()->GetUserData().pointer);
     Collider* B = static_cast<Collider*>((void*)contact->GetFixtureB()->GetBody()->GetUserData().pointer);
-    if (A != nullptr)
-    {
-        CollisionData data = {B, contact->GetFixtureA(), contact->GetFixtureB()};
-        m_beginContact.push_back({A, data}); // TODO redo this storage
-        A->m_currentCollisions.insert(data);
-        // A->BeginContact({B, contact->GetFixtureA(), contact->GetFixtureB()});
-    }
-    if (B != nullptr)
-    {
-        CollisionData data = {A, contact->GetFixtureB(), contact->GetFixtureA()};
-        m_beginContact.push_back({B, data}); // TODO redo this storage
-        B->m_currentCollisions.insert(data);
-        // B->BeginContact({A, contact->GetFixtureB(), contact->GetFixtureA()});
-    }
+
+    CollisionData data = {B, contact->GetFixtureA(), contact->GetFixtureB()};
+    m_beginContact.push_back({A, data}); // TODO redo this storage
+    A->m_currentCollisions.insert(data);
+
+    data = {A, contact->GetFixtureB(), contact->GetFixtureA()};
+    m_beginContact.push_back({B, data}); // TODO redo this storage
+    B->m_currentCollisions.insert(data);
 }
 
 void CollisionManager::EndContact(b2Contact* contact)
@@ -72,6 +66,15 @@ void CollisionManager::PostSolve(b2Contact* contact, const b2ContactImpulse* imp
 
 void CollisionManager::Update()
 {
+    for (auto obj: m_objects)
+    {
+        obj->_update();
+        for (auto collision: obj->m_currentCollisions) // TODO implement this feature better
+        {
+            obj->OnColliding(collision);
+        }
+    }
+
     for (auto data: m_beginContact)
     {
         data.first->BeginContact(data.second);
@@ -83,15 +86,6 @@ void CollisionManager::Update()
         data.first->EndContact(data.second);
     }
     m_endContact.clear();
-
-    for (auto obj: m_objects)
-    {
-        obj->_update();
-        for (auto collision: obj->m_currentCollisions) // TODO implement this feature better
-        {
-            obj->OnColliding(collision);
-        }
-    }
 }
 
 void CollisionManager::addCollider(Collider* Collider)

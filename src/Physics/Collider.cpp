@@ -3,9 +3,10 @@
 
 Collider::Collider()
 {
-    Object::m_onDisabled(&Collider::updatePhysicsState, this);
-    Object::m_onEnabled(&Collider::updatePhysicsState, this);
-    Object::m_onDestroyQueue(&Collider::destroyBody, this);
+    Object::m_onDisabled(&Collider::m_updatePhysicsState, this);
+    Object::m_onEnabled(&Collider::m_updatePhysicsState, this);
+    Object::onDestroy(&Collider::destroyBody, this);
+    Object::m_onTransformUpdated(&Collider::m_updateTransform, this);
     // Object::_onParentRemoved(&CollisionManager::addCollider, this);
     // Object::_onParentSet(&CollisionManager::removeCollider, this);
 
@@ -14,17 +15,16 @@ Collider::Collider()
 
 Collider::~Collider()
 {
-    if (m_body != nullptr)
-    {
-        WorldHandler::getWorld().DestroyBody(m_body);
-    }
-
+    destroyBody();
     CollisionManager::removeCollider(this);
 }
 
 void Collider::destroyBody()
 {
-    CollisionManager::removeCollider(this);
+    if (m_body)
+    {
+        WorldHandler::getWorld().DestroyBody(m_body);
+    }
 }
 
 b2Body* Collider::operator->()
@@ -85,25 +85,14 @@ b2Fixture* Collider::createFixtureSensor(const b2Shape& shape, const float& dens
     return m_body->CreateFixture(&def);
 }
 
-void Collider::initCollider(const b2Vec2& pos, const b2Rot& rot)
-{
-    this->initCollider(pos.x, pos.y, rot.GetAngle());
-}
-
-void Collider::initCollider(const float& x, const float& y, const float& rot)
+void Collider::initCollider()
 {
     b2BodyDef bodyDef;
     bodyDef.type = b2_dynamicBody;
-    bodyDef.position.Set(x,y);
-    bodyDef.angle = rot;
-    this->initCollider(bodyDef);
-}
-
-void Collider::initCollider(const b2BodyDef& bodyDef)
-{
+    bodyDef.position = Object::getPosition();
+    bodyDef.angle = Object::getRotation();
     m_body = WorldHandler::getWorld().CreateBody(&bodyDef);
     m_body->GetUserData().pointer = (uintptr_t)this;
-    Object::setTransform(m_body->GetTransform());
 }
 
 void Collider::setPhysicsEnabled(const bool& enabled)
@@ -121,60 +110,21 @@ bool Collider::isPhysicsEnabled() const
     return m_enabled && Object::isEnabled();
 }
 
-void Collider::updatePhysicsState()
+void Collider::m_updatePhysicsState()
 {
     m_body->SetEnabled(m_enabled && Object::isEnabled());
+}
+
+void Collider::m_updateTransform()
+{
+    if (m_body)
+        m_body->SetTransform(Object::getPosition(), Object::getRotation());
 }
 
 void Collider::_update()
 {
     if (m_body != nullptr)
-        Object::setTransform(m_body->GetTransform());
-}
-
-void Collider::setPosition(const b2Vec2& position) 
-{
-    if (m_body != nullptr)
-    {
-        m_body->SetTransform(position, m_body->GetAngle());
-    }
-    Object::setPosition(position);
-}
-
-void Collider::setRotation(const float& rotation) 
-{
-    if (m_body != nullptr)
-    {
-        m_body->SetTransform(m_body->GetPosition(), rotation);
-    }
-    Object::setRotation(rotation);
-}
-
-void Collider::setTransform(const b2Transform& transform) 
-{
-    if (m_body != nullptr)
-    {
-        m_body->SetTransform(transform.p, transform.q.GetAngle());
-    }
-    Object::setTransform(transform);
-}
-
-void Collider::move(const b2Vec2& move)
-{
-    if (m_body != nullptr)
-    {
-        m_body->SetTransform(m_body->GetPosition() + move, m_body->GetAngle());
-    }
-    Object::move(move);
-}
-
-void Collider::rotate(const float& rot)
-{
-    if (m_body != nullptr)
-    {
-        m_body->SetTransform(m_body->GetPosition(), m_body->GetAngle() + rot);
-    }
-    Object::rotate(rot);
+        Object::setTransform(m_body->GetTransform()); //! NOTE this updates the object position which calls event to update this position (could result in errors later)
 }
 
 void Collider::setAwake(const bool& awake)

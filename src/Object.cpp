@@ -40,9 +40,6 @@ Object::~Object()
         auto temp = child++;
         (*temp)->m_destroy();
     }
-
-    // m_onDestroy.invoke();
-    // onDestroy.invoke();
 }
 
 void Object::destroy()
@@ -50,7 +47,6 @@ void Object::destroy()
     ObjectManager::addToDestroyQueue(this);
     m_enabled = false; // dont want the event to be called
     m_onDestroy.invoke();
-    m_onDestroyQueue.invoke();
     onDestroy.invoke();
 }
 
@@ -128,6 +124,7 @@ void Object::rotateAround(const b2Vec2& center, const float& rot)
 {
     b2Vec2 posChange = rotateAround(m_transform.p, center, rot) - m_transform.p;
     m_transform.p += posChange;
+    m_onTransformUpdated.invoke();
 
     for (auto child: m_children)
     {
@@ -147,13 +144,13 @@ b2Vec2 Object::rotateAround(const b2Vec2& vec, const b2Vec2& center, const float
 void Object::setPosition(const b2Vec2& position)
 {   
     b2Vec2 posChange = position - m_transform.p;
+    m_transform.p = position;
+    m_onTransformUpdated.invoke();
 
     for (auto child: m_children)
     {
         child->move(posChange);
     }
-
-    m_transform.p = position;
 }
 
 b2Vec2 Object::getPosition() const
@@ -164,14 +161,14 @@ b2Vec2 Object::getPosition() const
 void Object::setRotation(const float& rotation)
 {
     float rotChange = rotation - m_transform.q.GetAngle();
+    m_transform.q.Set(rotation);
+    m_onTransformUpdated.invoke();
 
     for (auto child: m_children)
     {
         child->rotateAround(m_transform.p, rotChange);
         child->rotate(rotChange);
     }
-
-    m_transform.q.Set(rotation);
 }
 
 float Object::getRotation() const
@@ -193,6 +190,7 @@ b2Transform Object::getTransform() const
 void Object::move(const b2Vec2& move)
 {
     m_transform.p += move;
+    m_onTransformUpdated.invoke();
 
     for (auto child: m_children)
     {
@@ -203,6 +201,7 @@ void Object::move(const b2Vec2& move)
 void Object::rotate(const float& rot)
 {
     m_transform.q.Set(m_transform.q.GetAngle() + rot);
+    m_onTransformUpdated.invoke();
 
     for (auto child: m_children)
     {

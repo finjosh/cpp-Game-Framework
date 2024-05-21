@@ -39,6 +39,7 @@ private:
 
 // TODO completely hide all body functions unless they are needed
 // TODO refactor for easier to use code
+// TODO hide more box2d code so that its harder to screw up
 /// @note do not use body user data as that stores this collider
 class Collider : public virtual Object
 {
@@ -61,14 +62,14 @@ public:
     /// @param restitution the restitution (elasticity) usually in the range [0,1]
     /// @param restitutionThreshold Restitution velocity threshold, usually in m/s. Collisions above this speed have restitution applied (will bounce)
     /// @param filter contact filtering data
-    /// @returns the pointer to the new fixture
+    /// @returns the pointer to the new fixture or nullptr if no body is stored
     b2Fixture* createFixture(const b2Shape& shape, const float& density = 1.f, const float& friction = 0.1, 
                             const float& restitution = 0.f, const float& restitutionThreshold = 0.f, const b2Filter& filter = {});
     /// @brief creates a fixture with the given shape and density
     /// @param density the density of the shape
     /// @param isSensor a sensor shape collects contact information but never generates a collision response
     /// @param filter contact filtering data
-    /// @returns the pointer to the new fixture
+    /// @returns the pointer to the new fixture or nullptr if no body is stored
     b2Fixture* createFixtureSensor(const b2Shape& shape, const float& density = 1.f, const b2Filter& filter = {});
 
     /// @warning DO NOT DESTROY THE BODY
@@ -95,13 +96,13 @@ public:
     inline virtual void EndContact(CollisionData collisionData) {};
     /// @brief This can be called multiple times in one frame (called before the collision is handled)
     /// @note to get the collider get the userdata from the body and cast to Collider
-    /// @warning do not destroy the body during this callback
+    /// @warning do not destroy or edit the body during this callback
     /// @param contact the contact data
     /// @param oldManifold the old manifold data
     inline virtual void PreSolve(b2Contact* contact, const b2Manifold* oldManifold) {};
     /// @brief This can be called multiple times in one frame (called after the collision is handled)
     /// @note to get the collider get the userdata from the body and cast to Collider
-    /// @warning do not destroy the body during this callback
+    /// @warning do not destroy or edit the body during this callback
     /// @param contact the contact data
     /// @param impulse the impulse data
     inline virtual void PostSolve(b2Contact* contact, const b2ContactImpulse* impulse) {};
@@ -109,31 +110,11 @@ public:
     /// @note this will also be called on start of contact
     inline virtual void OnColliding(CollisionData collisionData) {};
 
-    /// @brief dont use this during a box2d callback (PreSolve and PostSolve)
-    /// @note does not wake the body (i.e. no physics will be updated when body is asleep)
-    void setPosition(const b2Vec2& position) override; // TODO find a better way to do this so there is no ambiguity when using this function
-    /// @brief dont use this during a box2d callback (PreSolve and PostSolve)
-    /// @note does not wake the body (i.e. no physics will be updated when body is asleep)
-    void setRotation(const float& rotation) override; // TODO find a better way to do this so there is no ambiguity when using this function
-    /// @brief dont use this during a box2d callback (PreSolve and PostSolve)
-    /// @note does not wake the body (i.e. no physics will be updated when body is asleep)
-    void setTransform(const b2Transform& transform) override; // TODO find a better way to do this so there is no ambiguity when using this function
-    /// @brief dont use this during a box2d callback (PreSolve and PostSolve)
-    /// @note does not wake the body (i.e. no physics will be updated when body is asleep)
-    void move(const b2Vec2& move) override; // TODO find a better way to do this so there is no ambiguity when using this function
-    /// @brief dont use this during a box2d callback (PreSolve and PostSolve)
-    /// @note does not wake the body (i.e. no physics will be updated when body is asleep)
-    void rotate(const float& rot) override; // TODO find a better way to do this so there is no ambiguity when using this function
     void setAwake(const bool& awake = true);
 
 protected:
-    /// @brief creates a body in the world with the default body def parameters
-    void initCollider(const float& x = 0.f, const float& y = 0.f, const float& rot = 0.f);
     /// @brief create a body in the world with the default body def parameters
-    /// @param pos the position to init the body at
-    void initCollider(const b2Vec2& pos, const b2Rot& rot = b2Rot(0));
-    /// @brief create a body in the world with the given body def
-    void initCollider(const b2BodyDef& bodyDef);
+    void initCollider();
 
     /// @brief updates the object transform to this colliders body transform
     void _update();
@@ -144,10 +125,13 @@ protected:
     friend CollisionManager;
 
 private:
-    /// @brief updates the body state (enabled or not)
-    void updatePhysicsState();
 
-    b2Body* m_body;
+    /// @brief updates the body state (enabled or not)
+    void m_updatePhysicsState();
+    /// @brief updates the body transform to match the object transform
+    void m_updateTransform();
+
+    b2Body* m_body = nullptr;
     /// @brief if true follows object else physics are disabled no matter object state
     bool m_enabled = true;
     /// @note stores all the current contacts that are ongoing

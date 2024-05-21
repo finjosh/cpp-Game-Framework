@@ -199,7 +199,7 @@ public:
     EventHelper::Event onEnabled;
     /// @note if derived class, use the virtual function
     EventHelper::Event onDisabled;
-    /// @note if using this in the object just use deconstructor instead
+    /// @note this is called one frame before the object is actually destroyed
     /// @note you should NOT access any thing about the object through this event
     EventHelper::Event onDestroy;
     /// @note this is called when the parent is set to anything but nullptr
@@ -245,8 +245,8 @@ public:
     /// @param center the point to rotate around
     /// @param rot rotation in RAD
     /// @returns the rotated vector
-    static b2Vec2 rotateAround(const b2Vec2& vec, const b2Vec2& center, const float& rot);
-    virtual void setPosition(const b2Vec2& position);
+    b2Vec2 rotateAround(const b2Vec2& vec, const b2Vec2& center, const float& rot);
+    void setPosition(const b2Vec2& position);
     /// @brief if this is a child then the position will be set according to the parent
     /// @note if "canSetTransform" is false then this does nothing
     /// @note if this is not a child then position is set according to global
@@ -257,7 +257,7 @@ public:
     /// @returns position according to parent
     b2Vec2 getLocalPosition() const;
     /// @param rotation in radians
-    virtual void setRotation(const float& rotation);
+    void setRotation(const float& rotation);
     /// @brief if this is a child then the rotation will be set according to the parent
     /// @note if "canSetTransform" is false then this does nothing
     /// @note if this is not a child then rotation is set according to global
@@ -270,11 +270,11 @@ public:
     /// @note if no parent returns global rotation
     /// @returns rotation according to parent
     float getLocalRotation() const;
-    virtual void setTransform(const b2Transform& transform);
+    void setTransform(const b2Transform& transform);
     b2Transform getTransform() const;
-    virtual void move(const b2Vec2& move);
+    void move(const b2Vec2& move);
     /// @param rot in radians
-    virtual void rotate(const float& rot);
+    void rotate(const float& rot);
 
 protected:
     inline virtual void OnEnable() {};
@@ -283,15 +283,16 @@ protected:
     EventHelper::Event m_onEnabled;
     /// @warning do NOT disconnect all EVER
     EventHelper::Event m_onDisabled;
+    /// @brief called when the object is added to the destroy queue (should act as if it is already destroyed)
     /// @warning do NOT disconnect all EVER
     EventHelper::Event m_onDestroy;
     /// @warning do NOT disconnect all EVER
     EventHelper::Event m_onParentSet;
     /// @warning do NOT disconnect all EVER
     EventHelper::Event m_onParentRemoved;
-    /// @brief called when added to destroy queue
+    /// @brief called when ever the transform of this object is updated
     /// @warning do NOT disconnect all EVER
-    EventHelper::Event m_onDestroyQueue;
+    EventHelper::Event m_onTransformUpdated;
     /// @brief adds this object to the destroy queue
     /// @note same as using destroy
     void m_addToDestroyQueue();
@@ -310,7 +311,6 @@ private:
     std::atomic_bool m_enabled = true;
     size_t m_id = 0;
 
-    // TODO make a renderer that uses this transform
     b2Transform m_transform = b2Transform(b2Vec2(0,0), b2Rot(0));
 
     Object* m_parent = nullptr;

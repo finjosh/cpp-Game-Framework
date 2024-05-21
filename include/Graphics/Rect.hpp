@@ -13,6 +13,13 @@ class Rect : public virtual Object, public DrawableObject, public virtual sf::Re
 {
 public:
     using Object::setPosition;
+    using Object::getPosition;
+    using Object::setRotation;
+    using Object::getRotation;
+    using Object::setTransform;
+    using Object::getTransform;
+    using Object::move;
+    using Object::rotate;
 
 protected:
     inline virtual void Draw(sf::RenderWindow& window) override
@@ -23,7 +30,6 @@ protected:
     }
 
 private:
-    using sf::RectangleShape::setPosition;
 
 };
 
