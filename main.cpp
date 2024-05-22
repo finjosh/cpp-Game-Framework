@@ -20,13 +20,13 @@
 #include "TestHelper.hpp"
 //! -------
 
-#include "Graphics/Rect.hpp"
+#include "Graphics/Renderer.hpp"
 
 using namespace std;
 
 void addThemeCommands();
 
-class Player : public virtual Object, public Collider, public Rect, public UpdateInterface
+class Player : public virtual Object, public Collider, public Renderer<sf::RectangleShape>, public UpdateInterface
 {
 public:
     std::string name = "Random Name";
@@ -39,28 +39,28 @@ public:
         Collider::initCollider();
         Collider::createFixture(b2shape, 1, 0.25);
 
-        Rect::setSize({10*PIXELS_PER_METER,10*PIXELS_PER_METER});
-        Rect::setOrigin(5*PIXELS_PER_METER,5*PIXELS_PER_METER);
-        Rect::setFillColor(sf::Color::White);
+        setSize({10*PIXELS_PER_METER,10*PIXELS_PER_METER});
+        setOrigin(5*PIXELS_PER_METER,5*PIXELS_PER_METER);
+        setFillColor(sf::Color::White);
     }
 
     inline virtual void Update(const float& deltaTime) override
     {
         if (sf::Keyboard::isKeyPressed(sf::Keyboard::Key::W))
         {
-            move({0,-10*deltaTime});
+            move({0,-25*deltaTime});
         }
         if (sf::Keyboard::isKeyPressed(sf::Keyboard::Key::A))
         {
-            move({-10*deltaTime,0});
+            move({-25*deltaTime,0});
         }
         if (sf::Keyboard::isKeyPressed(sf::Keyboard::Key::S))
         {
-            move({0,10*deltaTime});
+            move({0,25*deltaTime});
         }
         if (sf::Keyboard::isKeyPressed(sf::Keyboard::Key::D))
         {
-            move({10*deltaTime,0});
+            move({25*deltaTime,0});
         }
         Collider::setAwake(true);
     }
@@ -73,7 +73,7 @@ public:
     createDestroy();
 };
 
-class Wall : public virtual Object, public Collider, public Rect
+class Wall : public virtual Object, public Collider, public Renderer<sf::RectangleShape>
 {
 public:
     inline Wall(const b2Vec2& pos, const b2Vec2& size)
@@ -87,27 +87,27 @@ public:
         Collider::createFixture(b2shape, 1, 0.25);
         Collider::getBody()->SetType(b2BodyType::b2_staticBody);
 
-        Rect::setSize({size.x*PIXELS_PER_METER,size.y*PIXELS_PER_METER});
-        Rect::setOrigin(size.x/2*PIXELS_PER_METER,size.y/2*PIXELS_PER_METER);
-        Rect::setFillColor(sf::Color::Red);
+        setSize({size.x*PIXELS_PER_METER,size.y*PIXELS_PER_METER});
+        setOrigin(size.x/2*PIXELS_PER_METER,size.y/2*PIXELS_PER_METER);
+        setFillColor(sf::Color::Red);
     }
 
-    inline void BeginContact(CollisionData data) override
-    {
-        if (Object::Ptr<Player> player = data.getCollider()->cast<Player>())
-        {
-            Command::Prompt::print("Begin Contact with player: " + player->name);
-            data.getCollider()->destroy();
-        }
-    }
+    // inline void BeginContact(CollisionData data) override
+    // {
+    //     if (Object::Ptr<Player> player = data.getCollider()->cast<Player>())
+    //     {
+    //         Command::Prompt::print("Begin Contact with player: " + player->name);
+    //         data.getCollider()->destroy();
+    //     }
+    // }
 
-    inline void EndContact(CollisionData data) override
-    {
-        if (Object::Ptr<Player> player = data.getCollider()->cast<Player>())
-        {
-            Command::Prompt::print("End contact with player: " + player->name);
-        }
-    }
+    // inline void EndContact(CollisionData data) override
+    // {
+    //     if (Object::Ptr<Player> player = data.getCollider()->cast<Player>())
+    //     {
+    //         Command::Prompt::print("End contact with player: " + player->name);
+    //     }
+    // }
 
     createDestroy();
 };
@@ -130,7 +130,7 @@ int main()
 
     // setup for sfml and tgui
     sf::RenderWindow window(sf::VideoMode::getDesktopMode(), "Game Framework", sf::Style::Fullscreen);
-    window.setFramerateLimit(60);
+    // window.setFramerateLimit(60);
     WindowHandler::setRenderWindow(&window);
 
     tgui::Gui gui{window};
@@ -157,6 +157,7 @@ int main()
     new Player();
     auto p = new Player();
     p->setPosition({15,0});
+    p->setRotation(45);
     p->name = "Something";
 
     sf::Clock deltaClock;

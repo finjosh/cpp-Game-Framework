@@ -15,14 +15,14 @@ b2World& WorldHandler::getWorld()
 // TODO make a simple lerp function to fix "jittery" physics
 void WorldHandler::updateWorld(const double& deltaTime)
 {
-    // _accumulate += deltaTime;
-    // int32 updates = std::min(int(_accumulate*_tickRate), _maxUpdates);
-    // _accumulate -= updates*(1.f/_tickRate);
-    // while (updates > 0)
-    // {
+    _accumulate += deltaTime;
+    int32 updates = std::min(int(_accumulate*_tickRate), _maxUpdates);
+    _accumulate -= updates*(1.f/_tickRate);
+    while (updates > 0)
+    {
         _world.Step(1.f/_tickRate, int32(8), int32(3));
-        // updates--;
-    // }
+        updates--;
+    }
 }
 
 void WorldHandler::setTickRate(const int32& interval)

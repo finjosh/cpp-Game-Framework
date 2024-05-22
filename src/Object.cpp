@@ -176,7 +176,7 @@ float Object::getRotation() const
     return m_transform.q.GetAngle();
 }
 
-void Object::setTransform(const b2Transform& transform)
+void Object::setTransform(const b2Transform transform)
 {
     Object::setPosition(transform.p);
     Object::setRotation(transform.q.GetAngle());

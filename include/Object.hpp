@@ -270,7 +270,7 @@ public:
     /// @note if no parent returns global rotation
     /// @returns rotation according to parent
     float getLocalRotation() const;
-    void setTransform(const b2Transform& transform);
+    void setTransform(const b2Transform transform);
     b2Transform getTransform() const;
     void move(const b2Vec2& move);
     /// @param rot in radians
