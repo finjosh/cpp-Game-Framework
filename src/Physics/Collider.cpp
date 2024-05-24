@@ -5,21 +5,29 @@ Collider::Collider()
 {
     Object::m_onDisabled(&Collider::m_updatePhysicsState, this);
     Object::m_onEnabled(&Collider::m_updatePhysicsState, this);
-    Object::onDestroy(&Collider::destroyBody, this);
+    Object::onDestroy(&Collider::m_destroyBody, this);
     Object::m_onTransformUpdated(&Collider::m_updateTransform, this);
     // Object::_onParentRemoved(&CollisionManager::addCollider, this);
     // Object::_onParentSet(&CollisionManager::removeCollider, this);
 
     CollisionManager::addCollider(this);
+
+    // initializing the body in box2d
+    b2BodyDef bodyDef;
+    bodyDef.type = b2_dynamicBody;
+    bodyDef.position = Object::getPosition();
+    bodyDef.angle = Object::getRotation();
+    m_body = WorldHandler::getWorld().CreateBody(&bodyDef);
+    m_body->GetUserData().pointer = (uintptr_t)this;
 }
 
 Collider::~Collider()
 {
-    destroyBody();
+    m_destroyBody();
     CollisionManager::removeCollider(this);
 }
 
-void Collider::destroyBody()
+void Collider::m_destroyBody()
 {
     if (m_body)
     {
@@ -85,16 +93,6 @@ b2Fixture* Collider::createFixtureSensor(const b2Shape& shape, const float& dens
     return m_body->CreateFixture(&def);
 }
 
-void Collider::initCollider()
-{
-    b2BodyDef bodyDef;
-    bodyDef.type = b2_dynamicBody;
-    bodyDef.position = Object::getPosition();
-    bodyDef.angle = Object::getRotation();
-    m_body = WorldHandler::getWorld().CreateBody(&bodyDef);
-    m_body->GetUserData().pointer = (uintptr_t)this;
-}
-
 void Collider::setPhysicsEnabled(const bool& enabled)
 {
     m_enabled = enabled;
@@ -121,7 +119,7 @@ void Collider::m_updateTransform()
         m_body->SetTransform(Object::getPosition(), Object::getRotation());
 }
 
-void Collider::_update()
+void Collider::m_update()
 {
     if (m_body != nullptr)
         Object::setTransform(m_body->GetTransform()); //! NOTE this updates the object position which calls event to update this position (could result in errors later)

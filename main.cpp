@@ -17,7 +17,7 @@
 #include "Physics/CollisionManager.hpp"
 
 //! TESTING
-#include "TestHelper.hpp"
+// #include "TestHelper.hpp"
 //! -------
 
 #include "Graphics/Renderer.hpp"
@@ -36,7 +36,6 @@ public:
         b2PolygonShape b2shape;
         b2shape.SetAsBox(5,5);
 
-        Collider::initCollider();
         Collider::createFixture(b2shape, 1, 0.25);
 
         setSize({10*PIXELS_PER_METER,10*PIXELS_PER_METER});
@@ -83,7 +82,6 @@ public:
         b2PolygonShape b2shape;
         b2shape.SetAsBox(size.x/2, size.y/2);
 
-        Collider::initCollider();
         Collider::createFixture(b2shape, 1, 0.25);
         Collider::getBody()->SetType(b2BodyType::b2_staticBody);
 
@@ -119,15 +117,6 @@ class EmptyUpdateObject : public virtual Object, public UpdateInterface
 
 int main()
 {
-    // BS::thread_pool pool;
-
-    // TestHelper::initTest("Normal Enable Check (all enabled)", "# of Objects", {[](){ UpdateManager::Update(0); }}, {[](){ new EmptyUpdateObject(); }}, 100001, 0);
-    // // , {[](){ ObjectManager::destroyAllObjects(); }}, 10
-    // TestHelper::runTest(TestHelper::FileExists::MakeNew); 
-    
-    // TODO the ability to zoom into a specific section of the data (from x0 to x1 OR from y0 to y1)
-    // TestHelper::graphData();
-
     // setup for sfml and tgui
     sf::RenderWindow window(sf::VideoMode::getDesktopMode(), "Game Framework", sf::Style::Fullscreen);
     // window.setFramerateLimit(60);

@@ -30,9 +30,19 @@ protected:
     friend Collider;
 
 private:
+    struct m_contactData
+    {
+        m_contactData(Collider* A, b2Fixture* AFix, Collider* B, b2Fixture* BFix);
+
+        Collider* A = nullptr;
+        b2Fixture* AFix = nullptr;
+        Collider* B = nullptr;
+        b2Fixture* BFix = nullptr;
+    };
+
     static std::unordered_set<Collider*> m_objects;
-    static std::list<std::pair<Collider*, CollisionData>> m_beginContact; // TODO optimize this
-    static std::list<std::pair<Collider*, CollisionData>> m_endContact; // TODO optimize this
+    static std::list<m_contactData> m_beginContact;
+    static std::list<m_contactData> m_endContact;
 };
 
 #endif

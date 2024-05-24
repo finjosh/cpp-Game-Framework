@@ -2,22 +2,21 @@
 #include "Physics/Collider.hpp"
 #include "ObjectManager.hpp"
 
+CollisionManager::m_contactData::m_contactData(Collider* A, b2Fixture* AFix, Collider* B, b2Fixture* BFix) : A(A), B(B), AFix(AFix), BFix(BFix) {}
+
 std::unordered_set<Collider*> CollisionManager::m_objects;
-std::list<std::pair<Collider*, CollisionData>> CollisionManager::m_beginContact;
-std::list<std::pair<Collider*, CollisionData>> CollisionManager::m_endContact;
+std::list<CollisionManager::m_contactData> CollisionManager::m_beginContact;
+std::list<CollisionManager::m_contactData> CollisionManager::m_endContact;
 
 void CollisionManager::BeginContact(b2Contact* contact)
 {
     Collider* A = static_cast<Collider*>((void*)contact->GetFixtureA()->GetBody()->GetUserData().pointer);
     Collider* B = static_cast<Collider*>((void*)contact->GetFixtureB()->GetBody()->GetUserData().pointer);
 
-    CollisionData data = {B, contact->GetFixtureA(), contact->GetFixtureB()};
-    m_beginContact.push_back({A, data}); // TODO redo this storage
-    A->m_currentCollisions.insert(data);
-
-    data = {A, contact->GetFixtureB(), contact->GetFixtureA()};
-    m_beginContact.push_back({B, data}); // TODO redo this storage
-    B->m_currentCollisions.insert(data);
+    // updating all lists for new contact
+    m_beginContact.push_back({A, contact->GetFixtureA(), B, contact->GetFixtureB()});
+    A->m_currentCollisions.insert({B, contact->GetFixtureA(), contact->GetFixtureB()});
+    B->m_currentCollisions.insert({A, contact->GetFixtureB(), contact->GetFixtureA()});
 }
 
 void CollisionManager::EndContact(b2Contact* contact)
@@ -25,11 +24,10 @@ void CollisionManager::EndContact(b2Contact* contact)
     Collider* A = static_cast<Collider*>((void*)contact->GetFixtureA()->GetBody()->GetUserData().pointer);
     Collider* B = static_cast<Collider*>((void*)contact->GetFixtureB()->GetBody()->GetUserData().pointer);
 
+    // updating all lists for end contact
+    m_endContact.push_back({A, contact->GetFixtureA(), B, contact->GetFixtureB()});
     A->m_currentCollisions.erase({B, contact->GetFixtureA(), contact->GetFixtureB()});
     B->m_currentCollisions.erase({A, contact->GetFixtureB(), contact->GetFixtureA()});
-
-    m_endContact.push_back({A, {B, contact->GetFixtureA(), contact->GetFixtureB()}});
-    m_endContact.push_back({B, {A, contact->GetFixtureB(), contact->GetFixtureA()}});
 }
 
 void CollisionManager::PreSolve(b2Contact* contact, const b2Manifold* oldManifold)
@@ -68,8 +66,8 @@ void CollisionManager::Update()
 {
     for (auto obj: m_objects)
     {
-        obj->_update();
-        for (auto collision: obj->m_currentCollisions) // TODO implement this feature better
+        obj->m_update();
+        for (auto collision: obj->m_currentCollisions)
         {
             obj->OnColliding(collision);
         }
@@ -77,13 +75,15 @@ void CollisionManager::Update()
 
     for (auto data: m_beginContact)
     {
-        data.first->BeginContact(data.second);
+        data.A->BeginContact({data.B, data.AFix, data.BFix});
+        data.B->BeginContact({data.A, data.BFix, data.AFix});
     }
     m_beginContact.clear();
 
     for (auto data: m_endContact)
     {
-        data.first->EndContact(data.second);
+        data.A->EndContact({data.B, data.AFix, data.BFix});
+        data.B->EndContact({data.A, data.BFix, data.AFix});
     }
     m_endContact.clear();
 }

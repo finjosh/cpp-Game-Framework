@@ -113,19 +113,13 @@ public:
     void setAwake(const bool& awake = true);
 
 protected:
-    /// @brief create a body in the world with the default body def parameters
-    void initCollider();
-
-    /// @brief updates the object transform to this colliders body transform
-    void _update();
-
-    /// @brief removes the current body from physics
-    void destroyBody();
-
-    friend CollisionManager;
 
 private:
-
+    friend CollisionManager;
+    /// @brief removes the current body from physics
+    void m_destroyBody();
+    /// @brief updates the object transform to this colliders body transform
+    void m_update();
     /// @brief updates the body state (enabled or not)
     void m_updatePhysicsState();
     /// @brief updates the body transform to match the object transform
