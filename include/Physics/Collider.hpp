@@ -8,9 +8,10 @@
 #include "box2d/box2d.h"
 
 #include "Physics/WorldHandler.hpp"
+#include "Physics/Fixture.hpp"
 #include "Object.hpp"
 
-class CollisionManager;
+class CollisionManager; // defined early to friend in Collider
 
 class Collider;
 
@@ -40,7 +41,8 @@ private:
 // TODO completely hide all body functions unless they are needed
 // TODO refactor for easier to use code
 // TODO hide more box2d code so that its harder to screw up
-/// @note do not use body user data as that stores this collider
+// TODO implement contact filtering
+/// @note do not use body user data as that stores this collider !(REMOVE THIS WHEN DONE REFACTOR)!
 class Collider : public virtual Object
 {
 public:
@@ -116,6 +118,7 @@ protected:
 
 private:
     friend CollisionManager;
+    friend Fixture;
     /// @brief removes the current body from physics
     void m_destroyBody();
     /// @brief updates the object transform to this colliders body transform
