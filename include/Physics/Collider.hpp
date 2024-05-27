@@ -40,11 +40,7 @@ private:
 
 typedef ContactData CollisionData;
 
-// TODO completely hide all body functions unless they are needed
-// TODO refactor for easier to use code
-// TODO hide more box2d code so that its harder to screw up
 // TODO implement contact filtering
-/// @note do not use body user data as that stores this collider !(REMOVE THIS WHEN DONE REFACTOR)!
 class Collider : public virtual Object
 {
 public:
@@ -72,41 +68,6 @@ public:
     Fixture createFixtureSensor(const b2Shape& shape, const float& density = 1.f, const b2Filter& filter = {});
 	/// @param fixture the fixture to be removed.
 	void DestroyFixture(const Fixture& fixture);
-
-    // /// @brief creates a fixture with the given fixture def
-    // /// @returns the pointer to the new fixture
-    // b2Fixture* createFixture(const b2FixtureDef& fixture);
-    // /// @brief creates a fixture with the given shape and density
-    // /// @param density the density of the shape
-    // /// @param friction the friction of the shape usually between [0,1]
-    // /// @param restitution the restitution (elasticity) usually in the range [0,1]
-    // /// @param restitutionThreshold Restitution velocity threshold, usually in m/s. Collisions above this speed have restitution applied (will bounce)
-    // /// @param filter contact filtering data
-    // /// @returns the pointer to the new fixture or nullptr if no body is stored
-    // b2Fixture* createFixture(const b2Shape& shape, const float& density = 1.f, const float& friction = 0.1, 
-    //                         const float& restitution = 0.f, const float& restitutionThreshold = 0.f, const b2Filter& filter = {});
-    // /// @brief creates a fixture with the given shape and density
-    // /// @param density the density of the shape
-    // /// @param isSensor a sensor shape collects contact information but never generates a collision response
-    // /// @param filter contact filtering data
-    // /// @returns the pointer to the new fixture or nullptr if no body is stored
-    // b2Fixture* createFixtureSensor(const b2Shape& shape, const float& density = 1.f, const b2Filter& filter = {});
-
-    // /// @warning DO NOT DESTROY THE BODY
-    // /// @warning DO NOT USE USER DATA
-    // /// @note if you want to destroy the physics body call destroy on this object
-    // b2Body* operator->();
-    // const b2Body* operator->() const;
-    // /// @warning DO NOT DESTROY THE BODY
-    // /// @warning DO NOT USE USER DATA
-    // /// @note if you want to destroy the physics body call destroy on this object
-    // b2Body* operator*();
-    // const b2Body* operator*() const;
-    // /// @warning DO NOT DESTROY THE BODY
-    // /// @warning DO NOT USE USER DATA
-    // /// @note if you want to destroy the physics body call destroy on this object
-    // b2Body* getBody();
-    // const b2Body* getBody() const;
 
     /// @brief called when a contact begins
     /// @param ContactData the collision data

@@ -30,6 +30,7 @@ class Player : public virtual Object, public Collider, public Renderer<sf::Recta
 {
 public:
     std::string name = "Random Name";
+    sf::Texture temp;
 
     inline Player()
     {
@@ -38,9 +39,11 @@ public:
 
         Collider::createFixture(b2shape, 1, 0.25);
 
-        setSize({10*PIXELS_PER_METER,10*PIXELS_PER_METER});
-        setOrigin(5*PIXELS_PER_METER,5*PIXELS_PER_METER);
+        setSize({10,10});
+        setOrigin(5,5);
         setFillColor(sf::Color::White);
+        temp.loadFromFile("Assets/test.png");
+        setTexture(&temp);
     }
 
     inline virtual void Update(const float& deltaTime) override
@@ -85,8 +88,8 @@ public:
         Collider::createFixture(b2shape, 1, 0.25);
         Collider::SetType(b2BodyType::b2_staticBody);
 
-        setSize({size.x*PIXELS_PER_METER,size.y*PIXELS_PER_METER});
-        setOrigin(size.x/2*PIXELS_PER_METER,size.y/2*PIXELS_PER_METER);
+        setSize({size.x,size.y});
+        setOrigin(size.x/2,size.y/2);
         setFillColor(sf::Color::Red);
     }
 
@@ -128,7 +131,7 @@ int main()
     Command::color::setDefaultColor({255,255,255,255});
     // -----------------------
 
-    WorldHandler::getWorld().SetGravity({0.f,0.f});
+    WorldHandler::getWorld().SetGravity({0.f,9.8f});
     WorldHandler::getWorld().SetContactListener(new CollisionManager); // TODO put this stuff into the constructor
 
     //! Required to initialize VarDisplay and CommandPrompt
@@ -141,11 +144,14 @@ int main()
     TFuncDisplay::init(gui);
     //! ---------------------------------------------------
 
-    new Wall({25,25}, {100,10});
+    new Wall({window.getSize().x/2/PIXELS_PER_METER,window.getSize().y/PIXELS_PER_METER}, {window.getSize().x/PIXELS_PER_METER,10});
+    new Wall({window.getSize().x/2/PIXELS_PER_METER,0}, {window.getSize().x/PIXELS_PER_METER,10});
+    new Wall({window.getSize().x/PIXELS_PER_METER, window.getSize().y/2/PIXELS_PER_METER}, {10, window.getSize().y/PIXELS_PER_METER});
+    new Wall({0, window.getSize().y/2/PIXELS_PER_METER}, {10, window.getSize().y/PIXELS_PER_METER});
     /// @brief create a body in the world with the default body def parameters
-    new Player();
+    (new Player())->setPosition({25,10});
     auto p = new Player();
-    p->setPosition({15,0});
+    p->setPosition({15,10});
     p->setRotation(45);
     p->name = "Something";
 

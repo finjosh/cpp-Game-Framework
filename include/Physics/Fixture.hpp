@@ -5,19 +5,15 @@
 
 #include "Box2D/b2_fixture.h"
 
-#include "Object.hpp"
-
 class Collider;
 class ContactData;
 
-// TODO finish fixture class that encapsulates b2Fixture
 /// @note this does not update when the collider is destroyed (only store in the colliders object or keep track if it is still alive)
 class Fixture
 {
 public:
     Fixture(Collider* collider, const b2FixtureDef& fixtureDef); // TODO put all input vars for fixture def instead of using it as input
     Fixture(Collider& collider, const b2FixtureDef& fixtureDef);
-    // Fixture(Object::Ptr<Collider>& collider, const b2FixtureDef& fixtureDef);
 
 	/// Set if this fixture is a sensor.
 	void SetSensor(const bool& sensor);

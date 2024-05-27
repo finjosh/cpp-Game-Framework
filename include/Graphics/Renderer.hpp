@@ -29,11 +29,13 @@ protected:
     {
         T::setPosition(Object::getPosition().x*PIXELS_PER_METER, Object::getPosition().y*PIXELS_PER_METER);
         T::setRotation(Object::getRotation()*180/PI);
+        T::setScale(PIXELS_PER_METER, PIXELS_PER_METER);
         window.draw(*this);
     }
 
 private:
-
+    using T::setScale;
+    using T::getScale;
 };
 
 #endif
