@@ -99,12 +99,4 @@ void Fixture::SetRestitutionThreshold(const float& threshold)
     m_fixture->SetRestitutionThreshold(threshold);
 }
 
-// Fixture::Fixture(b2Body* body, const b2FixtureDef& fixtureDef)
-// {
-
-// }
-
-// Fixture::Fixture(b2Fixture* fixture)
-// {
-
-// }
+Fixture::Fixture(b2Fixture* fixture) : m_fixture(fixture) {}

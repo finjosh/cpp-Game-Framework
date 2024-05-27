@@ -83,14 +83,14 @@ public:
         b2shape.SetAsBox(size.x/2, size.y/2);
 
         Collider::createFixture(b2shape, 1, 0.25);
-        Collider::getBody()->SetType(b2BodyType::b2_staticBody);
+        Collider::SetType(b2BodyType::b2_staticBody);
 
         setSize({size.x*PIXELS_PER_METER,size.y*PIXELS_PER_METER});
         setOrigin(size.x/2*PIXELS_PER_METER,size.y/2*PIXELS_PER_METER);
         setFillColor(sf::Color::Red);
     }
 
-    // inline void BeginContact(CollisionData data) override
+    // inline void BeginContact(ContactData data) override
     // {
     //     if (Object::Ptr<Player> player = data.getCollider()->cast<Player>())
     //     {
@@ -99,7 +99,7 @@ public:
     //     }
     // }
 
-    // inline void EndContact(CollisionData data) override
+    // inline void EndContact(ContactData data) override
     // {
     //     if (Object::Ptr<Player> player = data.getCollider()->cast<Player>())
     //     {

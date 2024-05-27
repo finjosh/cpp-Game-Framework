@@ -8,8 +8,10 @@
 #include "Object.hpp"
 
 class Collider;
+class ContactData;
 
 // TODO finish fixture class that encapsulates b2Fixture
+/// @note this does not update when the collider is destroyed (only store in the colliders object or keep track if it is still alive)
 class Fixture
 {
 public:
@@ -61,11 +63,11 @@ public:
 	void SetRestitutionThreshold(const float& threshold);
 
 protected:
-    // Fixture(b2Body* body, const b2FixtureDef& fixtureDef);
-    // Fixture(b2Fixture* fixture);
+    friend Collider;
+	friend ContactData;
+    Fixture(b2Fixture* fixture);
 
 private:
-    friend Collider;
     b2Fixture* m_fixture;
 };
 
