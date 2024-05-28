@@ -13,6 +13,7 @@
 
 #include "UpdateManager.hpp"
 #include "Graphics/DrawableManager.hpp"
+#include "Graphics/Renderer.hpp"
 #include "ObjectManager.hpp"
 #include "Physics/CollisionManager.hpp"
 
@@ -20,9 +21,9 @@
 // #include "TestHelper.hpp"
 //! -------
 
-#include "Graphics/Renderer.hpp"
-
 using namespace std;
+
+// TODO make animation class
 
 void addThemeCommands();
 
@@ -50,26 +51,34 @@ public:
     {
         if (sf::Keyboard::isKeyPressed(sf::Keyboard::Key::W))
         {
-            move({0,-25*deltaTime});
+            ApplyForceToCenter({0,-25});
         }
         if (sf::Keyboard::isKeyPressed(sf::Keyboard::Key::A))
         {
-            move({-25*deltaTime,0});
+            ApplyForceToCenter({-25,0});
         }
         if (sf::Keyboard::isKeyPressed(sf::Keyboard::Key::S))
         {
-            move({0,25*deltaTime});
+            ApplyForceToCenter({0,25});
         }
         if (sf::Keyboard::isKeyPressed(sf::Keyboard::Key::D))
         {
-            move({25*deltaTime,0});
+            ApplyForceToCenter({25,0});
         }
-        Collider::setAwake(true);
+        if (sf::Keyboard::isKeyPressed(sf::Keyboard::Key::E))
+        {
+            ApplyTorque(75);
+        }
+        if (sf::Keyboard::isKeyPressed(sf::Keyboard::Key::Q))
+        {
+            ApplyTorque(-75);
+        }
+        setAwake(true);
     }
 
     inline virtual void OnColliding(CollisionData data) override
     {
-        Command::Prompt::print("Colliding: " + std::to_string(Object::getPosition().x) + ", " + std::to_string(Object::getPosition().y));
+        Command::Prompt::print("Colliding: " + std::to_string(getPosition().x) + ", " + std::to_string(getPosition().y));
     }
 
     createDestroy();
@@ -131,8 +140,7 @@ int main()
     Command::color::setDefaultColor({255,255,255,255});
     // -----------------------
 
-    WorldHandler::getWorld().SetGravity({0.f,9.8f});
-    WorldHandler::getWorld().SetContactListener(new CollisionManager); // TODO put this stuff into the constructor
+    WorldHandler::init({0.f,9.8f});
 
     //! Required to initialize VarDisplay and CommandPrompt
     // creates the UI for the VarDisplay

@@ -12,9 +12,6 @@ class ContactData;
 class Fixture
 {
 public:
-    Fixture(Collider* collider, const b2FixtureDef& fixtureDef); // TODO put all input vars for fixture def instead of using it as input
-    Fixture(Collider& collider, const b2FixtureDef& fixtureDef);
-
 	/// Set if this fixture is a sensor.
 	void SetSensor(const bool& sensor);
 	/// Is this fixture a sensor (non-solid)?
@@ -62,6 +59,8 @@ protected:
     friend Collider;
 	friend ContactData;
     Fixture(b2Fixture* fixture);
+	Fixture(Collider* collider, const b2FixtureDef& fixtureDef);
+    Fixture(Collider& collider, const b2FixtureDef& fixtureDef);
 
 private:
     b2Fixture* m_fixture;

@@ -10,6 +10,7 @@
 #include "Physics/WorldHandler.hpp"
 #include "Physics/Fixture.hpp"
 #include "Object.hpp"
+#include "Settings.hpp"
 
 class CollisionManager; // defined early to friend in Collider
 
@@ -23,9 +24,9 @@ public:
     /// @returns the other objects collider
     Collider* getCollider();
     /// @returns the fixture from this object that collided
-    Fixture getFixtureA();
+    Fixture getThisFixture();
     /// @returns the fixture from the other object that collided
-    Fixture getFixtureB();
+    Fixture getOtherFixture();
 
     bool operator < (const ContactData& data) const;
     bool operator > (const ContactData& data) const;
@@ -33,9 +34,9 @@ public:
     bool operator != (const ContactData& data) const;
 
 private:
-    Collider* m_collider;
-    b2Fixture* m_thisFixture;
-    b2Fixture* m_otherFixture;
+    Collider *const m_collider;
+    b2Fixture *const m_thisFixture;
+    b2Fixture *const m_otherFixture;
 };
 
 typedef ContactData CollisionData;

@@ -265,12 +265,12 @@ Collider* ContactData::getCollider()
     return m_collider;
 }
 
-Fixture ContactData::getFixtureA()
+Fixture ContactData::getThisFixture()
 {
     return Fixture(m_thisFixture);
 }
 
-Fixture ContactData::getFixtureB()
+Fixture ContactData::getOtherFixture()
 {
     return Fixture(m_otherFixture);
 }

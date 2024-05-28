@@ -6,6 +6,7 @@
 #include "SFML/Graphics/Shape.hpp"
 
 #include "Object.hpp"
+#include "Settings.hpp"
 #include "Graphics/DrawableObject.hpp"
 // #include "Physics/WorldHandler.hpp"
 
@@ -15,6 +16,11 @@ template <typename T, typename std::enable_if_t<std::is_base_of<sf::Shape, T>::v
 class Renderer : public virtual Object, public DrawableObject, public T
 {
 public:
+    inline Renderer()
+    {
+        T::setScale(PIXELS_PER_METER, PIXELS_PER_METER);
+    }
+
     using Object::setPosition;
     using Object::getPosition;
     using Object::setRotation;
@@ -29,7 +35,6 @@ protected:
     {
         T::setPosition(Object::getPosition().x*PIXELS_PER_METER, Object::getPosition().y*PIXELS_PER_METER);
         T::setRotation(Object::getRotation()*180/PI);
-        T::setScale(PIXELS_PER_METER, PIXELS_PER_METER);
         window.draw(*this);
     }
 

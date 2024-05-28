@@ -5,11 +5,10 @@
 
 #include "box2d/Box2D.h"
 
-const float PIXELS_PER_METER = 10;
-
 class WorldHandler
 {
 public:
+    static void init(const b2Vec2& gravity);
     static b2World& getWorld();
     static void updateWorld(const double& deltaTime);
     /// @note only call this before using any physics
@@ -25,16 +24,18 @@ public:
     /// @brief The max steps per frame
     static void setMaxUpdates(const int32& maxUpdates = 8);
     static int32 getMaxUpdates();
+    static void setGravity(const b2Vec2& gravity);
+    static b2Vec2 getGravity();
 
 private:
     inline WorldHandler() = default;
     
-    static b2World _world;
-    static double _accumulate;
-    static int32 _tickRate;
-    static int32 _velocityIterations;
-    static int32 _positionIterations; 
-    static int32 _maxUpdates;
+    static b2World m_world;
+    static double m_accumulate;
+    static int32 m_tickRate;
+    static int32 m_velocityIterations;
+    static int32 m_positionIterations; 
+    static int32 m_maxUpdates;
 };
 
 #endif
