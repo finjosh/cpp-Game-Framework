@@ -3,6 +3,15 @@
 
 #pragma once
 
-#define PIXELS_PER_METER 10.0f
+// TODO do this better
+
+#define PIXELS_PER_METER 10.0F
+
+/// @brief draws from low to high
+enum DrawStage
+{
+    Particles = 0,
+    Default = 1
+};
 
 #endif

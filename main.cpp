@@ -7,15 +7,16 @@
 #include "BS_thread_pool.hpp"
 
 #include "Utils.hpp"
-#include "Graphics/WindowHandler.hpp"
-#include "Physics/WorldHandler.hpp"
 #include "Utils/iniParser.hpp"
 
+#include "ObjectManager.hpp"
 #include "UpdateManager.hpp"
+#include "Graphics/WindowHandler.hpp"
 #include "Graphics/DrawableManager.hpp"
 #include "Graphics/Renderer.hpp"
-#include "ObjectManager.hpp"
+#include "Physics/WorldHandler.hpp"
 #include "Physics/CollisionManager.hpp"
+#include "ParticleEmitter.hpp"
 
 //! TESTING
 // #include "TestHelper.hpp"
@@ -31,7 +32,7 @@ class Player : public virtual Object, public Collider, public Renderer<sf::Recta
 {
 public:
     std::string name = "Random Name";
-    sf::Texture temp;
+    // sf::Texture temp;
 
     inline Player()
     {
@@ -43,8 +44,8 @@ public:
         setSize({10,10});
         setOrigin(5,5);
         setFillColor(sf::Color::White);
-        temp.loadFromFile("Assets/test.png");
-        setTexture(&temp);
+        // temp.loadFromFile("Assets/test.png");
+        // setTexture(&temp);
     }
 
     inline virtual void Update(const float& deltaTime) override
@@ -76,10 +77,10 @@ public:
         setAwake(true);
     }
 
-    inline virtual void OnColliding(CollisionData data) override
-    {
-        Command::Prompt::print("Colliding: " + std::to_string(getPosition().x) + ", " + std::to_string(getPosition().y));
-    }
+    // inline virtual void OnColliding(CollisionData data) override
+    // {
+    //     Command::Prompt::print("Colliding: " + std::to_string(getPosition().x) + ", " + std::to_string(getPosition().y));
+    // }
 
     createDestroy();
 };
@@ -163,6 +164,17 @@ int main()
     p->setRotation(45);
     p->name = "Something";
 
+    sf::RectangleShape particleShape;
+    particleShape.setSize({10,10});
+    particleShape.setOrigin({5,5});
+    particleShape.setFillColor(sf::Color::Magenta);
+
+    Object::Ptr<ParticleEmitter> emitter(new ParticleEmitter(&particleShape, {10,10}, 10, 0, 0.1, 3, 25, 1, 360));
+    emitter->setPosition({50, window.getSize().y/PIXELS_PER_METER - 10});
+    emitter->setLayer(100); // since player default layer is 0
+    emitter->setDrawStage(DrawStage::Particles);
+    emitter->setSpawning();
+
     sf::Clock deltaClock;
     float fixedUpdate = 0;
     UpdateManager::Start();
@@ -177,7 +189,7 @@ int main()
         sf::Event event;
         while (window.pollEvent(event))
         {
-            if (event.type == sf::Event::Closed)
+            if (event.type == sf::Event::Closed || event.key.code == sf::Keyboard::Key::Escape)
                 window.close();
 
             gui.handleEvent(event);

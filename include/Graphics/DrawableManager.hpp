@@ -24,10 +24,8 @@ protected:
 
 private:
     inline DrawableManager() = default;
-
-    /// @note first is the layer
-    /// @note second is the obj
-    static std::set<DrawableObject*, _drawableComp> _drawables;
+    
+    static std::set<DrawableObject*, _drawableComp> m_drawables;
 };
 
 #endif

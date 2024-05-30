@@ -6,6 +6,7 @@
 #include "SFML/Graphics/RenderWindow.hpp"
 
 #include "Object.hpp"
+#include "Settings.hpp"
 
 #include <set>
 
@@ -29,6 +30,11 @@ public:
     void setLayer(const int& layer);
     /// @note the layer is relative to the parent layer if it is a drawableObject
     int getLayer() const;
+    /// @brief sets the stage at which this object will be drawn
+    /// @note stage is relative to the parent unless manually set
+    void setDrawStage(const DrawStage& stage); // TODO implement for children
+    /// @note stage is relative to the parent unless manually set
+    DrawStage getDrawStage() const;
 
     /// @brief should be used to draw the obj
     /// @note called before children draw
@@ -51,10 +57,11 @@ protected:
     friend DrawableManager;
 
 private:
-    int _layer = 0;
+    int m_layer = 0;
+    DrawStage m_stage = DrawStage::Default;
 
-    DrawableObject* _drawableParent;
-    std::set<DrawableObject*, _drawableComp> _drawableChildren;
+    DrawableObject* m_drawableParent;
+    std::set<DrawableObject*, _drawableComp> m_drawableChildren;
 };
 
 #endif

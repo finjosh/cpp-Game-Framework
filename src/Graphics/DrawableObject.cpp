@@ -3,13 +3,22 @@
 
 bool _drawableComp::operator() (const DrawableObject* lhs, const DrawableObject* rhs) const
 {
-    if (lhs->getLayer() < rhs->getLayer() || lhs->getLayer() == rhs->getLayer() && lhs->getID() < rhs->getID())
+    if (lhs->getDrawStage() < rhs->getDrawStage())
         return true;
-    else    
+    else if (lhs->getDrawStage() > rhs->getDrawStage())
         return false;
+    else if (lhs->getLayer() <= rhs->getLayer() && lhs->getID() < rhs->getID())
+        return true;
+    else 
+        return false;
+
+//     if (lhs->getDrawStage() < rhs->getDrawStage() || (lhs->getDrawStage() == rhs->getDrawStage() && lhs->getLayer() <= rhs->getLayer()) && lhs->getID() < rhs->getID())
+//         return true;
+//     else    
+//         return false;
 }
 
-DrawableObject::DrawableObject(const int& layer) : _layer(layer)
+DrawableObject::DrawableObject(const int& layer) : m_layer(layer)
 {
     m_onParentRemoved(&DrawableObject::_removeParent, this);
     m_onParentSet(&DrawableObject::_setParent, this);
@@ -25,13 +34,25 @@ DrawableObject::~DrawableObject()
 void DrawableObject::setLayer(const int& layer)
 {
     DrawableManager::removeDrawable(this);
-    _layer = layer;
+    m_layer = layer;
     DrawableManager::addDrawable(this);
 }
 
 int DrawableObject::getLayer() const
 {
-    return _layer;
+    return m_layer;
+}
+
+void DrawableObject::setDrawStage(const DrawStage& stage)
+{
+    DrawableManager::removeDrawable(this);
+    m_stage = stage;
+    DrawableManager::addDrawable(this);
+}
+
+DrawStage DrawableObject::getDrawStage() const
+{
+    return m_stage;
 }
 
 void DrawableObject::_setParent()
@@ -47,8 +68,8 @@ void DrawableObject::_setParent()
     if (drawableParent != nullptr)
     {
         DrawableManager::removeDrawable(this);
-        drawableParent->_drawableChildren.insert({this});
-        this->_drawableParent = drawableParent;
+        drawableParent->m_drawableChildren.insert({this});
+        this->m_drawableParent = drawableParent;
     }
 }
 
@@ -56,8 +77,8 @@ void DrawableObject::_removeParent()
 {
     DrawableObject::setLayer(0);
     DrawableManager::addDrawable(this);
-    _drawableParent->_drawableChildren.erase(this);
-    _drawableParent = nullptr;
+    m_drawableParent->m_drawableChildren.erase(this);
+    m_drawableParent = nullptr;
 }
 
 // TODO take in the parent position (either regular or interpolated)
@@ -66,7 +87,7 @@ void DrawableObject::_removeParent()
 void DrawableObject::_draw(sf::RenderWindow& window) 
 {
     this->Draw(window);
-    for (auto child: _drawableChildren)
+    for (auto child: m_drawableChildren)
     {
         child->_draw(window);
     }

@@ -27,7 +27,7 @@ public:
     /// @param lifetime the particle lifetime
     /// @param spawnAmount the amount of partials spawned at once
     /// @param fadeOutTime the time for a particle to fade out 
-    /// @param spread the max angle of spread
+    /// @param spread the max angle of spread (degrees)
     /// @param randomColor the max random addition to the default color
     ParticleEmitter(sf::Shape* shape,
                     const b2Vec2& pos, const float& vel, const float& rot = 0.f, const float& spawnRate = 0.1f, 
@@ -168,8 +168,6 @@ private:
     sf::Color _defaultColor = {255,255,255,255};
 
     std::list<Particle> _particles;
-
-    #define PIXELS_PER_METER 10
 };
 
 #endif
