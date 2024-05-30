@@ -82,6 +82,11 @@ Object::Ptr<> Object::getPtr()
 
 void Object::setParent(Object::Ptr<>& parent)
 {
+    setParent(parent.get());
+}
+
+void Object::setParent(Object* parent)
+{
     if (parent == this)
         return;
 
@@ -90,7 +95,7 @@ void Object::setParent(Object::Ptr<>& parent)
         m_parent->m_removeChild(this);
     }
 
-    m_parent = parent.get();
+    m_parent = parent;
     // if not valid have no parent
     if (parent != nullptr)
     {
@@ -108,6 +113,19 @@ void Object::setParent(Object::Ptr<>& parent)
 Object::Ptr<> Object::getParent()
 {
     return m_parent;
+}
+
+void Object::addChild(Object::Ptr<>& child)
+{
+    addChild(child.get());
+}
+
+void Object::addChild(Object* child)
+{
+    if (child == this || child == nullptr)
+            return;
+    
+    child->setParent(this);
 }
 
 b2Vec2 Object::getLocalVector(const b2Vec2& vec) const
@@ -151,6 +169,11 @@ void Object::setPosition(const b2Vec2& position)
     {
         child->move(posChange);
     }
+}
+
+void Object::setPosition(const float& x, const float& y)
+{
+    setPosition({x,y});
 }
 
 b2Vec2 Object::getPosition() const

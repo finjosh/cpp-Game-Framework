@@ -26,7 +26,7 @@ void WorldHandler::updateWorld(const double& deltaTime)
     m_accumulate -= updates*(1.f/m_tickRate);
     while (updates > 0)
     {
-        m_world.Step(1.f/m_tickRate, int32(8), int32(3));
+        m_world.Step(1.f/m_tickRate, m_velocityIterations, m_positionIterations);
         updates--;
     }
 }

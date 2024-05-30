@@ -47,12 +47,18 @@ void DrawableObject::setDrawStage(const DrawStage& stage)
 {
     DrawableManager::removeDrawable(this);
     m_stage = stage;
-    DrawableManager::addDrawable(this);
+    if (m_drawableParent)
+        _removeParent(); // also adds back to the drawable manager
+    else
+        DrawableManager::addDrawable(this);
 }
 
 DrawStage DrawableObject::getDrawStage() const
 {
-    return m_stage;
+    if (m_drawableParent)
+        return m_drawableParent->getDrawStage();
+    else
+        return m_stage;
 }
 
 void DrawableObject::_setParent()
@@ -69,16 +75,15 @@ void DrawableObject::_setParent()
     {
         DrawableManager::removeDrawable(this);
         drawableParent->m_drawableChildren.insert({this});
-        this->m_drawableParent = drawableParent;
+        m_drawableParent = drawableParent;
     }
 }
 
 void DrawableObject::_removeParent()
 {
-    DrawableObject::setLayer(0);
-    DrawableManager::addDrawable(this);
     m_drawableParent->m_drawableChildren.erase(this);
     m_drawableParent = nullptr;
+    DrawableManager::addDrawable(this);
 }
 
 // TODO take in the parent position (either regular or interpolated)

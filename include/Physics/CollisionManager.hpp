@@ -32,12 +32,11 @@ protected:
 private:
     struct m_contactData
     {
-        m_contactData(Collider* A, b2Fixture* AFix, Collider* B, b2Fixture* BFix);
+        m_contactData(Collider* A, Collider* B, b2Contact* contactData);
 
         Collider* A = nullptr;
-        b2Fixture* AFix = nullptr;
         Collider* B = nullptr;
-        b2Fixture* BFix = nullptr;
+        b2Contact* contactData = nullptr;
     };
 
     static std::unordered_set<Collider*> m_objects;

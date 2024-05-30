@@ -28,7 +28,7 @@ public:
     class Ptr
     {
     public:
-        inline Ptr(T* obj)
+        inline Ptr(T* obj = nullptr)
         {
             this->set(obj);
         }
@@ -125,18 +125,25 @@ public:
             return this->getID() > (Ptr == nullptr ? 0 : Ptr->getID());
         }
         
+        /// @brief if there is no ptr returns nullptr
         inline T* get()
         {
             return m_ptr;
         }
         
         /// @brief if there is no ptr returns nullptr
-        /// @returns obj or nullptr if no obj
         inline const T* get() const
         {
             return m_ptr;
         }
-        
+
+        /// @note if there is no ptr returns nullptr
+        /// @returns the ptr to the base object
+        inline Object* getObj() const
+        {
+            return static_cast<Object*>(m_ptr);
+        }
+
         inline bool isValid() const
         {
             return (m_ptr != nullptr);
@@ -187,13 +194,70 @@ public:
     bool isEnabled() const;
 
     unsigned long int getID() const;
+    /// @note if you want a pointer to a derived type just use the Object::Ptr<T> constructor
+    /// @returns the object ptr
     Object::Ptr<> getPtr();
 
     /// @note set parent to nullptr if you dont want a parent
     /// @param parent the wanted parent
     void setParent(Object::Ptr<>& parent);
+    /// @note set parent to nullptr if you dont want a parent
+    /// @param parent the wanted parent
+    void setParent(Object* parent);
+    // /// @note set parent to nullptr if you dont want a parent
+    // /// @param parent the wanted parent
+    // template <typename T, typename std::enable_if_t<std::is_base_of<Object, T>::value>* = nullptr>
+    // inline void setParent(Object::Ptr<T>& parent)
+    // {
+    //     if (static_cast<Object*>(parent) == this)
+    //         return;
+
+    //     if (m_parent != nullptr)
+    //     {
+    //         m_parent->m_removeChild(this);
+    //     }
+
+    //     m_parent = static_cast<Object*>(parent.get());
+    //     // if not valid have no parent
+    //     if (parent != nullptr)
+    //     {
+    //         parent->m_addChild(this);
+    //         m_onParentSet.invoke();
+    //         onParentSet.invoke();
+    //     }
+    //     else
+    //     {
+    //         m_onParentRemoved.invoke();
+    //         onParentRemoved.invoke();
+    //     }
+    // }
     /// @returns an invalid ptr if no parent
     Object::Ptr<> getParent();
+    // /// @brief adds the given object as a child to this one
+    // template <typename T, typename std::enable_if_t<std::is_base_of<Object, T>::value>* = nullptr>
+    // inline void addChild(Object::Ptr<T>& child)
+    // {
+    //     if (static_cast<Object*>(child) == this || child == nullptr)
+    //         return;
+        
+    //     child->setParent(this);
+    // }
+    /// @brief adds the given object as a child to this one
+    void addChild(Object::Ptr<>& child);
+    /// @brief adds the given object as a child to this one
+    void addChild(Object* child);
+    /// @brief tries to convert every child to the given type until found
+    /// @tparam T the type that you want the child to be
+    /// @returns the first child of the wanted type
+    template <typename T>
+    inline Object::Ptr<T> tryGetChildOf()
+    {
+        for (auto child: m_children)
+        {
+            if (auto rtn = child->cast<T>())
+                return Object::Ptr<T>(rtn);
+        }
+    }
 
     /// @note if derived class, use the virtual function
     EventHelper::Event onEnabled;
@@ -247,6 +311,7 @@ public:
     /// @returns the rotated vector
     b2Vec2 rotateAround(const b2Vec2& vec, const b2Vec2& center, const float& rot);
     void setPosition(const b2Vec2& position);
+    void setPosition(const float& x, const float& y);
     /// @brief if this is a child then the position will be set according to the parent
     /// @note if "canSetTransform" is false then this does nothing
     /// @note if this is not a child then position is set according to global

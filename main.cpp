@@ -33,6 +33,7 @@ class Player : public virtual Object, public Collider, public Renderer<sf::Recta
 public:
     std::string name = "Random Name";
     // sf::Texture temp;
+    Object::Ptr<ParticleEmitter> m_hitParticle;
 
     inline Player()
     {
@@ -46,41 +47,38 @@ public:
         setFillColor(sf::Color::White);
         // temp.loadFromFile("Assets/test.png");
         // setTexture(&temp);
+
+        m_hitParticle.set(new ParticleEmitter(static_cast<RectangleShape*>(this), {}, 10, 0, 0, 1, 10, 0.5, 360));
     }
 
     inline virtual void Update(const float& deltaTime) override
     {
         if (sf::Keyboard::isKeyPressed(sf::Keyboard::Key::W))
         {
-            ApplyForceToCenter({0,-25});
+            ApplyForceToCenter({0,-250000*deltaTime});
         }
         if (sf::Keyboard::isKeyPressed(sf::Keyboard::Key::A))
         {
-            ApplyForceToCenter({-25,0});
+            ApplyForceToCenter({-250000*deltaTime,0});
         }
         if (sf::Keyboard::isKeyPressed(sf::Keyboard::Key::S))
         {
-            ApplyForceToCenter({0,25});
+            ApplyForceToCenter({0,250000*deltaTime});
         }
         if (sf::Keyboard::isKeyPressed(sf::Keyboard::Key::D))
         {
-            ApplyForceToCenter({25,0});
+            ApplyForceToCenter({250000*deltaTime,0});
         }
         if (sf::Keyboard::isKeyPressed(sf::Keyboard::Key::E))
         {
-            ApplyTorque(75);
+            ApplyTorque(750000*deltaTime);
         }
         if (sf::Keyboard::isKeyPressed(sf::Keyboard::Key::Q))
         {
-            ApplyTorque(-75);
+            ApplyTorque(-750000*deltaTime);
         }
         setAwake(true);
     }
-
-    // inline virtual void OnColliding(CollisionData data) override
-    // {
-    //     Command::Prompt::print("Colliding: " + std::to_string(getPosition().x) + ", " + std::to_string(getPosition().y));
-    // }
 
     createDestroy();
 };
@@ -123,8 +121,21 @@ public:
     createDestroy();
 };
 
-class EmptyUpdateObject : public virtual Object, public UpdateInterface 
+class Sensor : public virtual Object, public Renderer<sf::RectangleShape>, public Collider
 {
+public:
+    Sensor()
+    {
+        b2PolygonShape shape;
+        shape.SetAsBox(10,10);
+        Collider::createFixtureSensor(shape);
+
+        setSize({20,20});
+        setOrigin({10,10});
+        setFillColor(sf::Color::Transparent);
+        setOutlineColor(sf::Color::White);
+    }
+
     createDestroy();
 };
 
@@ -141,7 +152,7 @@ int main()
     Command::color::setDefaultColor({255,255,255,255});
     // -----------------------
 
-    WorldHandler::init({0.f,9.8f});
+    WorldHandler::init({0.f,0.f});
 
     //! Required to initialize VarDisplay and CommandPrompt
     // creates the UI for the VarDisplay
@@ -158,7 +169,7 @@ int main()
     new Wall({window.getSize().x/PIXELS_PER_METER, window.getSize().y/2/PIXELS_PER_METER}, {10, window.getSize().y/PIXELS_PER_METER});
     new Wall({0, window.getSize().y/2/PIXELS_PER_METER}, {10, window.getSize().y/PIXELS_PER_METER});
     /// @brief create a body in the world with the default body def parameters
-    (new Player())->setPosition({25,10});
+    // (new Player())->setPosition({25,10});
     auto p = new Player();
     p->setPosition({15,10});
     p->setRotation(45);
@@ -170,10 +181,20 @@ int main()
     particleShape.setFillColor(sf::Color::Magenta);
 
     Object::Ptr<ParticleEmitter> emitter(new ParticleEmitter(&particleShape, {10,10}, 10, 0, 0.1, 3, 25, 1, 360));
-    emitter->setPosition({50, window.getSize().y/PIXELS_PER_METER - 10});
+    // emitter->setPosition({50, window.getSize().y/PIXELS_PER_METER - 10});
     emitter->setLayer(100); // since player default layer is 0
-    emitter->setDrawStage(DrawStage::Particles);
+    // emitter->setDrawStage(DrawStage::Particles);
     emitter->setSpawning();
+    
+    p->addChild(emitter.getObj());
+    emitter->setDrawStage(DrawStage::Particles);
+
+    (new Sensor())->setPosition(50,50);
+
+    float secondTimer = 0;
+    int fps = 0;
+    auto fpsLabel = tgui::Label::create("FPS");
+    gui.add(fpsLabel);
 
     sf::Clock deltaClock;
     float fixedUpdate = 0;
@@ -185,6 +206,7 @@ int main()
         // updating the delta time var
         sf::Time deltaTime = deltaClock.restart();
         fixedUpdate += deltaTime.asSeconds();
+        secondTimer += deltaTime.asSeconds();
 
         sf::Event event;
         while (window.pollEvent(event))
@@ -222,6 +244,14 @@ int main()
         //! Draw after this
 
         //* Write code here
+
+        fps++;
+        if (secondTimer >= 1)
+        {
+            fpsLabel->setText("FPS: " + std::to_string(fps));
+            secondTimer = 0;
+            fps = 0;
+        }
 
         // ---------------
 

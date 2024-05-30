@@ -31,7 +31,7 @@ public:
     /// @note the layer is relative to the parent layer if it is a drawableObject
     int getLayer() const;
     /// @brief sets the stage at which this object will be drawn
-    /// @note stage is relative to the parent unless manually set
+    /// @note stage is the same as the drawable parent unless manually set (if there is any parent that is drawable)
     void setDrawStage(const DrawStage& stage); // TODO implement for children
     /// @note stage is relative to the parent unless manually set
     DrawStage getDrawStage() const;

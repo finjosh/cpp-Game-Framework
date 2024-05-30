@@ -258,7 +258,8 @@ Fixture Collider::GetFixtureList()
 
 //* Collision Data
 
-ContactData::ContactData(Collider* collider, b2Fixture* thisFixture, b2Fixture* otherFixture) : m_collider(collider), m_thisFixture(thisFixture), m_otherFixture(otherFixture) {}
+ContactData::ContactData(Collider* collider, b2Fixture* thisFixture, b2Fixture* otherFixture, b2Contact* contactData) : 
+    m_collider(collider), m_thisFixture(thisFixture), m_otherFixture(otherFixture), m_contactData(contactData) {}
 
 Collider* ContactData::getCollider()
 {
@@ -270,19 +271,29 @@ Fixture ContactData::getThisFixture()
     return Fixture(m_thisFixture);
 }
 
+Fixture ContactData::getThisFixture() const
+{
+    return Fixture(m_thisFixture);
+}
+
 Fixture ContactData::getOtherFixture()
 {
-    return Fixture(m_otherFixture);
+    return Fixture(m_contactData->GetFixtureA());
+}
+
+Fixture ContactData::getOtherFixture() const
+{
+    return Fixture(m_contactData->GetFixtureA());
 }
 
 bool ContactData::operator < (const ContactData& data) const
 {
-    return data.m_collider > this->m_collider && data.m_otherFixture > this->m_otherFixture && data.m_thisFixture > this->m_thisFixture;
+    return data.m_collider > this->m_collider || data.m_otherFixture > this->m_otherFixture || data.m_thisFixture > this->m_thisFixture;
 }
 
 bool ContactData::operator > (const ContactData& data) const
 {
-    return data.m_collider < this->m_collider && data.m_otherFixture < this->m_otherFixture && data.m_thisFixture < this->m_thisFixture;
+    return data.m_collider < this->m_collider || data.m_otherFixture < this->m_otherFixture || data.m_thisFixture < this->m_thisFixture;
 }
 
 bool ContactData::operator == (const ContactData& data) const

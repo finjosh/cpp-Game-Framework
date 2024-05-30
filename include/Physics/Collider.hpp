@@ -19,14 +19,19 @@ class Collider;
 class ContactData
 {
 public:
-    ContactData(Collider* collider, b2Fixture* thisFixture, b2Fixture* otherFixture);
+    ContactData(Collider* collider, b2Fixture* thisFixture, b2Fixture* otherFixture, b2Contact* contactData);
 
     /// @returns the other objects collider
     Collider* getCollider();
     /// @returns the fixture from this object that collided
     Fixture getThisFixture();
+    Fixture getThisFixture() const;
     /// @returns the fixture from the other object that collided
     Fixture getOtherFixture();
+    Fixture getOtherFixture() const;
+    
+    //!TEMP
+    inline b2Contact* getContactData() { return m_contactData; }
 
     bool operator < (const ContactData& data) const;
     bool operator > (const ContactData& data) const;
@@ -37,6 +42,7 @@ private:
     Collider *const m_collider;
     b2Fixture *const m_thisFixture;
     b2Fixture *const m_otherFixture;
+    b2Contact *const m_contactData;
 };
 
 typedef ContactData CollisionData;
@@ -71,9 +77,11 @@ public:
 	void DestroyFixture(const Fixture& fixture);
 
     /// @brief called when a contact begins
+    /// @note these are called for each fixture
     /// @param ContactData the collision data
     inline virtual void BeginContact(ContactData ContactData) {};
     /// @brief called when a contact ends
+    /// @note these are called for each fixture
     /// @param ContactData the collision data
     inline virtual void EndContact(ContactData ContactData) {};
     /// @brief This can be called multiple times in one frame (called before the collision is handled)
@@ -90,6 +98,7 @@ public:
     inline virtual void PostSolve(b2Contact* contact, const b2ContactImpulse* impulse) {};
     /// @brief called every frame until the two objects are no longer colliding
     /// @note this will also be called on start of contact
+    /// @note these are called for each fixture
     inline virtual void OnColliding(ContactData ContactData) {};
 
     void setAwake(const bool& awake = true);

@@ -5,7 +5,7 @@
 
 // TODO do this better
 
-#define PIXELS_PER_METER 10.0F
+const float PIXELS_PER_METER = 10.0F;
 
 /// @brief draws from low to high
 enum DrawStage
