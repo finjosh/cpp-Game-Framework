@@ -43,7 +43,7 @@ public:
     sf::Shape* getShape();
 
     /// @brief if the particles are spawning
-    bool getSpawning() const;
+    bool isSpawning() const;
     /// @brief if the particles are spawning
     void setSpawning(const bool& value = true);
     /// @brief the spawn rate of particles if spawning

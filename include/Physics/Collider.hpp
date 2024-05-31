@@ -29,9 +29,33 @@ public:
     /// @returns the fixture from the other object that collided
     Fixture getOtherFixture();
     Fixture getOtherFixture() const;
-    
-    //!TEMP
-    inline b2Contact* getContactData() { return m_contactData; }
+
+    class Info
+    {
+    public:
+        Info(b2Contact* contact);
+
+        /// @returns how many contact points there are
+        int32 getPointCount() const;
+
+        /// @returns returns the first point in a list that is the size of contact points
+        b2Vec2* getContactPoints();
+        const b2Vec2* getContactPoints() const;
+
+        /// @note negative distance is overlap in meters
+        /// @returns returns the first distance in a list that is the size of contact points
+        float* getSeparations();
+        const float* getSeparations() const;
+        b2Vec2 getNormal() const;
+
+    protected:
+        b2WorldManifold m_data;
+        int32 m_points;
+    };
+
+    /// @brief calculates more in-depth contact information
+    /// @note calculates the contact normal, points of contact, and distance of overlap
+    ContactData::Info getContactInfo() const;
 
     bool operator < (const ContactData& data) const;
     bool operator > (const ContactData& data) const;

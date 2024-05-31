@@ -113,7 +113,7 @@ sf::Shape* ParticleEmitter::getShape()
     return _particleShape;
 }
 
-bool ParticleEmitter::getSpawning() const
+bool ParticleEmitter::isSpawning() const
 {
     return _spawning;
 }

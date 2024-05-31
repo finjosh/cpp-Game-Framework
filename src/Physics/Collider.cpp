@@ -83,7 +83,9 @@ void Collider::m_updateTransform()
 
 void Collider::m_update()
 {
-    Object::setTransform(m_body->GetTransform()); //! NOTE this updates the object position which calls event to update this position (could result in errors later)
+    Object::m_onTransformUpdated.setEnabled(false);
+    Object::setTransform(m_body->GetTransform());
+    Object::m_onTransformUpdated.setEnabled(true);
 }
 
 void Collider::setAwake(const bool& awake)
@@ -304,4 +306,45 @@ bool ContactData::operator == (const ContactData& data) const
 bool ContactData::operator != (const ContactData& data) const
 {
     return !(*this == data);
+}
+
+ContactData::Info ContactData::getContactInfo() const
+{
+    return Info(m_contactData);
+}
+
+ContactData::Info::Info(b2Contact* contact)
+{
+    contact->GetWorldManifold(&m_data);
+    m_points = contact->GetManifold()->pointCount;
+}
+
+int32 ContactData::Info::getPointCount() const
+{
+    return m_points;
+}
+
+b2Vec2* ContactData::Info::getContactPoints()
+{
+    return &m_data.points[0];
+}
+
+const b2Vec2* ContactData::Info::getContactPoints() const
+{
+    return &m_data.points[0];
+}
+
+float* ContactData::Info::getSeparations()
+{
+    return &m_data.separations[0];
+}
+
+const float* ContactData::Info::getSeparations() const
+{
+    return &m_data.separations[0];
+}
+
+b2Vec2 ContactData::Info::getNormal() const
+{
+    return m_data.normal;
 }

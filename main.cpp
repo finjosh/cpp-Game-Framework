@@ -27,6 +27,9 @@ using namespace std;
 // TODO make animation class
 
 void addThemeCommands();
+/// @param themes in order of most wanted
+/// @param directories directories to check in ("" for current)
+void tryLoadTheme(std::list<std::string> themes, std::list<std::string> directories);
 
 class Player : public virtual Object, public Collider, public Renderer<sf::RectangleShape>, public UpdateInterface
 {
@@ -34,13 +37,14 @@ public:
     std::string name = "Random Name";
     // sf::Texture temp;
     Object::Ptr<ParticleEmitter> m_hitParticle;
+    sf::RectangleShape m_particle;
 
     inline Player()
     {
         b2PolygonShape b2shape;
         b2shape.SetAsBox(5,5);
 
-        Collider::createFixture(b2shape, 1, 0.25);
+        Collider::createFixture(b2shape, 1);
 
         setSize({10,10});
         setOrigin(5,5);
@@ -48,7 +52,10 @@ public:
         // temp.loadFromFile("Assets/test.png");
         // setTexture(&temp);
 
-        m_hitParticle.set(new ParticleEmitter(static_cast<RectangleShape*>(this), {}, 10, 0, 0, 1, 10, 0.5, 360));
+        m_particle.setFillColor(sf::Color::Green);
+        m_particle.setSize({10,10});
+        m_particle.setOrigin({5,5});
+        m_hitParticle.set(new ParticleEmitter(&m_particle, {0,0}, 10, 0, 0, 1, 10, 0.5, 360));
     }
 
     inline virtual void Update(const float& deltaTime) override
@@ -77,7 +84,16 @@ public:
         {
             ApplyTorque(-750000*deltaTime);
         }
-        setAwake(true);
+    }
+
+    void BeginContact(ContactData data) override
+    {
+        auto info = data.getContactInfo();
+        if (info.getPointCount() > 0 && GetLinearVelocity().LengthSquared() > 100)
+        {
+            m_hitParticle->setPosition(info.getContactPoints()[0]);
+            m_hitParticle->emit();
+        }
     }
 
     createDestroy();
@@ -93,7 +109,7 @@ public:
         b2PolygonShape b2shape;
         b2shape.SetAsBox(size.x/2, size.y/2);
 
-        Collider::createFixture(b2shape, 1, 0.25);
+        Collider::createFixture(b2shape, 1);
         Collider::SetType(b2BodyType::b2_staticBody);
 
         setSize({size.x,size.y});
@@ -124,19 +140,36 @@ public:
 class Sensor : public virtual Object, public Renderer<sf::RectangleShape>, public Collider
 {
 public:
-    Sensor()
+    Sensor(funcHelper::func<void> onEnter, const Object::Ptr<>& object = Object::Ptr<>(nullptr))
     {
         b2PolygonShape shape;
         shape.SetAsBox(10,10);
         Collider::createFixtureSensor(shape);
+        Collider::SetType(b2BodyType::b2_staticBody);
 
         setSize({20,20});
         setOrigin({10,10});
         setFillColor(sf::Color::Transparent);
         setOutlineColor(sf::Color::White);
+        setOutlineThickness(1);
+
+        m_onEnter = onEnter;
+        m_object = object;
+    }
+
+    void BeginContact(ContactData data) override
+    {
+        if (data.getCollider() == m_object.get())
+        {
+            m_onEnter.invoke();
+        }
     }
 
     createDestroy();
+
+private:
+    funcHelper::func<> m_onEnter;
+    Object::Ptr<> m_object;
 };
 
 int main()
@@ -148,11 +181,11 @@ int main()
 
     tgui::Gui gui{window};
     gui.setRelativeView({0, 0, 1920/(float)window.getSize().x, 1080/(float)window.getSize().y});
-    tgui::Theme::setDefault("Assets/themes/Dark.txt");
+    tryLoadTheme({"Dark.txt", "Black.txt"}, {"", "Assets/", "themes/", "Themes/", "assets/", "Assets/Themes/", "Assets/themes/", "assets/themes/", "assets/Themes/"});
     Command::color::setDefaultColor({255,255,255,255});
     // -----------------------
 
-    WorldHandler::init({0.f,0.f});
+    WorldHandler::init({0.f,9.8f});
 
     //! Required to initialize VarDisplay and CommandPrompt
     // creates the UI for the VarDisplay
@@ -189,7 +222,7 @@ int main()
     p->addChild(emitter.getObj());
     emitter->setDrawStage(DrawStage::Particles);
 
-    (new Sensor())->setPosition(50,50);
+    (new Sensor({[&emitter](){ emitter->setSpawning(!emitter->isSpawning()); }}, p))->setPosition(50,50);
 
     float secondTimer = 0;
     int fps = 0;
@@ -305,4 +338,19 @@ void addThemeCommands()
             }}}
         }
     });
+}
+
+void tryLoadTheme(std::list<std::string> themes, std::list<std::string> directories)
+{
+    for (auto theme: themes)
+    {
+        for (auto directory: directories)
+        {
+            if (std::filesystem::exists(directory + theme))
+            {
+                tgui::Theme::setDefault(directory + theme);
+                return;
+            }
+        }
+    }
 }
