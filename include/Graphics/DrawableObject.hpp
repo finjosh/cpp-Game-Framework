@@ -60,7 +60,7 @@ private:
     int m_layer = 0;
     DrawStage m_stage = DrawStage::Default;
 
-    DrawableObject* m_drawableParent;
+    DrawableObject* m_drawableParent = nullptr;
     std::set<DrawableObject*, _drawableComp> m_drawableChildren;
 };
 

@@ -4,19 +4,22 @@
 #include "TGUI/TGUI.hpp"
 #include "TGUI/Backend/SFML-Graphics.hpp"
 #include "box2d/Box2D.h"
-#include "BS_thread_pool.hpp"
+// #include "BS_thread_pool.hpp"
 
 #include "Utils.hpp"
 #include "Utils/iniParser.hpp"
 
 #include "ObjectManager.hpp"
 #include "UpdateManager.hpp"
+#include "ParticleEmitter.hpp"
+
 #include "Graphics/WindowHandler.hpp"
 #include "Graphics/DrawableManager.hpp"
 #include "Graphics/Renderer.hpp"
+
 #include "Physics/WorldHandler.hpp"
 #include "Physics/CollisionManager.hpp"
-#include "ParticleEmitter.hpp"
+#include "Physics/DebugDraw.hpp"
 
 //! TESTING
 // #include "TestHelper.hpp"
@@ -31,6 +34,27 @@ void addThemeCommands();
 /// @param directories directories to check in ("" for current)
 void tryLoadTheme(std::list<std::string> themes, std::list<std::string> directories);
 
+class Wall : public virtual Object, public Collider, public Renderer<sf::RectangleShape>
+{
+public:
+    inline Wall(const b2Vec2& pos, const b2Vec2& size)
+    {
+        setPosition(pos);
+
+        b2PolygonShape b2shape;
+        b2shape.SetAsBox(size.x/2, size.y/2);
+
+        Collider::createFixture(b2shape, 1);
+        Collider::SetType(b2BodyType::b2_staticBody);
+
+        setSize({size.x,size.y});
+        setOrigin(size.x/2,size.y/2);
+        setFillColor(sf::Color::Red);
+    }
+
+    createDestroy();
+};
+
 class Player : public virtual Object, public Collider, public Renderer<sf::RectangleShape>, public UpdateInterface
 {
 public:
@@ -42,19 +66,19 @@ public:
     inline Player()
     {
         b2PolygonShape b2shape;
-        b2shape.SetAsBox(5,5);
+        b2shape.SetAsBox(2.5,2.5);
 
         Collider::createFixture(b2shape, 1);
 
-        setSize({10,10});
-        setOrigin(5,5);
+        setSize({5,5});
+        setOrigin(2.5,2.5);
         setFillColor(sf::Color::White);
         // temp.loadFromFile("Assets/test.png");
         // setTexture(&temp);
 
         m_particle.setFillColor(sf::Color::Green);
-        m_particle.setSize({10,10});
-        m_particle.setOrigin({5,5});
+        m_particle.setSize({5,5});
+        m_particle.setOrigin({2.5,2.5});
         m_hitParticle.set(new ParticleEmitter(&m_particle, {0,0}, 10, 0, 0, 1, 10, 0.5, 360));
     }
 
@@ -89,50 +113,12 @@ public:
     void BeginContact(ContactData data) override
     {
         auto info = data.getContactInfo();
-        if (info.getPointCount() > 0 && GetLinearVelocity().LengthSquared() > 100)
+        if (info.getPointCount() > 0 && GetLinearVelocity().LengthSquared() > 100 && data.getCollider()->cast<Wall>())
         {
             m_hitParticle->setPosition(info.getContactPoints()[0]);
             m_hitParticle->emit();
         }
     }
-
-    createDestroy();
-};
-
-class Wall : public virtual Object, public Collider, public Renderer<sf::RectangleShape>
-{
-public:
-    inline Wall(const b2Vec2& pos, const b2Vec2& size)
-    {
-        setPosition(pos);
-
-        b2PolygonShape b2shape;
-        b2shape.SetAsBox(size.x/2, size.y/2);
-
-        Collider::createFixture(b2shape, 1);
-        Collider::SetType(b2BodyType::b2_staticBody);
-
-        setSize({size.x,size.y});
-        setOrigin(size.x/2,size.y/2);
-        setFillColor(sf::Color::Red);
-    }
-
-    // inline void BeginContact(ContactData data) override
-    // {
-    //     if (Object::Ptr<Player> player = data.getCollider()->cast<Player>())
-    //     {
-    //         Command::Prompt::print("Begin Contact with player: " + player->name);
-    //         data.getCollider()->destroy();
-    //     }
-    // }
-
-    // inline void EndContact(ContactData data) override
-    // {
-    //     if (Object::Ptr<Player> player = data.getCollider()->cast<Player>())
-    //     {
-    //         Command::Prompt::print("End contact with player: " + player->name);
-    //     }
-    // }
 
     createDestroy();
 };
@@ -159,7 +145,7 @@ public:
 
     void BeginContact(ContactData data) override
     {
-        if (data.getCollider() == m_object.get())
+        if (!m_object || data.getCollider() == m_object.get())
         {
             m_onEnter.invoke();
         }
@@ -172,6 +158,7 @@ private:
     Object::Ptr<> m_object;
 };
 
+// TODO implement contact filter callback
 int main()
 {
     // setup for sfml and tgui
@@ -185,7 +172,10 @@ int main()
     Command::color::setDefaultColor({255,255,255,255});
     // -----------------------
 
-    WorldHandler::init({0.f,9.8f});
+    WorldHandler::init({0.f,0.f});
+    DebugDraw debugDraw(&window);
+    debugDraw.initCommands();
+    WorldHandler::getWorld().SetDebugDraw(&debugDraw);
 
     //! Required to initialize VarDisplay and CommandPrompt
     // creates the UI for the VarDisplay
@@ -197,12 +187,14 @@ int main()
     TFuncDisplay::init(gui);
     //! ---------------------------------------------------
 
+    //* init code
     new Wall({window.getSize().x/2/PIXELS_PER_METER,window.getSize().y/PIXELS_PER_METER}, {window.getSize().x/PIXELS_PER_METER,10});
     new Wall({window.getSize().x/2/PIXELS_PER_METER,0}, {window.getSize().x/PIXELS_PER_METER,10});
     new Wall({window.getSize().x/PIXELS_PER_METER, window.getSize().y/2/PIXELS_PER_METER}, {10, window.getSize().y/PIXELS_PER_METER});
     new Wall({0, window.getSize().y/2/PIXELS_PER_METER}, {10, window.getSize().y/PIXELS_PER_METER});
     /// @brief create a body in the world with the default body def parameters
-    // (new Player())->setPosition({25,10});
+    for (int i = 0; i < 100; i++)
+        (new Player())->setPosition({50,50});
     auto p = new Player();
     p->setPosition({15,10});
     p->setRotation(45);
@@ -213,29 +205,28 @@ int main()
     particleShape.setOrigin({5,5});
     particleShape.setFillColor(sf::Color::Magenta);
 
-    Object::Ptr<ParticleEmitter> emitter(new ParticleEmitter(&particleShape, {10,10}, 10, 0, 0.1, 3, 25, 1, 360));
+    Object::Ptr<ParticleEmitter> emitter(new ParticleEmitter(&particleShape, {50,50}, 10, 0, 0.1, 3, 25, 1, 360));
     // emitter->setPosition({50, window.getSize().y/PIXELS_PER_METER - 10});
     emitter->setLayer(100); // since player default layer is 0
     // emitter->setDrawStage(DrawStage::Particles);
     emitter->setSpawning();
-    
-    p->addChild(emitter.getObj());
     emitter->setDrawStage(DrawStage::Particles);
-
-    (new Sensor({[&emitter](){ emitter->setSpawning(!emitter->isSpawning()); }}, p))->setPosition(50,50);
+    
+    (new Sensor({[&emitter](){ emitter->setSpawning(!emitter->isSpawning()); }}, nullptr))->setPosition(50,50);
 
     float secondTimer = 0;
     int fps = 0;
     auto fpsLabel = tgui::Label::create("FPS");
     gui.add(fpsLabel);
+    // -------------
 
     sf::Clock deltaClock;
     float fixedUpdate = 0;
     UpdateManager::Start();
     while (window.isOpen())
     {
-        EventHelper::Event::ThreadSafe::update();
         window.clear();
+        EventHelper::Event::ThreadSafe::update();
         // updating the delta time var
         sf::Time deltaTime = deltaClock.restart();
         fixedUpdate += deltaTime.asSeconds();
@@ -289,6 +280,7 @@ int main()
         // ---------------
 
         DrawableManager::draw(window);
+        WorldHandler::getWorld().DebugDraw();
 
         ObjectManager::ClearDestroyQueue();
 
