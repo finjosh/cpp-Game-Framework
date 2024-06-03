@@ -1,299 +1,299 @@
 #include "ParticleEmitter.hpp"
 
-ParticleEmitter::Particle::Particle(const b2Vec2& pos, const b2Vec2& vel, const float& rotation, const sf::Color& color) 
-    : _position(pos), _velocity(vel), _rotation(rotation), _color(color) {}
+ParticleEmitter::Particle::Particle(const b2Vec2& pos, const b2Vec2& vel, float rotation, sf::Color color) 
+    : m_position(pos), m_velocity(vel), m_rotation(rotation), m_color(color) {}
 
 void ParticleEmitter::Particle::setPosition(const b2Vec2& position)
 {
-    _position = position;
+    m_position = position;
 }
 
 b2Vec2 ParticleEmitter::Particle::getPosition() const
 {
-    return _position;
+    return m_position;
 }
 
 void ParticleEmitter::Particle::setVelocity(const b2Vec2& velocity)
 {
-    _velocity = velocity;
+    m_velocity = velocity;
 }
 
 b2Vec2 ParticleEmitter::Particle::getVelocity() const
 {
-    return _velocity;
+    return m_velocity;
 }
 
-void ParticleEmitter::Particle::setRotation(const float& rot)
+void ParticleEmitter::Particle::setRotation(float rot)
 {
-    _rotation = rot;
+    m_rotation = rot;
 }
 
 float ParticleEmitter::Particle::getRotation() const
 {
-    return _rotation;
+    return m_rotation;
 }
 
 float ParticleEmitter::Particle::getLifetime() const
 {
-    return _lifetime;
+    return m_lifetime;
 }
 
 sf::Color ParticleEmitter::Particle::getColor() const
 {
-    return _color;
+    return m_color;
 }
 
-void ParticleEmitter::Particle::setColor(const sf::Color& color)
+void ParticleEmitter::Particle::setColor(sf::Color color)
 {
-    _color = color;
+    m_color = color;
 }
 
-void ParticleEmitter::Particle::setAlpha(const int8_t& alpha)
+void ParticleEmitter::Particle::setAlpha(int8_t alpha)
 {
-    _color.a = alpha;
+    m_color.a = alpha;
 }
 
 void ParticleEmitter::Particle::move(const b2Vec2& vec)
 {
-    _position.x += vec.x;
-    _position.y += vec.y;
+    m_position.x += vec.x;
+    m_position.y += vec.y;
 }
 
 void ParticleEmitter::Particle::draw(sf::Shape* shape, sf::RenderWindow& window)
 {
-    shape->setPosition({_position.x * PIXELS_PER_METER, _position.y * PIXELS_PER_METER});
-    shape->setRotation(_rotation);
-    shape->setFillColor(_color);
+    shape->setPosition({m_position.x * PIXELS_PER_METER, m_position.y * PIXELS_PER_METER});
+    shape->setRotation(m_rotation);
+    shape->setFillColor(m_color);
     window.draw(*shape);
 }
 
-void ParticleEmitter::Particle::update(const float& deltaTime)
+void ParticleEmitter::Particle::update(float deltaTime)
 {
-    _position.x += _velocity.x * deltaTime;
-    _position.y += _velocity.y * deltaTime;
-    _lifetime += deltaTime;
+    m_position.x += m_velocity.x * deltaTime;
+    m_position.y += m_velocity.y * deltaTime;
+    m_lifetime += deltaTime;
 }
 
-ParticleEmitter::ParticleEmitter(sf::Shape* shape) : _particleShape(shape)
+ParticleEmitter::ParticleEmitter(sf::Shape* shape) : m_particleShape(shape)
 {}
 
 ParticleEmitter::ParticleEmitter(sf::Shape* shape, const b2Vec2& pos, 
-                    const float& vel, const float& rot, const float& spawnRate,
-                    const float& lifetime, const int& spawnAmount, const float& fadeOutTime, 
-                    const float& spread, const sf::Color& randomColor)
-    : _particleShape(shape), _velocity(vel), _spawnRate(spawnRate), _lifetime(lifetime), 
-    _spawnAmount(spawnAmount), _fadeOutTime(fadeOutTime), _spread(spread), _randomColor(randomColor)
+                    float vel, float rot, float spawnRate,
+                    float lifetime, int spawnAmount, float fadeOutTime, 
+                    float spread, sf::Color randomColor)
+    : m_particleShape(shape), m_velocity(vel), m_spawnRate(spawnRate), m_lifetime(lifetime), 
+    m_spawnAmount(spawnAmount), m_fadeOutTime(fadeOutTime), m_spread(spread), m_randomColor(randomColor)
 {
     this->setPosition(pos);
     this->setRotation(rot);
     
     if (shape != nullptr)
     {
-        _defaultColor = shape->getFillColor();
+        m_defaultColor = shape->getFillColor();
     }
 }
 
 void ParticleEmitter::removeShape()
 {
-    _particleShape = nullptr;
+    m_particleShape = nullptr;
 }
 
 void ParticleEmitter::setShape(sf::Shape* shape)
 {
-    _particleShape = shape;
+    m_particleShape = shape;
 }
 
 const sf::Shape* ParticleEmitter::getShape() const
 {
-    return _particleShape;
+    return m_particleShape;
 }
 
 sf::Shape* ParticleEmitter::getShape()
 {
-    return _particleShape;
+    return m_particleShape;
 }
 
 bool ParticleEmitter::isSpawning() const
 {
-    return _spawning;
+    return m_spawning;
 }
 
-void ParticleEmitter::setSpawning(const bool& value)
+void ParticleEmitter::setSpawning(bool value)
 {
-    _spawning = value;
+    m_spawning = value;
 }
 
 float ParticleEmitter::getSpawnRate() const
 {
-    return _spawnRate;
+    return m_spawnRate;
 }
 
-void ParticleEmitter::setSpawnRate(const float& value)
+void ParticleEmitter::setSpawnRate(float value)
 {
-    _spawnRate = value;
+    m_spawnRate = value;
 }
 
 float ParticleEmitter::getRandomSpawnRate() const
 {
-    return _randomSpawnRate;
+    return m_randomSpawnRate;
 }
 
-void ParticleEmitter::setRandomSpawnRate(const float& value)
+void ParticleEmitter::setRandomSpawnRate(float value)
 {
-    _randomSpawnRate = value;
+    m_randomSpawnRate = value;
 }
 
 int ParticleEmitter::getSpawnAmount() const
 {
-    return _spawnAmount;
+    return m_spawnAmount;
 }
 
-void ParticleEmitter::setSpawnAmount(const int& value)
+void ParticleEmitter::setSpawnAmount(int value)
 {
-    _spawnAmount = value;
+    m_spawnAmount = value;
 }
 
 unsigned int ParticleEmitter::getRandomSpawnAmount() const
 {
-    return _randomSpawnAmount;
+    return m_randomSpawnAmount;
 }
 
-void ParticleEmitter::setRandomSpawnAmount(const unsigned int& value)
+void ParticleEmitter::setRandomSpawnAmount(unsigned int value)
 {
-    _randomSpawnAmount = std::min(std::max(value, 1U), (unsigned int)RAND_MAX);
+    m_randomSpawnAmount = std::min(std::max(value, 1U), (unsigned int)RAND_MAX);
 }
 
 float ParticleEmitter::getSpread() const
 {
-    return _spread;
+    return m_spread;
 }
 
-void ParticleEmitter::setSpread(const float& value)
+void ParticleEmitter::setSpread(float value)
 {
-    _spread = value;
+    m_spread = value;
 }
 
 float ParticleEmitter::getRandomRotation() const
 {
-    return _randomRotation;
+    return m_randomRotation;
 }
 
-void ParticleEmitter::setRandomRotation(const float& value)
+void ParticleEmitter::setRandomRotation(float value)
 {
-    _randomRotation = value;
+    m_randomRotation = value;
 }
 
 float ParticleEmitter::getLifetime() const
 {
-    return _lifetime;
+    return m_lifetime;
 }
 
-void ParticleEmitter::setLifetime(const float& value)
+void ParticleEmitter::setLifetime(float value)
 {
-    _lifetime = value;
+    m_lifetime = value;
 }
 
 float ParticleEmitter::getFadeOutTime() const
 {
-    return _fadeOutTime;
+    return m_fadeOutTime;
 }
 
-void ParticleEmitter::setFadeOutTime(const float& value)
+void ParticleEmitter::setFadeOutTime(float value)
 {
-    _fadeOutTime = value;
+    m_fadeOutTime = value;
 }
 
 float ParticleEmitter::getVelocity() const
 {
-    return _velocity;
+    return m_velocity;
 }
 
-void ParticleEmitter::setVelocity(const float& value)
+void ParticleEmitter::setVelocity(float value)
 {
-    _velocity = value;
+    m_velocity = value;
 }
 
-void ParticleEmitter::setRandomColor(const sf::Color& color)
+void ParticleEmitter::setRandomColor(sf::Color color)
 {
-    _randomColor = color;
+    m_randomColor = color;
 }
 
 sf::Color ParticleEmitter::getRandomColor() const
 {
-    return _randomColor;
+    return m_randomColor;
 }
 
-void ParticleEmitter::setDefaultColor(const sf::Color& color)
+void ParticleEmitter::setDefaultColor(sf::Color color)
 {
-    _defaultColor = color;
+    m_defaultColor = color;
 }
 
 sf::Color ParticleEmitter::getDefaultColor() const
 {
-    return _defaultColor;
+    return m_defaultColor;
 }
 
 void ParticleEmitter::emit()
 {
-    for (unsigned int i = 0; i < _spawnAmount - (rand()%_randomSpawnAmount); i++)
+    for (unsigned int i = 0; i < m_spawnAmount - (rand()%m_randomSpawnAmount); i++)
     {
-        float spread = (randX(_spread) - _spread/2)*b2_pi/180;
-        float rotation = randX(_randomRotation);
-        sf::Color color(_defaultColor.r + rand()%(_randomColor.r+1), _defaultColor.g + rand()%(_randomColor.g+1),
-                        _defaultColor.b + rand()%(_randomColor.b+1), _defaultColor.a + rand()%(_randomColor.a+1));
-        auto polar = std::polar<float>(_velocity, this->getRotation() + spread);
+        float spread = (randX(m_spread) - m_spread/2)*b2_pi/180;
+        float rotation = randX(m_randomRotation);
+        sf::Color color(m_defaultColor.r + rand()%(m_randomColor.r+1), m_defaultColor.g + rand()%(m_randomColor.g+1),
+                        m_defaultColor.b + rand()%(m_randomColor.b+1), m_defaultColor.a + rand()%(m_randomColor.a+1));
+        auto polar = std::polar<float>(m_velocity, this->getRotation() + spread);
 
-        _particles.push_back({this->getPosition(), 
+        m_particles.push_back({this->getPosition(), 
                             {polar.real(), polar.imag()}, 
                             rotation, color});
     }
 }
 
-void ParticleEmitter::Update(const float& deltaTime)
+void ParticleEmitter::Update(float deltaTime)
 {
-    for (std::list<Particle>::iterator particle = _particles.begin(); particle != _particles.end(); particle++)
+    for (std::list<Particle>::iterator particle = m_particles.begin(); particle != m_particles.end(); particle++)
     {
         particle->update(deltaTime);
-        if (particle->getLifetime() >= _lifetime)
+        if (particle->getLifetime() >= m_lifetime)
         {
             auto temp = particle;
             particle--;
-            _particles.erase(temp);
+            m_particles.erase(temp);
         }
-        if (particle->getLifetime() >= _lifetime - _fadeOutTime)
+        if (particle->getLifetime() >= m_lifetime - m_fadeOutTime)
         {
-            particle->setAlpha(_defaultColor.a*((_lifetime - particle->getLifetime())/_fadeOutTime));
+            particle->setAlpha(m_defaultColor.a*((m_lifetime - particle->getLifetime())/m_fadeOutTime));
         }
     }
     
-    if (!_spawning)
+    if (!m_spawning)
         return;
 
-    _spawnTimer += deltaTime + randX(_randomSpawnRate);
-    if (_spawnTimer >= _spawnRate)
+    m_spawnTimer += deltaTime + randX(m_randomSpawnRate);
+    if (m_spawnTimer >= m_spawnRate)
     {
-        _spawnTimer = 0.f;
+        m_spawnTimer = 0.f;
         this->emit();
     }
 }
 
 void ParticleEmitter::Draw(sf::RenderWindow& window)
 {
-    if (_particleShape == nullptr)
+    if (m_particleShape == nullptr)
         return;
 
-    for (auto particle: _particles)
+    for (auto particle: m_particles)
     {
-        particle.draw(_particleShape, window);
+        particle.draw(m_particleShape, window);
     }
 }
 
-float ParticleEmitter::randX(const float& x)
+float ParticleEmitter::randX(float x)
 {
     return ((float)rand() / (float)RAND_MAX) * x;
 }
 
 void ParticleEmitter::clear()
 {
-    _particles.clear();
+    m_particles.clear();
 }

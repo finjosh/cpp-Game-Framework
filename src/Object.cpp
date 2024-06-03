@@ -138,7 +138,7 @@ b2Vec2 Object::getGlobalVector(const b2Vec2& vec) const
     return b2Mul(m_transform.q, vec);
 }
 
-void Object::rotateAround(const b2Vec2& center, const float& rot)
+void Object::rotateAround(const b2Vec2& center, float rot)
 {
     b2Vec2 posChange = rotateAround(m_transform.p, center, rot) - m_transform.p;
     m_transform.p += posChange;
@@ -151,7 +151,7 @@ void Object::rotateAround(const b2Vec2& center, const float& rot)
     }
 }
 
-b2Vec2 Object::rotateAround(const b2Vec2& vec, const b2Vec2& center, const float& rot)
+b2Vec2 Object::rotateAround(const b2Vec2& vec, const b2Vec2& center, float rot)
 {
     auto polar = std::polar<float>(1.0, rot);
     std::complex<float> temp(vec.x - center.x, vec.y - center.y);
@@ -171,7 +171,7 @@ void Object::setPosition(const b2Vec2& position)
     }
 }
 
-void Object::setPosition(const float& x, const float& y)
+void Object::setPosition(float x, float y)
 {
     setPosition({x,y});
 }
@@ -181,7 +181,7 @@ b2Vec2 Object::getPosition() const
     return m_transform.p;
 }
 
-void Object::setRotation(const float& rotation)
+void Object::setRotation(float rotation)
 {
     float rotChange = rotation - m_transform.q.GetAngle();
     m_transform.q.Set(rotation);
@@ -199,7 +199,7 @@ float Object::getRotation() const
     return m_transform.q.GetAngle();
 }
 
-void Object::setTransform(const b2Transform transform)
+void Object::setTransform(const b2Transform& transform)
 {
     Object::setPosition(transform.p);
     Object::setRotation(transform.q.GetAngle());
@@ -221,7 +221,7 @@ void Object::move(const b2Vec2& move)
     }
 }
 
-void Object::rotate(const float& rot)
+void Object::rotate(float rot)
 {
     m_transform.q.Set(m_transform.q.GetAngle() + rot);
     m_onTransformUpdated.invoke();
@@ -253,7 +253,7 @@ b2Vec2 Object::getLocalPosition() const
     return this->getPosition();
 }
 
-void Object::setLocalRotation(const float& rotation)
+void Object::setLocalRotation(float rotation)
 {
     if (m_parent)
     {

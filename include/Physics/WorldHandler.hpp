@@ -5,24 +5,25 @@
 
 #include "box2d/Box2D.h"
 
+// TODO setup box2d multithreading steps (have to make collision Manager thread safe also)
 class WorldHandler
 {
 public:
     static void init(const b2Vec2& gravity);
     static b2World& getWorld();
-    static void updateWorld(const double& deltaTime);
+    static void updateWorld(double deltaTime);
     /// @note only call this before using any physics
     /// @param ticksPerSecond the number of updates the physics engine will take per second
-    static void setTickRate(const int32& ticksPreSecond = 60);
+    static void setTickRate(int32 ticksPreSecond = 60);
     static int32 getTickRate();
     /// @note only call this before using any physics
-    static void setVelocityIterations(const int32& iterations = 8);
+    static void setVelocityIterations(int32 iterations = 8);
     static int32 getVelocityIterations();
     /// @note only call this before using any physics
-    static void setPositionIterations(const int32& iterations = 3);
+    static void setPositionIterations(int32 iterations = 3);
     static int32 getPositionIterations();
     /// @brief The max steps per frame
-    static void setMaxUpdates(const int32& maxUpdates = 8);
+    static void setMaxUpdates(int32 maxUpdates = 8);
     static int32 getMaxUpdates();
     static void setGravity(const b2Vec2& gravity);
     static b2Vec2 getGravity();

@@ -12,6 +12,7 @@
 #include "ObjectManager.hpp"
 #include "UpdateManager.hpp"
 #include "ParticleEmitter.hpp"
+#include "VectorConversions.hpp"
 
 #include "Graphics/WindowHandler.hpp"
 #include "Graphics/DrawableManager.hpp"
@@ -21,10 +22,6 @@
 #include "Physics/CollisionManager.hpp"
 #include "Physics/DebugDraw.hpp"
 
-//! TESTING
-// #include "TestHelper.hpp"
-//! -------
-
 using namespace std;
 
 // TODO make animation class
@@ -33,6 +30,7 @@ void addThemeCommands();
 /// @param themes in order of most wanted
 /// @param directories directories to check in ("" for current)
 void tryLoadTheme(std::list<std::string> themes, std::list<std::string> directories);
+std::string vecToStr(b2Vec2 vec);
 
 class Wall : public virtual Object, public Collider, public Renderer<sf::RectangleShape>
 {
@@ -45,7 +43,7 @@ public:
         b2shape.SetAsBox(size.x/2, size.y/2);
 
         Collider::createFixture(b2shape, 1);
-        Collider::SetType(b2BodyType::b2_staticBody);
+        Collider::setType(b2BodyType::b2_staticBody);
 
         setSize({size.x,size.y});
         setOrigin(size.x/2,size.y/2);
@@ -82,38 +80,38 @@ public:
         m_hitParticle.set(new ParticleEmitter(&m_particle, {0,0}, 10, 0, 0, 1, 10, 0.5, 360));
     }
 
-    inline virtual void Update(const float& deltaTime) override
+    inline virtual void Update(float deltaTime) override
     {
         if (sf::Keyboard::isKeyPressed(sf::Keyboard::Key::W))
         {
-            ApplyForceToCenter({0,-250000*deltaTime});
+            applyForceToCenter({0,-250000*deltaTime});
         }
         if (sf::Keyboard::isKeyPressed(sf::Keyboard::Key::A))
         {
-            ApplyForceToCenter({-250000*deltaTime,0});
+            applyForceToCenter({-250000*deltaTime,0});
         }
         if (sf::Keyboard::isKeyPressed(sf::Keyboard::Key::S))
         {
-            ApplyForceToCenter({0,250000*deltaTime});
+            applyForceToCenter({0,250000*deltaTime});
         }
         if (sf::Keyboard::isKeyPressed(sf::Keyboard::Key::D))
         {
-            ApplyForceToCenter({250000*deltaTime,0});
+            applyForceToCenter({250000*deltaTime,0});
         }
         if (sf::Keyboard::isKeyPressed(sf::Keyboard::Key::E))
         {
-            ApplyTorque(750000*deltaTime);
+            applyTorque(750000*deltaTime);
         }
         if (sf::Keyboard::isKeyPressed(sf::Keyboard::Key::Q))
         {
-            ApplyTorque(-750000*deltaTime);
+            applyTorque(-750000*deltaTime);
         }
     }
 
     void BeginContact(ContactData data) override
     {
-        auto info = data.getContactInfo();
-        if (info.getPointCount() > 0 && GetLinearVelocity().LengthSquared() > 100 && data.getCollider()->cast<Wall>())
+        auto info = data.getInfo();
+        if (info.getPointCount() > 0 && getLinearVelocity().LengthSquared() > 100 && data.getCollider()->cast<Wall>())
         {
             m_hitParticle->setPosition(info.getContactPoints()[0]);
             m_hitParticle->emit();
@@ -131,7 +129,7 @@ public:
         b2PolygonShape shape;
         shape.SetAsBox(10,10);
         Collider::createFixtureSensor(shape);
-        Collider::SetType(b2BodyType::b2_staticBody);
+        Collider::setType(b2BodyType::b2_staticBody);
 
         setSize({20,20});
         setOrigin({10,10});
@@ -158,6 +156,54 @@ private:
     Object::Ptr<> m_object;
 };
 
+class OneWay : public virtual Object, public Renderer<sf::RectangleShape>, public Collider, public UpdateInterface
+{
+public:
+    inline OneWay(const b2Vec2& pos, const b2Vec2& size)
+    {
+        setPosition(pos);
+
+        b2PolygonShape b2shape;
+        b2shape.SetAsBox(size.x/2, size.y/2);
+
+        Collider::createFixture(b2shape, 1);
+        // Collider::setType(b2BodyType::b2_staticBody);
+
+        setSize({size.x,size.y});
+        setOrigin(size.x/2,size.y/2);
+        setFillColor(sf::Color::Transparent);
+        setOutlineThickness(0.5);
+        setOutlineColor(sf::Color::Blue);
+    }
+
+    void Update(float delta) override
+    {
+        b2Vec2 mousePos = convertVec2<int>(sf::Mouse::getPosition(*WindowHandler::getRenderWindow()));
+        mousePos *= 1/PIXELS_PER_METER;
+
+        if (sf::Mouse::isButtonPressed(sf::Mouse::Left))
+        {
+            mousePos -= getPosition();
+            mousePos.Normalize();
+            mousePos *= 500000.f*delta;
+            applyForceToCenter(mousePos);
+        }
+    }
+
+    void PreSolve(PreSolveData data) const override
+    {
+        // Command::Prompt::print(vecToStr(data.getLocalNormal()));
+        if (data.getCollider()->cast<Wall>() != nullptr)
+            return;
+        if (getLocalVector(data.getInfo().getNormal()).y < -0.5f)
+        {
+            data.setEnabled(false);
+        }
+    }
+
+    createDestroy();
+};
+
 // TODO implement contact filter callback
 int main()
 {
@@ -176,6 +222,7 @@ int main()
     DebugDraw debugDraw(&window);
     debugDraw.initCommands();
     WorldHandler::getWorld().SetDebugDraw(&debugDraw);
+    // WorldHandler::getWorld().SetContactFilter();
 
     //! Required to initialize VarDisplay and CommandPrompt
     // creates the UI for the VarDisplay
@@ -213,6 +260,8 @@ int main()
     emitter->setDrawStage(DrawStage::Particles);
     
     (new Sensor({[&emitter](){ emitter->setSpawning(!emitter->isSpawning()); }}, nullptr))->setPosition(50,50);
+
+    new OneWay({40,25}, {40,10});
 
     float secondTimer = 0;
     int fps = 0;
@@ -345,4 +394,9 @@ void tryLoadTheme(std::list<std::string> themes, std::list<std::string> director
             }
         }
     }
+}
+
+std::string vecToStr(b2Vec2 vec)
+{
+    return std::to_string(vec.x) + ", " + std::to_string(vec.x);
 }

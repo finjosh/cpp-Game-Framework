@@ -32,34 +32,27 @@ void CollisionManager::EndContact(b2Contact* contact)
 
 void CollisionManager::PreSolve(b2Contact* contact, const b2Manifold* oldManifold)
 {
-    b2Body* body = contact->GetFixtureA()->GetBody();
-    if (body != nullptr)
-    {
-        Collider* collider = static_cast<Collider*>((void*)body->GetUserData().pointer);
-        collider->PreSolve(contact, oldManifold);
-    }
-    body = contact->GetFixtureB()->GetBody();
-    if (body != nullptr)
-    {
-        Collider* collider = static_cast<Collider*>((void*)body->GetUserData().pointer);
-        collider->PreSolve(contact, oldManifold);
-    }
+    Collider* A = static_cast<Collider*>((void*)contact->GetFixtureA()->GetBody()->GetUserData().pointer);
+    Collider* B = static_cast<Collider*>((void*)contact->GetFixtureB()->GetBody()->GetUserData().pointer);
+
+    A->PreSolve({B, contact->GetFixtureA(), contact->GetFixtureB(), contact});
+    B->PreSolve({A, contact->GetFixtureB(), contact->GetFixtureA(), contact});
 }
 
 void CollisionManager::PostSolve(b2Contact* contact, const b2ContactImpulse* impulse)
 {
-    b2Body* body = contact->GetFixtureA()->GetBody();
-    if (body != nullptr)
-    {
-        Collider* collider = static_cast<Collider*>((void*)body->GetUserData().pointer);
-        collider->PostSolve(contact, impulse);
-    }
-    body = contact->GetFixtureB()->GetBody();
-    if (body != nullptr)
-    {
-        Collider* collider = static_cast<Collider*>((void*)body->GetUserData().pointer);
-        collider->PostSolve(contact, impulse);
-    }
+    // b2Body* body = contact->GetFixtureA()->GetBody();
+    // if (body != nullptr)
+    // {
+    //     Collider* collider = static_cast<Collider*>((void*)body->GetUserData().pointer);
+    //     collider->PostSolve(contact, impulse);
+    // }
+    // body = contact->GetFixtureB()->GetBody();
+    // if (body != nullptr)
+    // {
+    //     Collider* collider = static_cast<Collider*>((void*)body->GetUserData().pointer);
+    //     collider->PostSolve(contact, impulse);
+    // }
 }
 
 void CollisionManager::Update()

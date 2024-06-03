@@ -32,8 +32,8 @@ void Collider::m_destroyBody()
     m_body = nullptr;
 }
 
-Fixture Collider::createFixture(const b2Shape& shape, const float& friction, const float& restitution, const float& restitutionThreshold, 
-                      const float& density, const b2Filter& filter)
+Fixture Collider::createFixture(const b2Shape& shape, float friction, float restitution, float restitutionThreshold, 
+                      float density, const b2Filter& filter)
 {
     b2FixtureDef temp;
     temp.density = density;
@@ -45,7 +45,7 @@ Fixture Collider::createFixture(const b2Shape& shape, const float& friction, con
     return Fixture(this, temp);
 }
 
-Fixture Collider::createFixtureSensor(const b2Shape& shape, const float& density, const b2Filter& filter)
+Fixture Collider::createFixtureSensor(const b2Shape& shape, float density, const b2Filter& filter)
 {
     b2FixtureDef temp;
     temp.density = density;
@@ -55,12 +55,12 @@ Fixture Collider::createFixtureSensor(const b2Shape& shape, const float& density
     return Fixture(this, temp);
 }
 
-void Collider::DestroyFixture(const Fixture& fixture)
+void Collider::destroyFixture(const Fixture& fixture)
 {
     m_body->DestroyFixture(fixture.m_fixture);
 }
 
-void Collider::setPhysicsEnabled(const bool& enabled)
+void Collider::setPhysicsEnabled(bool enabled)
 {
     m_enabled = enabled;
     m_body->SetEnabled(m_enabled && Object::isEnabled());
@@ -88,172 +88,172 @@ void Collider::m_update()
     Object::m_onTransformUpdated.setEnabled(true);
 }
 
-void Collider::setAwake(const bool& awake)
+void Collider::setAwake(bool awake)
 {
     m_body->SetAwake(awake);
 }
 
-const b2Vec2& Collider::GetWorldCenter() const
+const b2Vec2& Collider::getWorldCenter() const
 {
     return m_body->GetWorldCenter();
 }
 
-const b2Vec2& Collider::GetLocalCenter() const
+const b2Vec2& Collider::getLocalCenter() const
 {
     return m_body->GetLocalCenter();
 }
 
-void Collider::SetLinearVelocity(const b2Vec2& v)
+void Collider::setLinearVelocity(const b2Vec2& v)
 {
     m_body->SetLinearVelocity(v);
 }
 
-const b2Vec2& Collider::GetLinearVelocity() const
+const b2Vec2& Collider::getLinearVelocity() const
 {
     return m_body->GetLinearVelocity();
 }
 
-void Collider::SetAngularVelocity(const float& omega)
+void Collider::setAngularVelocity(float omega)
 {
     m_body->SetAngularVelocity(omega);
 }
 
-float Collider::GetAngularVelocity() const
+float Collider::getAngularVelocity() const
 {
     return m_body->GetAngularVelocity();
 }
 
-void Collider::ApplyForce(const b2Vec2& force, const b2Vec2& point, const bool& wake)
+void Collider::applyForce(const b2Vec2& force, const b2Vec2& point, bool wake)
 {
     m_body->ApplyForce(force, point, wake);
 }
 
-void Collider::ApplyForceToCenter(const b2Vec2& force, const bool& wake)
+void Collider::applyForceToCenter(const b2Vec2& force, bool wake)
 {
     m_body->ApplyForceToCenter(force, wake);
 }
 
-void Collider::ApplyTorque(const float& torque, const bool& wake)
+void Collider::applyTorque(float torque, bool wake)
 {
     m_body->ApplyTorque(torque, wake);
 }
 
-void Collider::ApplyLinearImpulse(const b2Vec2& impulse, const b2Vec2& point, const bool& wake)
+void Collider::applyLinearImpulse(const b2Vec2& impulse, const b2Vec2& point, bool wake)
 {
     m_body->ApplyLinearImpulse(impulse, point, wake);
 }
 
-void Collider::ApplyLinearImpulseToCenter(const b2Vec2& impulse, const bool& wake)
+void Collider::applyLinearImpulseToCenter(const b2Vec2& impulse, bool wake)
 {
     m_body->ApplyLinearImpulseToCenter(impulse, wake);
 }
 
-void Collider::ApplyAngularImpulse(const float& impulse, const bool& wake)
+void Collider::applyAngularImpulse(float impulse, bool wake)
 {
     m_body->ApplyAngularImpulse(impulse, wake);
 }
 
-float Collider::GetMass() const
+float Collider::getMass() const
 {
     return m_body->GetMass();
 }
 
-float Collider::GetInertia() const
+float Collider::getInertia() const
 {
     return m_body->GetInertia();
 }
 
-b2MassData Collider::GetMassData() const
+b2MassData Collider::getMassData() const
 {
     return m_body->GetMassData();
 }
 
-void Collider::SetMassData(const b2MassData* data)
+void Collider::setMassData(const b2MassData* data)
 {
     m_body->SetMassData(data);
 }
 
-void Collider::ResetMassData()
+void Collider::resetMassData()
 {
     m_body->ResetMassData();
 }
 
-float Collider::GetLinearDamping() const
+float Collider::getLinearDamping() const
 {
     return m_body->GetLinearDamping();
 }
 
-void Collider::SetLinearDamping(const float& linearDamping)
+void Collider::setLinearDamping(float linearDamping)
 {
     m_body->SetLinearDamping(linearDamping);
 }
 
-float Collider::GetAngularDamping() const
+float Collider::getAngularDamping() const
 {
     return m_body->GetAngularDamping();
 }
 
-void Collider::SetAngularDamping(const float& angularDamping)
+void Collider::setAngularDamping(float angularDamping)
 {
     m_body->SetAngularDamping(angularDamping);
 }
 
-float Collider::GetGravityScale() const
+float Collider::getGravityScale() const
 {
     return m_body->GetGravityScale();
 }
 
-void Collider::SetGravityScale(const float& scale)
+void Collider::setGravityScale(float scale)
 {
     m_body->SetAngularDamping(scale);
 }
 
-void Collider::SetType(const b2BodyType& type)
+void Collider::setType(b2BodyType type)
 {
     m_body->SetType(type);
 }
 
-b2BodyType Collider::GetType() const
+b2BodyType Collider::getType() const
 {
     return m_body->GetType();
 }
 
-void Collider::SetBullet(const bool& flag)
+void Collider::setBullet(bool flag)
 {
     m_body->SetBullet(flag);
 }
 
-bool Collider::IsBullet() const
+bool Collider::isBullet() const
 {
     return m_body->IsBullet();
 }
 
-void Collider::SetSleepingAllowed(const bool& flag)
+void Collider::setSleepingAllowed(bool flag)
 {
     m_body->SetSleepingAllowed(flag);
 }
 
-bool Collider::IsSleepingAllowed() const
+bool Collider::isSleepingAllowed() const
 {
     return m_body->IsSleepingAllowed();
 }
 
-bool Collider::IsAwake() const
+bool Collider::isAwake() const
 {
     return m_body->IsAwake();
 }
 
-void Collider::SetFixedRotation(const bool& flag)
+void Collider::setFixedRotation(bool flag)
 {
     m_body->SetFixedRotation(flag);
 }
 
-bool Collider::IsFixedRotation() const
+bool Collider::isFixedRotation() const
 {
     return m_body->IsFixedRotation();
 }
 
-Fixture Collider::GetFixtureList()
+Fixture Collider::getFixtureList()
 {
     return Fixture(m_body->GetFixtureList());
 }
@@ -268,12 +268,17 @@ Collider* ContactData::getCollider()
     return m_collider;
 }
 
+const Collider* ContactData::getCollider() const
+{
+    return m_collider;
+}
+
 Fixture ContactData::getThisFixture()
 {
     return Fixture(m_thisFixture);
 }
 
-Fixture ContactData::getThisFixture() const
+const Fixture ContactData::getThisFixture() const
 {
     return Fixture(m_thisFixture);
 }
@@ -283,7 +288,7 @@ Fixture ContactData::getOtherFixture()
     return Fixture(m_contactData->GetFixtureA());
 }
 
-Fixture ContactData::getOtherFixture() const
+const Fixture ContactData::getOtherFixture() const
 {
     return Fixture(m_contactData->GetFixtureA());
 }
@@ -308,7 +313,7 @@ bool ContactData::operator != (const ContactData& data) const
     return !(*this == data);
 }
 
-ContactData::Info ContactData::getContactInfo() const
+ContactData::Info ContactData::getInfo() const
 {
     return Info(m_contactData);
 }
@@ -324,19 +329,9 @@ int32 ContactData::Info::getPointCount() const
     return m_points;
 }
 
-b2Vec2* ContactData::Info::getContactPoints()
-{
-    return &m_data.points[0];
-}
-
 const b2Vec2* ContactData::Info::getContactPoints() const
 {
     return &m_data.points[0];
-}
-
-float* ContactData::Info::getSeparations()
-{
-    return &m_data.separations[0];
 }
 
 const float* ContactData::Info::getSeparations() const
@@ -347,4 +342,99 @@ const float* ContactData::Info::getSeparations() const
 b2Vec2 ContactData::Info::getNormal() const
 {
     return m_data.normal;
+}
+
+//* Pre Solve Data
+
+PreSolveData::PreSolveData(Collider* collider, b2Fixture* thisFixture, b2Fixture* otherFixture, b2Contact* contactData) : 
+    m_collider(collider), m_thisFixture(thisFixture), m_otherFixture(otherFixture), m_contactData(contactData) {}
+
+const Collider* PreSolveData::getCollider() const
+{
+    return m_collider;
+}
+
+const Fixture PreSolveData::getThisFixture() const
+{
+    return Fixture(m_thisFixture);
+}
+
+const Fixture PreSolveData::getOtherFixture() const
+{
+    return Fixture(m_contactData->GetFixtureA());
+}
+
+ContactData::Info PreSolveData::getInfo() const
+{
+    return ContactData::Info(m_contactData);
+}
+
+bool PreSolveData::isTouching() const
+{
+    return m_contactData->IsTouching();
+}
+
+void PreSolveData::setEnabled(bool flag)
+{
+    m_contactData->SetEnabled(flag);
+}
+
+bool PreSolveData::isEnabled() const
+{
+    return m_contactData->IsEnabled();
+}
+
+void PreSolveData::setFriction(float friction)
+{
+    m_contactData->SetFriction(friction);
+}
+
+float PreSolveData::getFriction() const
+{
+    return m_contactData->GetFriction();
+}
+
+void PreSolveData::resetFriction()
+{
+    m_contactData->ResetFriction();
+}
+
+void PreSolveData::setRestitution(float restitution)
+{
+    m_contactData->SetRestitution(restitution);
+}
+
+float PreSolveData::getRestitution() const
+{
+    return m_contactData->GetRestitution();
+}
+
+void PreSolveData::resetRestitution()
+{
+    m_contactData->ResetRestitution();
+}
+
+void PreSolveData::setRestitutionThreshold(float threshold)
+{
+    m_contactData->SetRestitutionThreshold(threshold);
+}
+
+float PreSolveData::getRestitutionThreshold() const
+{
+    return m_contactData->GetRestitutionThreshold();
+}
+
+void PreSolveData::resetRestitutionThreshold()
+{
+    m_contactData->ResetRestitutionThreshold();
+}
+
+void PreSolveData::setTangentSpeed(float speed)
+{
+    m_contactData->SetTangentSpeed(speed);
+}
+
+float PreSolveData::getTangentSpeed() const
+{
+    return m_contactData->GetTangentSpeed();
 }

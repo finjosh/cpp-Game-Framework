@@ -10,6 +10,8 @@
 #include "Graphics/DrawableObject.hpp"
 // #include "Physics/WorldHandler.hpp"
 
+// TODO add the ability to add multiple shapes to one renderer (or something of the sort)
+
 /// @brief renderer for any sf::Shape
 /// @tparam T the wanted sf::Shape to render
 template <typename T, typename std::enable_if_t<std::is_base_of<sf::Shape, T>::value>* = nullptr>

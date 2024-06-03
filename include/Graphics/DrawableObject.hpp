@@ -21,18 +21,18 @@ struct _drawableComp
 class DrawableObject : public virtual Object
 {
 public:
-    DrawableObject(const int& layer = 0);
+    DrawableObject(int layer = 0);
     ~DrawableObject();
 
     /// @brief changes the order in which this obj will be drawn
     /// @note layer is relative to the parents layer if it is a drawableObject
     /// @param layer smaller is earlier and larger is later
-    void setLayer(const int& layer);
+    void setLayer(int layer);
     /// @note the layer is relative to the parent layer if it is a drawableObject
     int getLayer() const;
     /// @brief sets the stage at which this object will be drawn
     /// @note stage is the same as the drawable parent unless manually set (if there is any parent that is drawable)
-    void setDrawStage(const DrawStage& stage); // TODO implement for children
+    void setDrawStage(DrawStage stage);
     /// @note stage is relative to the parent unless manually set
     DrawStage getDrawStage() const;
 
@@ -45,14 +45,14 @@ public:
 protected:
     /// @brief attempts to set parent given the current object parent
     /// @note only use this if you know what you are doing
-    void _setParent();
+    void m_setParent();
     /// @brief removes the parent only from the drawable object
     /// @note only use this if you know what you are doing
-    void _removeParent();
+    void m_removeParent();
 
     /// @brief draws the objects recursively 
     /// @note only use this if you know what you are doing
-    void _draw(sf::RenderWindow& window);
+    void m_draw(sf::RenderWindow& window);
 
     friend DrawableManager;
 

@@ -19,7 +19,7 @@ b2World& WorldHandler::getWorld()
     return m_world;
 }
 
-void WorldHandler::updateWorld(const double& deltaTime)
+void WorldHandler::updateWorld(double deltaTime)
 {
     m_accumulate += deltaTime;
     int32 updates = std::min(int(m_accumulate*m_tickRate), m_maxUpdates);
@@ -31,7 +31,7 @@ void WorldHandler::updateWorld(const double& deltaTime)
     }
 }
 
-void WorldHandler::setTickRate(const int32& interval)
+void WorldHandler::setTickRate(int32 interval)
 {
     m_tickRate = interval;
 }
@@ -41,7 +41,7 @@ int32 WorldHandler::getTickRate()
     return m_tickRate;
 }
 
-void WorldHandler::setVelocityIterations(const int32& iterations)
+void WorldHandler::setVelocityIterations(int32 iterations)
 {
     m_velocityIterations = iterations;
 }
@@ -51,7 +51,7 @@ int32 WorldHandler::getVelocityIterations()
     return m_velocityIterations;
 }
 
-void WorldHandler::setPositionIterations(const int32& iterations)
+void WorldHandler::setPositionIterations(int32 iterations)
 {
     m_positionIterations = iterations;
 }

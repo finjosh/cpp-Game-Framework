@@ -14,9 +14,9 @@ UpdateInterface::~UpdateInterface()
     UpdateManager::removeUpdateObject(this);
 }
 
-void UpdateInterface::Update(const float& deltaTime) {}
+void UpdateInterface::Update(float deltaTime) {}
 
-void UpdateInterface::LateUpdate(const float& deltaTime) {}
+void UpdateInterface::LateUpdate(float deltaTime) {}
 
 void UpdateInterface::FixedUpdate() {}
 

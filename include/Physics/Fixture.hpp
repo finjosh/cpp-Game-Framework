@@ -7,57 +7,60 @@
 
 class Collider;
 class ContactData;
+class PreSolveData;
 // TODO implement a enum used for easy comparison of fixtures
 /// @note this does not update when the collider is destroyed (only store in the colliders object or keep track if it is still alive)
 class Fixture
 {
 public:
 	/// Set if this fixture is a sensor.
-	void SetSensor(const bool& sensor);
+	void setSensor(bool sensor);
 	/// Is this fixture a sensor (non-solid)?
 	/// @return the true if the shape is a sensor.
-	bool IsSensor() const;
+	bool isSensor() const;
 	/// Set the contact filtering data. This will not update contacts until the next time
 	/// step when either parent body is active and awake.
 	/// This automatically calls Refilter.
-	void SetFilterData(const b2Filter& filter);
+	void setFilterData(const b2Filter& filter);
 	/// Get the contact filtering data.
-	const b2Filter& GetFilterData() const;
+	const b2Filter& getFilterData() const;
 	/// @brief updates the current fixture to the next fixture for this fixtures collider
     /// @returns false if there are no more fixtures in this fixtures collider (this fixture stays the same)
-	bool GetNext();
+	bool getNext();
 	Collider* getCollider();
+	const Collider* getCollider() const;
 	/// Test a point for containment in this fixture.
 	/// @param p a point in world coordinates.
-	bool TestPoint(const b2Vec2& p) const;
+	bool testPoint(const b2Vec2& p) const;
 	/// Get the mass data for this fixture. The mass data is based on the density and
 	/// the shape. The rotational inertia is about the shape's origin. This operation
 	/// may be expensive.
-	void GetMassData(b2MassData* massData) const;
+	void getMassData(b2MassData* massData) const;
 	/// Set the density of this fixture. This will _not_ automatically adjust the mass
 	/// of the body. You must call b2Body::ResetMassData to update the body's mass.
-	void SetDensity(const float& density);
+	void setDensity(float density);
 	/// Get the density of this fixture.
-	float GetDensity() const;
+	float getDensity() const;
 	/// Get the coefficient of friction.
-	float GetFriction() const;
+	float getFriction() const;
 	/// Set the coefficient of friction. This will _not_ change the friction of
 	/// existing contacts.
-	void SetFriction(const float& friction);
+	void setFriction(float friction);
 	/// Get the coefficient of restitution.
-	float GetRestitution() const;
+	float getRestitution() const;
 	/// Set the coefficient of restitution. This will _not_ change the restitution of
 	/// existing contacts.
-	void SetRestitution(const float& restitution);
+	void setRestitution(float restitution);
 	/// Get the restitution velocity threshold.
-	float GetRestitutionThreshold() const;
+	float getRestitutionThreshold() const;
 	/// Set the restitution threshold. This will _not_ change the restitution threshold of
 	/// existing contacts.
-	void SetRestitutionThreshold(const float& threshold);
+	void setRestitutionThreshold(float threshold);
 
 protected:
     friend Collider;
 	friend ContactData;
+	friend PreSolveData;
     Fixture(b2Fixture* fixture);
 	Fixture(Collider* collider, const b2FixtureDef& fixtureDef);
     Fixture(Collider& collider, const b2FixtureDef& fixtureDef);

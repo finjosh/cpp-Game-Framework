@@ -7,7 +7,7 @@ void DrawableManager::draw(sf::RenderWindow& window)
     for (auto drawable: m_drawables)    
     {
         if (drawable->isEnabled())
-            drawable->_draw(window);
+            drawable->m_draw(window);
     }
 }
 

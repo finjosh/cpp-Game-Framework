@@ -18,10 +18,10 @@ bool _drawableComp::operator() (const DrawableObject* lhs, const DrawableObject*
 //         return false;
 }
 
-DrawableObject::DrawableObject(const int& layer) : m_layer(layer)
+DrawableObject::DrawableObject(int layer) : m_layer(layer)
 {
-    m_onParentRemoved(&DrawableObject::_removeParent, this);
-    m_onParentSet(&DrawableObject::_setParent, this);
+    m_onParentRemoved(&DrawableObject::m_removeParent, this);
+    m_onParentSet(&DrawableObject::m_setParent, this);
 
     DrawableManager::addDrawable(this);
 }
@@ -31,7 +31,7 @@ DrawableObject::~DrawableObject()
     DrawableManager::removeDrawable(this);
 }
 
-void DrawableObject::setLayer(const int& layer)
+void DrawableObject::setLayer(int layer)
 {
     DrawableManager::removeDrawable(this);
     m_layer = layer;
@@ -43,12 +43,12 @@ int DrawableObject::getLayer() const
     return m_layer;
 }
 
-void DrawableObject::setDrawStage(const DrawStage& stage)
+void DrawableObject::setDrawStage(DrawStage stage)
 {
     DrawableManager::removeDrawable(this);
     m_stage = stage;
     if (m_drawableParent)
-        _removeParent(); // also adds back to the drawable manager
+        m_removeParent(); // also adds back to the drawable manager
     else
         DrawableManager::addDrawable(this);
 }
@@ -61,7 +61,7 @@ DrawStage DrawableObject::getDrawStage() const
         return m_stage;
 }
 
-void DrawableObject::_setParent()
+void DrawableObject::m_setParent()
 {
     auto curParent = this->getParent();
     DrawableObject* drawableParent = curParent->cast<DrawableObject>();
@@ -79,7 +79,7 @@ void DrawableObject::_setParent()
     }
 }
 
-void DrawableObject::_removeParent()
+void DrawableObject::m_removeParent()
 {
     m_drawableParent->m_drawableChildren.erase(this);
     m_drawableParent = nullptr;
@@ -89,12 +89,12 @@ void DrawableObject::_removeParent()
 // TODO take in the parent position (either regular or interpolated)
 // TODO make objects children store local instead of global position?
 // TODO update all object functions to work with local instead of global?
-void DrawableObject::_draw(sf::RenderWindow& window) 
+void DrawableObject::m_draw(sf::RenderWindow& window) 
 {
     this->Draw(window);
     for (auto child: m_drawableChildren)
     {
-        child->_draw(window);
+        child->m_draw(window);
     }
     this->LateDraw(window);
 }

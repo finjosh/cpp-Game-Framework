@@ -13,9 +13,9 @@ public:
     ~UpdateInterface();
 
     /// @brief called every frame
-    virtual void Update(const float& deltaTime);
+    virtual void Update(float deltaTime);
     /// @brief called every frame after update
-    virtual void LateUpdate(const float& deltaTime);
+    virtual void LateUpdate(float deltaTime);
     /// @brief called a fixed amount of times per second
     virtual void FixedUpdate();
     /// @brief called right before window opens

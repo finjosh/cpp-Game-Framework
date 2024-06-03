@@ -291,6 +291,25 @@ public:
         return temp;
     }
 
+    /// @brief tries to cast this object to a given type
+    /// @returns nullptr if cast was unsuccessful  
+    template<typename type>
+    const type* cast() const
+    {
+        const type* temp = nullptr;
+    
+        try
+        {
+            temp = dynamic_cast<const type*>(this);    
+        }
+        catch(const std::exception& e)
+        {
+            temp = nullptr;
+        }
+
+        return temp;
+    }
+    
     void destroy();
 
     /// @param vec global b2Vec2
@@ -303,15 +322,15 @@ public:
     /// @param vec global vector
     /// @param rot rotation in RAD
     /// @returns the rotated vector
-    void rotateAround(const b2Vec2& center, const float& rot);
+    void rotateAround(const b2Vec2& center, float rot);
     /// @brief rotates the given b2Vec2 around the given center
     /// @param vec the point to rotate
     /// @param center the point to rotate around
     /// @param rot rotation in RAD
     /// @returns the rotated vector
-    b2Vec2 rotateAround(const b2Vec2& vec, const b2Vec2& center, const float& rot);
+    b2Vec2 rotateAround(const b2Vec2& vec, const b2Vec2& center, float rot);
     void setPosition(const b2Vec2& position);
-    void setPosition(const float& x, const float& y);
+    void setPosition(float x, float y);
     /// @brief if this is a child then the position will be set according to the parent
     /// @note if "canSetTransform" is false then this does nothing
     /// @note if this is not a child then position is set according to global
@@ -322,12 +341,12 @@ public:
     /// @returns position according to parent
     b2Vec2 getLocalPosition() const;
     /// @param rotation in radians
-    void setRotation(const float& rotation);
+    void setRotation(float rotation);
     /// @brief if this is a child then the rotation will be set according to the parent
     /// @note if "canSetTransform" is false then this does nothing
     /// @note if this is not a child then rotation is set according to global
     /// @param rotation according to the parent rotation
-    void setLocalRotation(const float& rotation);
+    void setLocalRotation(float rotation);
     /// @returns rotation in radians
     float getRotation() const;
     /// @returns the rotation in terms of b2Rot
@@ -335,11 +354,11 @@ public:
     /// @note if no parent returns global rotation
     /// @returns rotation according to parent
     float getLocalRotation() const;
-    void setTransform(const b2Transform transform);
+    void setTransform(const b2Transform& transform);
     b2Transform getTransform() const;
     void move(const b2Vec2& move);
     /// @param rot in radians
-    void rotate(const float& rot);
+    void rotate(float rot);
 
 protected:
     inline virtual void OnEnable() {};
@@ -366,9 +385,9 @@ private:
     /// @brief this should actually delete the object
     virtual void m_destroy() = 0;
     /// @warning only use this if you know what you are doing
-    Object(unsigned long long id);
+    Object(size_t id);
     /// @warning only use this if you know what you are doing
-    void setID(unsigned long long id);
+    void setID(size_t id);
 
     void m_addChild(Object* object);
     void m_removeChild(Object* object);
