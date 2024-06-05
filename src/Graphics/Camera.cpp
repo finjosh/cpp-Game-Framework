@@ -15,7 +15,9 @@ Camera::~Camera()
 
 void Camera::setLayer(int layer)
 {
+    CameraManager::removeCamera(this);
     m_layer = layer;
+    CameraManager::addCamera(this);
 }
 
 int Camera::getLayer() const
@@ -25,8 +27,13 @@ int Camera::getLayer() const
 
 void Camera::setMainCamera()
 {
-    m_layer = std::numeric_limits<int>().min();
+    m_layer = -1;
     CameraManager::setMainCamera(this);
+}
+
+bool Camera::isMainCamera()
+{
+    return (this == CameraManager::getMainCamera());
 }
 
 void Camera::setViewSize(b2Vec2 size)
@@ -86,4 +93,9 @@ void Camera::setRotationLocked(bool locked)
 bool Camera::isRotationLocked()
 {
     return m_rotationLock;
+}
+
+sf::Vector2f Camera::getPixelSize() const
+{
+    return {m_size.x*PIXELS_PER_METER, m_size.y*PIXELS_PER_METER};
 }

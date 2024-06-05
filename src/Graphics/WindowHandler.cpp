@@ -18,11 +18,29 @@ void WindowHandler::setRenderWindow(sf::RenderWindow* renderWindow)
 
 void WindowHandler::Display(tgui::Gui& gui)
 {
-    for (auto camera: CameraManager::m_cameras)
+    for (auto camera: CameraManager::m_cameras) // Note this can not be multithreaded easily (camera uses regular events that could lead to memory races)
     {
+        if (camera->DrawBackground.getNumCallbacks() > 0)
+        {
+            // reseting the view first
+            auto view = camera->getCameraView();
+            view.setCenter(view.getSize().x/2, view.getSize().y/2);
+            m_renderWindow->setView(view);
+            camera->DrawBackground.invoke(m_renderWindow, camera->getPixelSize());
+        }
+        
         m_renderWindow->setView(camera->getCameraView());
         DrawableManager::draw(*m_renderWindow);
         WorldHandler::getWorld().DebugDraw();
+        
+        if (camera->DrawOverlay.getNumCallbacks() > 0)
+        {
+            // reseting the view first
+            auto view = camera->getCameraView();
+            view.setCenter(view.getSize().x/2, view.getSize().y/2);
+            m_renderWindow->setView(view);
+            camera->DrawOverlay.invoke(m_renderWindow, camera->getPixelSize());
+        }
     }
 
     if (auto camera = CameraManager::getMainCamera()) // TODO do this after drawing UI and add canvases

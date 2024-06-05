@@ -19,7 +19,12 @@ void CameraManager::removeCamera(Camera* camera)
 {
     m_cameras.erase(camera);
     if (m_mainCamera == camera)
-        m_mainCamera = nullptr;
+    {
+        if (m_cameras.size() == 0)
+            m_mainCamera = nullptr;
+        else
+            m_cameras.begin().operator*()->setMainCamera();
+    }
 }
 
 Camera* CameraManager::getMainCamera()

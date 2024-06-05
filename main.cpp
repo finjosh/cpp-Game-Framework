@@ -68,7 +68,7 @@ public:
         b2PolygonShape b2shape;
         b2shape.SetAsBox(2.5,2.5);
 
-        Collider::createFixture(b2shape, 1);
+        Collider::createFixture(b2shape, 1, 0.1);
 
         setSize({5,5});
         setOrigin(2.5,2.5);
@@ -262,10 +262,10 @@ int main()
     //! ---------------------------------------------------
 
     //* init code
-    new Wall({window.getSize().x/2/PIXELS_PER_METER,window.getSize().y/PIXELS_PER_METER}, {window.getSize().x/PIXELS_PER_METER,10});
-    new Wall({window.getSize().x/2/PIXELS_PER_METER,0}, {window.getSize().x/PIXELS_PER_METER,10});
-    new Wall({window.getSize().x/PIXELS_PER_METER, window.getSize().y/2/PIXELS_PER_METER}, {10, window.getSize().y/PIXELS_PER_METER});
-    new Wall({0, window.getSize().y/2/PIXELS_PER_METER}, {10, window.getSize().y/PIXELS_PER_METER});
+    new Wall({96,108}, {192,10});
+    new Wall({96,0}, {192,10});
+    new Wall({192, 54}, {10, 108});
+    new Wall({0, 54}, {10, 108});
     // for (int i = 0; i < 100; i++)
     //     (new Player())->setPosition({50,50});
     auto p = new Player();
@@ -292,6 +292,11 @@ int main()
     auto camera = new Camera(10);
     camera->setScreenRect({0,0,0.25,0.25});
     camera->setPosition(window.getSize().x/PIXELS_PER_METER/2, window.getSize().y/PIXELS_PER_METER/2);
+    camera->DrawBackground.connect([](sf::RenderWindow* win, sf::Vector2f size){
+        sf::RectangleShape temp(size);
+        temp.setFillColor(sf::Color(100,100,100,75));
+        win->draw(temp);
+    });
 
     float secondTimer = 0;
     int fps = 0;
