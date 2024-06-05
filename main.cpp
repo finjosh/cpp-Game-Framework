@@ -17,6 +17,8 @@
 #include "Graphics/WindowHandler.hpp"
 #include "Graphics/DrawableManager.hpp"
 #include "Graphics/Renderer.hpp"
+#include "Graphics/Camera.hpp"
+#include "Graphics/CameraManager.hpp"
 
 #include "Physics/WorldHandler.hpp"
 #include "Physics/CollisionManager.hpp"
@@ -53,7 +55,7 @@ public:
     createDestroy();
 };
 
-class Player : public virtual Object, public Collider, public Renderer<sf::RectangleShape>, public UpdateInterface
+class Player : public virtual Object, public Collider, public Renderer<sf::RectangleShape>, public UpdateInterface, public Camera
 {
 public:
     std::string name = "Random Name";
@@ -78,44 +80,53 @@ public:
         m_particle.setSize({5,5});
         m_particle.setOrigin({2.5,2.5});
         m_hitParticle.set(new ParticleEmitter(&m_particle, {0,0}, 10, 0, 0, 1, 10, 0.5, 360));
+
+        setMainCamera();
+        Camera::setRotationLocked(true);
     }
 
     inline virtual void Update(float deltaTime) override
     {
         if (sf::Keyboard::isKeyPressed(sf::Keyboard::Key::W))
         {
-            applyForceToCenter({0,-250000*deltaTime});
+            applyForceToCenter({0,-120000*deltaTime});
         }
         if (sf::Keyboard::isKeyPressed(sf::Keyboard::Key::A))
         {
-            applyForceToCenter({-250000*deltaTime,0});
+            applyForceToCenter({-120000*deltaTime,0});
         }
         if (sf::Keyboard::isKeyPressed(sf::Keyboard::Key::S))
         {
-            applyForceToCenter({0,250000*deltaTime});
+            applyForceToCenter({0,120000*deltaTime});
         }
         if (sf::Keyboard::isKeyPressed(sf::Keyboard::Key::D))
         {
-            applyForceToCenter({250000*deltaTime,0});
+            applyForceToCenter({120000*deltaTime,0});
         }
         if (sf::Keyboard::isKeyPressed(sf::Keyboard::Key::E))
         {
-            applyTorque(750000*deltaTime);
+            applyTorque(500000*deltaTime);
         }
         if (sf::Keyboard::isKeyPressed(sf::Keyboard::Key::Q))
         {
-            applyTorque(-750000*deltaTime);
+            applyTorque(-500000*deltaTime);
         }
     }
 
     void BeginContact(ContactData data) override
     {
         auto info = data.getInfo();
-        if (info.getPointCount() > 0 && getLinearVelocity().LengthSquared() > 100 && data.getCollider()->cast<Wall>())
+        if (info.getPointCount() > 0 && getLinearVelocity().LengthSquared() > 250 && data.getCollider()->cast<Wall>())
         {
             m_hitParticle->setPosition(info.getContactPoints()[0]);
             m_hitParticle->emit();
         }
+    }
+
+    void OnColliding(ContactData data) override
+    {
+        Command::Prompt::print(vecToStr(data.getInfo().getNormal()));
+        Command::Prompt::print(vecToStr(data.getInfo().getContactPoints()[0]));
     }
 
     createDestroy();
@@ -149,9 +160,9 @@ public:
         }
     }
 
-    createDestroy();
 
 private:
+    createDestroy();
     funcHelper::func<> m_onEnter;
     Object::Ptr<> m_object;
 };
@@ -161,8 +172,6 @@ class OneWay : public virtual Object, public Renderer<sf::RectangleShape>, publi
 public:
     inline OneWay(const b2Vec2& pos, const b2Vec2& size)
     {
-        setPosition(pos);
-
         b2PolygonShape b2shape;
         b2shape.SetAsBox(size.x/2, size.y/2);
 
@@ -174,34 +183,52 @@ public:
         setFillColor(sf::Color::Transparent);
         setOutlineThickness(0.5);
         setOutlineColor(sf::Color::Blue);
+
+        auto opening = new Renderer<sf::RectangleShape>();
+        opening->setParent(this);
+        opening->setSize({size.x, size.y/8});
+        opening->setFillColor(sf::Color::Green);
+        opening->setOrigin(size.x/2, -size.y/2);
+
+        setPosition(pos);
     }
 
     void Update(float delta) override
     {
-        b2Vec2 mousePos = convertVec2<int>(sf::Mouse::getPosition(*WindowHandler::getRenderWindow()));
-        mousePos *= 1/PIXELS_PER_METER;
+        b2Vec2 mousePos = WindowHandler::getMousePos();
 
         if (sf::Mouse::isButtonPressed(sf::Mouse::Left))
         {
             mousePos -= getPosition();
             mousePos.Normalize();
-            mousePos *= 500000.f*delta;
+            mousePos *= 7500000.f*delta;
             applyForceToCenter(mousePos);
         }
     }
 
-    void PreSolve(PreSolveData data) const override
+    void PreSolve(PreSolveData data) override
     {
-        // Command::Prompt::print(vecToStr(data.getLocalNormal()));
         if (data.getCollider()->cast<Wall>() != nullptr)
             return;
-        if (getLocalVector(data.getInfo().getNormal()).y < -0.5f)
+        if (getLocalVector(data.getInfo().getNormal()).y < -0.5f) // if the object is colliding from the bottom
+        {
+            data.setEnabled(false);
+            m_freeFlow.emplace(data.getCollider());
+        }
+        else if (m_freeFlow.find(data.getCollider()) != m_freeFlow.end())
         {
             data.setEnabled(false);
         }
     }
 
+    void EndContact(ContactData data) override
+    {
+        m_freeFlow.erase(data.getCollider());
+    }
+
+private:
     createDestroy();
+    std::set<const Collider*> m_freeFlow;
 };
 
 // TODO implement contact filter callback
@@ -239,9 +266,8 @@ int main()
     new Wall({window.getSize().x/2/PIXELS_PER_METER,0}, {window.getSize().x/PIXELS_PER_METER,10});
     new Wall({window.getSize().x/PIXELS_PER_METER, window.getSize().y/2/PIXELS_PER_METER}, {10, window.getSize().y/PIXELS_PER_METER});
     new Wall({0, window.getSize().y/2/PIXELS_PER_METER}, {10, window.getSize().y/PIXELS_PER_METER});
-    /// @brief create a body in the world with the default body def parameters
-    for (int i = 0; i < 100; i++)
-        (new Player())->setPosition({50,50});
+    // for (int i = 0; i < 100; i++)
+    //     (new Player())->setPosition({50,50});
     auto p = new Player();
     p->setPosition({15,10});
     p->setRotation(45);
@@ -263,6 +289,10 @@ int main()
 
     new OneWay({40,25}, {40,10});
 
+    auto camera = new Camera(10);
+    camera->setScreenRect({0,0,0.25,0.25});
+    camera->setPosition(window.getSize().x/PIXELS_PER_METER/2, window.getSize().y/PIXELS_PER_METER/2);
+
     float secondTimer = 0;
     int fps = 0;
     auto fpsLabel = tgui::Label::create("FPS");
@@ -274,7 +304,6 @@ int main()
     UpdateManager::Start();
     while (window.isOpen())
     {
-        window.clear();
         EventHelper::Event::ThreadSafe::update();
         // updating the delta time var
         sf::Time deltaTime = deltaClock.restart();
@@ -328,15 +357,8 @@ int main()
 
         // ---------------
 
-        DrawableManager::draw(window);
-        WorldHandler::getWorld().DebugDraw();
-
         ObjectManager::ClearDestroyQueue();
-
-        // draw for tgui
-        gui.draw();
-        // display for sfml window
-        window.display();
+        WindowHandler::Display(gui);
     }
 
     //! Required so that VarDisplay and CommandPrompt release all data

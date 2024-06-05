@@ -16,11 +16,13 @@ Object::Object()
 
 Object::Object(unsigned long long id) : m_id(id) {}
 
-void Object::setID(unsigned long long id)
+void Object::m_setID(unsigned long long id)
 {
     m_id = id;
 }
 
+// TODO add a way to search through objects based on heirarchy 
+// TODO handle deletion of objects properly (should not be able to find object after it is added to deletion queue)
 Object::~Object()
 {
     // this is not a real object
@@ -44,10 +46,11 @@ Object::~Object()
 
 void Object::destroy()
 {
-    ObjectManager::addToDestroyQueue(this);
     m_enabled = false; // dont want the event to be called
     m_onDestroy.invoke();
     onDestroy.invoke();
+    ObjectManager::addToDestroyQueue(this);
+    // ObjectManager::removeObject(this);
 }
 
 void Object::setEnabled(bool enabled)
@@ -57,11 +60,13 @@ void Object::setEnabled(bool enabled)
     {
         m_onEnabled.invoke();
         onEnabled.invoke();
+        OnEnable();
     }
     else
     {
         m_onDisabled.invoke();
         onDisabled.invoke();
+        OnDisable();
     }
 }
 
@@ -128,14 +133,24 @@ void Object::addChild(Object* child)
     child->setParent(this);
 }
 
+b2Vec2 Object::getLocalPoint(const b2Vec2& point) const
+{
+    return b2Mul(m_transform, point);
+}
+
+b2Vec2 Object::getGlobalPoint(const b2Vec2& point) const
+{
+    return b2MulT(m_transform, point);
+}
+
+b2Vec2 Object::getWorldVector(const b2Vec2& vec) const
+{
+    return b2Mul(m_transform.q, vec);
+}
+
 b2Vec2 Object::getLocalVector(const b2Vec2& vec) const
 {
     return b2MulT(m_transform.q, vec);
-}
-
-b2Vec2 Object::getGlobalVector(const b2Vec2& vec) const
-{
-    return b2Mul(m_transform.q, vec);
 }
 
 void Object::rotateAround(const b2Vec2& center, float rot)

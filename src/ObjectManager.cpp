@@ -3,15 +3,15 @@
 ObjectManager::_objectCompClass ObjectManager::m_compClass(0);
 std::unordered_set<Object*> ObjectManager::m_objects;
 
-std::list<Object::Ptr<>> ObjectManager::m_destroyQueue0;
-std::list<Object::Ptr<>> ObjectManager::m_destroyQueue1;
+std::list<Object*> ObjectManager::m_destroyQueue0;
+std::list<Object*> ObjectManager::m_destroyQueue1;
 bool ObjectManager::m_nextQueue = false;
 
 
 //* Comparison classes
 
 ObjectManager::_objectCompClass::_objectCompClass(size_t id) : Object(id) {}
-void ObjectManager::_objectCompClass::setID(size_t id) { Object::setID(id); }
+void ObjectManager::_objectCompClass::setID(size_t id) { Object::m_setID(id); }
 
 // -------------------
 
@@ -31,13 +31,10 @@ size_t ObjectManager::getNumberOfObjects()
 
 void ObjectManager::ClearDestroyQueue()
 {
-    std::list<Object::Ptr<>>& list = m_nextQueue ? m_destroyQueue1 : m_destroyQueue0;
-    for (std::list<Object::Ptr<>>::iterator obj = list.begin(); obj != list.end(); obj++)
+    std::list<Object*>& list = m_nextQueue ? m_destroyQueue1 : m_destroyQueue0;
+    for (std::list<Object*>::iterator obj = list.begin(); obj != list.end(); obj++)
     {
-        if (*obj)
-        {
-            (*obj)->m_destroy();
-        }
+        (*obj)->m_destroy();
     }
     list.clear();
 
@@ -57,12 +54,14 @@ void ObjectManager::removeObject(Object* object)
 
 void ObjectManager::addToDestroyQueue(Object* object)
 {
-    std::list<Object::Ptr<>>& list = m_nextQueue ? m_destroyQueue0 : m_destroyQueue1;
+    std::list<Object*>& list = m_nextQueue ? m_destroyQueue0 : m_destroyQueue1;
     list.emplace_back(object);
 }
 
 void ObjectManager::destroyAllObjects()
 {
+    ClearDestroyQueue(); 
+    ClearDestroyQueue(); // clearing twice for both queues
     auto i = m_objects.begin();
     while (i != m_objects.end())
     {

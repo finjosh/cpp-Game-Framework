@@ -12,7 +12,7 @@ b2Vec2 convertVec2(sf::Vector2<T> vec)
     return {static_cast<float>(vec.x), static_cast<float>(vec.y)};
 }
 
-b2Vec2 convertVec2f(sf::Vector2f vec)
+inline b2Vec2 convertVec2f(sf::Vector2f vec)
 {
     return {vec.x, vec.y};
 }

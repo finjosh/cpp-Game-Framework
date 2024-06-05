@@ -13,9 +13,8 @@
 
 class ObjectManager;
 
-/// @brief dont use this unless you know what you are doing
-/// @note this anything after this will be public unless specifying scope
-#define createDestroy() private: inline virtual void m_destroy() override { delete(this); } public:
+/// @note anything after this will be private unless specifying scope
+#define createDestroy() private: inline virtual void m_destroy() override { delete(this); }
 
 #define PI b2_pi
 
@@ -105,22 +104,22 @@ public:
             return this->getID() > Ptr.getID();
         }
         
-        inline bool operator==(T* Ptr) const
+        inline bool operator==(const T* Ptr) const
         {
             return this->getID() == (Ptr == nullptr ? 0 : Ptr->getID());
         }
         
-        inline bool operator!=(T* Ptr) const
+        inline bool operator!=(const T* Ptr) const
         {
             return this->getID() != (Ptr == nullptr ? 0 : Ptr->getID());
         }
         
-        inline bool operator<(T* Ptr) const
+        inline bool operator<(const T* Ptr) const
         {
             return this->getID() < (Ptr == nullptr ? 0 : Ptr->getID());
         }
         
-        inline bool operator>(T* Ptr) const
+        inline bool operator>(const T* Ptr) const
         {
             return this->getID() > (Ptr == nullptr ? 0 : Ptr->getID());
         }
@@ -204,44 +203,8 @@ public:
     /// @note set parent to nullptr if you dont want a parent
     /// @param parent the wanted parent
     void setParent(Object* parent);
-    // /// @note set parent to nullptr if you dont want a parent
-    // /// @param parent the wanted parent
-    // template <typename T, typename std::enable_if_t<std::is_base_of<Object, T>::value>* = nullptr>
-    // inline void setParent(Object::Ptr<T>& parent)
-    // {
-    //     if (static_cast<Object*>(parent) == this)
-    //         return;
-
-    //     if (m_parent != nullptr)
-    //     {
-    //         m_parent->m_removeChild(this);
-    //     }
-
-    //     m_parent = static_cast<Object*>(parent.get());
-    //     // if not valid have no parent
-    //     if (parent != nullptr)
-    //     {
-    //         parent->m_addChild(this);
-    //         m_onParentSet.invoke();
-    //         onParentSet.invoke();
-    //     }
-    //     else
-    //     {
-    //         m_onParentRemoved.invoke();
-    //         onParentRemoved.invoke();
-    //     }
-    // }
     /// @returns an invalid ptr if no parent
     Object::Ptr<> getParent();
-    // /// @brief adds the given object as a child to this one
-    // template <typename T, typename std::enable_if_t<std::is_base_of<Object, T>::value>* = nullptr>
-    // inline void addChild(Object::Ptr<T>& child)
-    // {
-    //     if (static_cast<Object*>(child) == this || child == nullptr)
-    //         return;
-        
-    //     child->setParent(this);
-    // }
     /// @brief adds the given object as a child to this one
     void addChild(Object::Ptr<>& child);
     /// @brief adds the given object as a child to this one
@@ -312,12 +275,20 @@ public:
     
     void destroy();
 
-    /// @param vec global b2Vec2
-    /// @returns the equivalent local b2Vec2
+    /// @param vec global point
+    /// @returns the equivalent local point
+    b2Vec2 getLocalPoint(const b2Vec2& point) const;
+    /// @param vec local point
+    /// @return the equivalent global point
+    b2Vec2 getGlobalPoint(const b2Vec2& point) const;
+    /// @param vec global vector
+    /// @note only rotates
+    /// @returns the equivalent local vector
+    b2Vec2 getWorldVector(const b2Vec2& vec) const;
+    /// @param vec local vector
+    /// @note only rotates
+    /// @return the equivalent global vector
     b2Vec2 getLocalVector(const b2Vec2& vec) const;
-    /// @param vec local b2Vec2
-    /// @return the equivalent global b2Vec2
-    b2Vec2 getGlobalVector(const b2Vec2& vec) const;
     /// @brief rotates the given b2Vec2 around this object
     /// @param vec global vector
     /// @param rot rotation in RAD
@@ -387,7 +358,7 @@ private:
     /// @warning only use this if you know what you are doing
     Object(size_t id);
     /// @warning only use this if you know what you are doing
-    void setID(size_t id);
+    void m_setID(size_t id);
 
     void m_addChild(Object* object);
     void m_removeChild(Object* object);

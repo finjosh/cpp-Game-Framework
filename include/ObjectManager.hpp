@@ -47,8 +47,8 @@ private:
     static _objectCompClass m_compClass;
     static std::unordered_set<Object*> m_objects;
 
-    static std::list<Object::Ptr<>> m_destroyQueue0;
-    static std::list<Object::Ptr<>> m_destroyQueue1;
+    static std::list<Object*> m_destroyQueue0;
+    static std::list<Object*> m_destroyQueue1;
     static bool m_nextQueue;
 };
 

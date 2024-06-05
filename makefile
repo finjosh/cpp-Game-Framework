@@ -28,7 +28,7 @@ LINKERFLAGS:=-lutils -ltgui-s -lsfml-graphics-s -lsfml-window-s \
 			-lsfml-system-s -lsfml-audio-s -lsfml-network-s \
 			-lws2_32 -lflac -lvorbisenc -lvorbisfile -lvorbis \
 			-logg -lopenal32 -lopengl32 -lwinmm -lgdi32 -lfreetype \
-			-lstdc++ -lbox2d
+			-lstdc++ -lbox2d -mwindows
 # flags to generate dependencies for all .o files
 DEPFLAGS:=-MP -MD
 # any compiler options

@@ -10,9 +10,11 @@
 #include "Graphics/DrawableObject.hpp"
 // #include "Physics/WorldHandler.hpp"
 
-// TODO add the ability to add multiple shapes to one renderer (or something of the sort)
+// TODO manually override all the sfml drawing classes (maybe)
 
 /// @brief renderer for any sf::Shape
+/// @warning if derived from do NOT forget to use "createDestroy()"
+/// @note this can be used as a stand alone object
 /// @tparam T the wanted sf::Shape to render
 template <typename T, typename std::enable_if_t<std::is_base_of<sf::Shape, T>::value>* = nullptr>
 class Renderer : public virtual Object, public DrawableObject, public T
@@ -32,6 +34,17 @@ public:
     using Object::move;
     using Object::rotate;
 
+    inline void setScale(float x, float y)
+    {
+        T::setScale(PIXELS_PER_METER + x, PIXELS_PER_METER + y);
+    }
+
+    inline b2Vec2 getScale() const
+    {
+        sf::Vector2f temp = T::getScale();
+        return {temp.x - PIXELS_PER_METER, temp.y - PIXELS_PER_METER};
+    }
+
 protected:
     inline void Draw(sf::RenderWindow& window) override
     {
@@ -41,8 +54,13 @@ protected:
     }
 
 private:
+    float m_xScale = 1, m_yScale = 1;
+
     using T::setScale;
     using T::getScale;
+    using T::scale;
+
+    createDestroy();
 };
 
 #endif

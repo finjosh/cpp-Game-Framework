@@ -162,9 +162,9 @@ public:
     /// @param ContactData the collision data
     inline virtual void EndContact(ContactData ContactData) {};
     /// @brief This can be called multiple times in one frame (called before any collision is handled)
-    /// @warning do not destroy or edit the collider during this callback
+    /// @warning do NOT DESTROY OR EDIT the ANY colliders during this callback
     /// @param PreContactData the pre solve contact data
-    inline virtual void PreSolve(PreSolveData data) const {};
+    inline virtual void PreSolve(PreSolveData data) {};
     // /// @brief This can be called multiple times in one frame (called before the collision is handled)
     // /// @note to get the collider get the userdata from the body and cast to Collider
     // /// @warning do not destroy or edit the collider during this callback

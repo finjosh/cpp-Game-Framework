@@ -29,7 +29,7 @@ Collider::~Collider()
 void Collider::m_destroyBody()
 {
     WorldHandler::getWorld().DestroyBody(m_body);
-    m_body = nullptr;
+    // m_body = nullptr;
 }
 
 Fixture Collider::createFixture(const b2Shape& shape, float friction, float restitution, float restitutionThreshold, 
