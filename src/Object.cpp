@@ -46,11 +46,20 @@ Object::~Object()
 
 void Object::destroy()
 {
+    m_invokeDestroyEvents();
+    ObjectManager::addToDestroyQueue(this);
+    // ObjectManager::removeObject(this);
+}
+
+void Object::m_invokeDestroyEvents()
+{
+    for (auto child: m_children)
+    {
+        child->m_invokeDestroyEvents();
+    }
     m_enabled = false; // dont want the event to be called
     m_onDestroy.invoke();
     onDestroy.invoke();
-    ObjectManager::addToDestroyQueue(this);
-    // ObjectManager::removeObject(this);
 }
 
 void Object::setEnabled(bool enabled)
@@ -72,7 +81,10 @@ void Object::setEnabled(bool enabled)
 
 bool Object::isEnabled() const
 {
-    return m_enabled;
+    if (m_parent)
+        return m_enabled && m_parent->isEnabled();
+    else
+        return m_enabled;
 }
 
 unsigned long int Object::getID() const

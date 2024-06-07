@@ -14,11 +14,11 @@
 #include "ParticleEmitter.hpp"
 #include "VectorConversions.hpp"
 
+#include "Graphics/Renderer.hpp"
 #include "Graphics/WindowHandler.hpp"
 #include "Graphics/DrawableManager.hpp"
-#include "Graphics/Renderer.hpp"
-#include "Graphics/Camera.hpp"
 #include "Graphics/CameraManager.hpp"
+#include "Graphics/CanvasManager.hpp"
 
 #include "Physics/WorldHandler.hpp"
 #include "Physics/CollisionManager.hpp"
@@ -123,12 +123,6 @@ public:
         }
     }
 
-    void OnColliding(ContactData data) override
-    {
-        Command::Prompt::print(vecToStr(data.getInfo().getNormal()));
-        Command::Prompt::print(vecToStr(data.getInfo().getContactPoints()[0]));
-    }
-
     createDestroy();
 };
 
@@ -195,15 +189,15 @@ public:
 
     void Update(float delta) override
     {
-        b2Vec2 mousePos = WindowHandler::getMousePos();
+        // b2Vec2 mousePos = WindowHandler::getMousePos();
 
-        if (sf::Mouse::isButtonPressed(sf::Mouse::Left))
-        {
-            mousePos -= getPosition();
-            mousePos.Normalize();
-            mousePos *= 7500000.f*delta;
-            applyForceToCenter(mousePos);
-        }
+        // if (sf::Mouse::isButtonPressed(sf::Mouse::Left))
+        // {
+        //     mousePos -= getPosition();
+        //     mousePos.Normalize();
+        //     mousePos *= 7500000.f*delta;
+        //     applyForceToCenter(mousePos);
+        // }
     }
 
     void PreSolve(PreSolveData data) override
@@ -238,27 +232,26 @@ int main()
     sf::RenderWindow window(sf::VideoMode::getDesktopMode(), "Game Framework", sf::Style::Fullscreen);
     // window.setFramerateLimit(60);
     WindowHandler::setRenderWindow(&window);
+    CanvasManager::initGUI();
 
-    tgui::Gui gui{window};
-    gui.setRelativeView({0, 0, 1920/(float)window.getSize().x, 1080/(float)window.getSize().y});
+    // tgui::Gui gui{window};
+    // gui.setRelativeView({0, 0, 1920/(float)window.getSize().x, 1080/(float)window.getSize().y});
     tryLoadTheme({"Dark.txt", "Black.txt"}, {"", "Assets/", "themes/", "Themes/", "assets/", "Assets/Themes/", "Assets/themes/", "assets/themes/", "assets/Themes/"});
-    Command::color::setDefaultColor({255,255,255,255});
     // -----------------------
 
     WorldHandler::init({0.f,0.f});
     DebugDraw debugDraw(&window);
     debugDraw.initCommands();
     WorldHandler::getWorld().SetDebugDraw(&debugDraw);
-    // WorldHandler::getWorld().SetContactFilter();
 
     //! Required to initialize VarDisplay and CommandPrompt
     // creates the UI for the VarDisplay
-    VarDisplay::init(gui); 
+    VarDisplay::init(CanvasManager::getGui()); 
     // creates the UI for the CommandPrompt
-    Command::Prompt::init(gui);
+    Command::Prompt::init(CanvasManager::getGui());
     addThemeCommands();
     // create the UI for the TFuncDisplay
-    TFuncDisplay::init(gui);
+    TFuncDisplay::init(CanvasManager::getGui());
     //! ---------------------------------------------------
 
     //* init code
@@ -298,10 +291,17 @@ int main()
         win->draw(temp);
     });
 
+    auto gui = new Canvas();
+    auto gui2 = new Canvas();
+    gui2->setGlobalSpace();
+    gui2->setPosition(50,50);
+    gui2->add(tgui::ChildWindow::create("Test window"));
+    // gui->add(tgui::ChildWindow::create("Test window"));
+
     float secondTimer = 0;
     int fps = 0;
     auto fpsLabel = tgui::Label::create("FPS");
-    gui.add(fpsLabel);
+    gui->getWidget()->add(fpsLabel);
     // -------------
 
     sf::Clock deltaClock;
@@ -321,7 +321,11 @@ int main()
             if (event.type == sf::Event::Closed || event.key.code == sf::Keyboard::Key::Escape)
                 window.close();
 
-            gui.handleEvent(event);
+            // gui.handleEvent(event);
+            if (auto camera = CameraManager::getMainCamera())
+                CanvasManager::handleEvent(event, {camera->getPosition().x*PIXELS_PER_METER, camera->getPosition().y*PIXELS_PER_METER});
+            else
+                CanvasManager::handleEvent(event, {(float)WindowHandler::getRenderWindow()->getSize().x/2, (float)WindowHandler::getRenderWindow()->getSize().y/2});
 
             //! Required for LiveVar and CommandPrompt to work as intended
             LiveVar::UpdateLiveVars(event);
@@ -363,8 +367,10 @@ int main()
         // ---------------
 
         ObjectManager::ClearDestroyQueue();
-        WindowHandler::Display(gui);
+        WindowHandler::Display();
     }
+
+    ObjectManager::destroyAllObjects();
 
     //! Required so that VarDisplay and CommandPrompt release all data
     VarDisplay::close();
@@ -392,17 +398,17 @@ void addThemeCommands()
             Command::command{"dark", "Sets the them to the dark theme", {[](){ 
                 tgui::Theme::getDefault()->load("Assets/themes/Dark.txt"); 
                 // Note that command color does not update with theme so you have to set the default color
-                Command::color::setDefaultColor({255,255,255,255}); // white
+                Command::Prompt::UpdateDefaultColor();
             }}}, 
             Command::command{"black", "Sets the them to the black theme", {[](){ 
                 tgui::Theme::getDefault()->load("Assets/themes/Black.txt"); 
                 // Note that command color does not update with theme so you have to set the default color
-                Command::color::setDefaultColor({255,255,255,255}); // white
+                Command::Prompt::UpdateDefaultColor();
             }}},
             Command::command{"grey", "Sets the them to the transparent grey theme", {[](){ 
                 tgui::Theme::getDefault()->load("Assets/themes/TransparentGrey.txt"); 
                 // Note that command color does not update with theme so you have to set the default color
-                Command::color::setDefaultColor({0,0,0,255}); // black
+                Command::Prompt::UpdateDefaultColor();
             }}}
         }
     });
@@ -417,6 +423,7 @@ void tryLoadTheme(std::list<std::string> themes, std::list<std::string> director
             if (std::filesystem::exists(directory + theme))
             {
                 tgui::Theme::setDefault(directory + theme);
+                Command::Prompt::UpdateDefaultColor();
                 return;
             }
         }

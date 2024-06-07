@@ -18,7 +18,7 @@ bool _drawableComp::operator() (const DrawableObject* lhs, const DrawableObject*
 //         return false;
 }
 
-DrawableObject::DrawableObject(int layer) : m_layer(layer)
+DrawableObject::DrawableObject(int layer, DrawStage stage) : m_layer(layer), m_stage(stage)
 {
     m_onParentRemoved(&DrawableObject::m_removeParent, this);
     m_onParentSet(&DrawableObject::m_setParent, this);
@@ -65,6 +65,7 @@ void DrawableObject::m_setParent()
 {
     auto curParent = this->getParent();
     DrawableObject* drawableParent = curParent->cast<DrawableObject>();
+
     while (drawableParent == nullptr && curParent != nullptr)
     {
         curParent = curParent->getParent();

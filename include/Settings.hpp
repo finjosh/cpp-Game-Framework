@@ -11,7 +11,8 @@ const float PIXELS_PER_METER = 10.0F;
 enum DrawStage
 {
     Particles = 0,
-    Default = 1
+    Default = 10,
+    UI = 20
 };
 
 #endif

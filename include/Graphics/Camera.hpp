@@ -3,14 +3,16 @@
 
 #pragma once
 
+#include <list>
 #include "SFML/Graphics/Transformable.hpp"
 #include "SFML/Graphics/View.hpp"
 #include "Object.hpp"
 #include "Settings.hpp"
 #include "Utils/EventHelper.hpp"
 #include "SFML/Graphics/RenderWindow.hpp"
+#include "Graphics/Canvas.hpp"
 
-// TODO make a UI camera for ui that does not move with the screen and is in world cords
+class WindowHandler;
 
 /// @warning if derived from do NOT forget to use "createDestroy()"
 /// @note this can be used as a stand alone object
@@ -65,7 +67,18 @@ public:
     /// @note gives the size of the camera in pixels
     EventHelper::EventDynamic2<sf::RenderWindow*, sf::Vector2f> DrawOverlay;
 
+    /// @brief stops the given canvas from being displayed in this camera
+    void blacklistCanvas(Canvas* canvas);
+    /// @brief removes the given canvas from the blacklist
+    void whitelistCanvas(Canvas* canvas);
+    /// @returns true if the canvas is in the blacklist
+    bool isBlacklisted(Canvas* canvas);
+
 protected:
+    void disableBlacklistedCanvases();
+    void enableBlacklistedCanvases();
+
+    friend WindowHandler;
 
 private:
     int m_layer = 0;
@@ -73,6 +86,8 @@ private:
     bool m_enabled = true;
     bool m_rotationLock = false;
     sf::FloatRect m_screenRect = {0,0,1,1};
+    /// @brief canvases to ignore when drawing to this camera
+    std::list<Object::Ptr<Canvas>> m_canvases;
     createDestroy();
 };
 

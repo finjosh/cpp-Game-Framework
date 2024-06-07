@@ -21,20 +21,20 @@ struct _drawableComp
 class DrawableObject : public virtual Object
 {
 public:
-    DrawableObject(int layer = 0);
+    DrawableObject(int layer = 0, DrawStage stage = DrawStage::Default);
     ~DrawableObject();
 
     /// @brief changes the order in which this obj will be drawn
     /// @note layer is relative to the parents layer if it is a drawableObject
     /// @param layer smaller is earlier and larger is later
-    void setLayer(int layer);
+    virtual void setLayer(int layer);
     /// @note the layer is relative to the parent layer if it is a drawableObject
-    int getLayer() const;
+    virtual int getLayer() const;
     /// @brief sets the stage at which this object will be drawn
     /// @note stage is the same as the drawable parent unless manually set (if there is any parent that is drawable)
-    void setDrawStage(DrawStage stage);
+    virtual void setDrawStage(DrawStage stage);
     /// @note stage is relative to the parent unless manually set
-    DrawStage getDrawStage() const;
+    virtual DrawStage getDrawStage() const;
 
     /// @brief should be used to draw the obj
     /// @note called before children draw

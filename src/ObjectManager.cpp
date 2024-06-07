@@ -60,14 +60,11 @@ void ObjectManager::addToDestroyQueue(Object* object)
 
 void ObjectManager::destroyAllObjects()
 {
+    for (auto object: m_objects)
+    {
+        object->destroy();
+    }
     ClearDestroyQueue(); 
     ClearDestroyQueue(); // clearing twice for both queues
-    auto i = m_objects.begin();
-    while (i != m_objects.end())
-    {
-        auto temp = i;
-        i++;
-        (*temp)->m_destroy();
-    }
     Object::m_lastID = 1;
 }

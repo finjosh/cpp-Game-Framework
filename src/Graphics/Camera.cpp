@@ -99,3 +99,40 @@ sf::Vector2f Camera::getPixelSize() const
 {
     return {m_size.x*PIXELS_PER_METER, m_size.y*PIXELS_PER_METER};
 }
+
+void Camera::disableBlacklistedCanvases()
+{
+    for (auto& canvas: m_canvases)
+    {
+        canvas->setEnabled(false);
+    }
+}
+
+void Camera::enableBlacklistedCanvases()
+{
+    for (auto& canvas: m_canvases)
+    {
+        canvas->setEnabled(true);
+    }
+}
+
+void Camera::blacklistCanvas(Canvas* canvas)
+{
+    if (canvas)
+    {
+        m_canvases.emplace_back(canvas);
+    }
+}
+
+void Camera::whitelistCanvas(Canvas* canvas)
+{
+    if (canvas)
+    {
+        m_canvases.remove(canvas);
+    }
+}
+
+bool Camera::isBlacklisted(Canvas* canvas)
+{
+    return (std::find(m_canvases.begin(), m_canvases.end(), canvas) != m_canvases.end());
+}

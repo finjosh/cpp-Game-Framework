@@ -16,11 +16,11 @@ public:
     static void draw(sf::RenderWindow& window);
     static size_t getNumberOfObjects();
 
-protected:
+    /// @warning dont use this unless you know what you are doing
     static void addDrawable(DrawableObject* DrawableObject);
+    /// @warning dont use this unless you know what you are doing
     static void removeDrawable(DrawableObject* DrawableObject);
-
-    friend DrawableObject;
+protected:
 
 private:
     inline DrawableManager() = default;

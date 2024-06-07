@@ -36,7 +36,7 @@ public:
         {
             this->set(ptr.get());
         }
-        
+
         inline ~Ptr()
         {
             if (this->isValid())
@@ -164,7 +164,7 @@ public:
                 m_eventID = m_ptr->m_onDestroy(Object::Ptr<T>::removePtr, this);
             }
         }
-        
+
         /// @brief if this is invalid then returns 0
         /// @returns the id of the base Object class
         inline size_t getID() const
@@ -189,7 +189,7 @@ public:
     Object();
     ~Object();
 
-    void setEnabled(bool enabled = true);
+    void setEnabled(bool enabled = true); 
     bool isEnabled() const;
 
     unsigned long int getID() const;
@@ -339,6 +339,7 @@ protected:
     /// @warning do NOT disconnect all EVER
     EventHelper::Event m_onDisabled;
     /// @brief called when the object is added to the destroy queue (should act as if it is already destroyed)
+    /// @note this is where the object should show itself as being destroyed (deconstructor should be used to finalize destruction)
     /// @warning do NOT disconnect all EVER
     EventHelper::Event m_onDestroy;
     /// @warning do NOT disconnect all EVER
@@ -355,6 +356,8 @@ protected:
 private:
     /// @brief this should actually delete the object
     virtual void m_destroy() = 0;
+    /// @brief invokes the destroy events, sets enabled false, and calls on all children
+    void m_invokeDestroyEvents();
     /// @warning only use this if you know what you are doing
     Object(size_t id);
     /// @warning only use this if you know what you are doing

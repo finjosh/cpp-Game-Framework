@@ -4,18 +4,17 @@
 #pragma once
 
 #include <SFML/Graphics/RenderWindow.hpp>
-#include "TGUI/Backend/SFML-Graphics.hpp"
+// #include "TGUI/Backend/SFML-Graphics.hpp"
 #include "Box2D/b2_math.h"
 
 class WindowHandler
 {
 public:
-
     static sf::RenderWindow* getRenderWindow();
     /// @warning does NOT clear memory from last window if already set
     static void setRenderWindow(sf::RenderWindow* renderWindow);
 
-    static void Display(tgui::Gui& gui);
+    static void Display();
 
     /// @note based off of mainCamera
     /// @returns mouse position in global position 
