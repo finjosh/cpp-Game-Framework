@@ -90,12 +90,12 @@ void DrawableObject::m_removeParent()
 // TODO take in the parent position (either regular or interpolated)
 // TODO make objects children store local instead of global position?
 // TODO update all object functions to work with local instead of global?
-void DrawableObject::m_draw(sf::RenderWindow& window) 
+void DrawableObject::m_draw(sf::RenderTarget* target) 
 {
-    this->Draw(window);
+    this->Draw(target);
     for (auto child: m_drawableChildren)
     {
-        child->m_draw(window);
+        child->m_draw(target);
     }
-    this->LateDraw(window);
+    this->LateDraw(target);
 }

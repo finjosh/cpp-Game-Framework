@@ -38,9 +38,9 @@ public:
 
     /// @brief should be used to draw the obj
     /// @note called before children draw
-    inline virtual void Draw(sf::RenderWindow& window) {};
+    inline virtual void Draw(sf::RenderTarget* target) {};
     /// @brief this is called after children draw
-    inline virtual void LateDraw(sf::RenderWindow& window) {};
+    inline virtual void LateDraw(sf::RenderTarget* target) {};
 
 protected:
     /// @brief attempts to set parent given the current object parent
@@ -52,7 +52,7 @@ protected:
 
     /// @brief draws the objects recursively 
     /// @note only use this if you know what you are doing
-    void m_draw(sf::RenderWindow& window);
+    void m_draw(sf::RenderTarget* target);
 
     friend DrawableManager;
 

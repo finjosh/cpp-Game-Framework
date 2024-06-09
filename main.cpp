@@ -32,7 +32,10 @@ void addThemeCommands();
 /// @param themes in order of most wanted
 /// @param directories directories to check in ("" for current)
 void tryLoadTheme(std::list<std::string> themes, std::list<std::string> directories);
-std::string vecToStr(b2Vec2 vec);
+std::string vecToStr(b2Vec2 vec)
+{
+    return std::to_string(vec.x) + ", " + std::to_string(vec.x);
+}
 
 class Wall : public virtual Object, public Collider, public Renderer<sf::RectangleShape>
 {
@@ -82,7 +85,7 @@ public:
         m_hitParticle.set(new ParticleEmitter(&m_particle, {0,0}, 10, 0, 0, 1, 10, 0.5, 360));
 
         setMainCamera();
-        Camera::setRotationLocked(true);
+        Camera::setRotationLocked(true); // TODO remove this and make the canvases update properly
     }
 
     inline virtual void Update(float deltaTime) override
@@ -244,14 +247,16 @@ int main()
     debugDraw.initCommands();
     WorldHandler::getWorld().SetDebugDraw(&debugDraw);
 
+    Canvas* gui = new Canvas();
+
     //! Required to initialize VarDisplay and CommandPrompt
     // creates the UI for the VarDisplay
-    VarDisplay::init(CanvasManager::getGui()); 
+    VarDisplay::init(gui->getGroup()); 
     // creates the UI for the CommandPrompt
-    Command::Prompt::init(CanvasManager::getGui());
+    Command::Prompt::init(gui->getGroup());
     addThemeCommands();
     // create the UI for the TFuncDisplay
-    TFuncDisplay::init(CanvasManager::getGui());
+    TFuncDisplay::init(gui->getGroup());
     //! ---------------------------------------------------
 
     //* init code
@@ -285,23 +290,23 @@ int main()
     auto camera = new Camera(10);
     camera->setScreenRect({0,0,0.25,0.25});
     camera->setPosition(window.getSize().x/PIXELS_PER_METER/2, window.getSize().y/PIXELS_PER_METER/2);
+    camera->zoom(2);
     camera->DrawBackground.connect([](sf::RenderWindow* win, sf::Vector2f size){
         sf::RectangleShape temp(size);
         temp.setFillColor(sf::Color(100,100,100,75));
         win->draw(temp);
     });
 
-    auto gui = new Canvas();
     auto gui2 = new Canvas();
     gui2->setGlobalSpace();
     gui2->setPosition(50,50);
     gui2->add(tgui::ChildWindow::create("Test window"));
-    // gui->add(tgui::ChildWindow::create("Test window"));
+    // camera->blacklistCanvas(gui2);
 
     float secondTimer = 0;
     int fps = 0;
     auto fpsLabel = tgui::Label::create("FPS");
-    gui->getWidget()->add(fpsLabel);
+    gui->add(fpsLabel);
     // -------------
 
     sf::Clock deltaClock;
@@ -321,11 +326,7 @@ int main()
             if (event.type == sf::Event::Closed || event.key.code == sf::Keyboard::Key::Escape)
                 window.close();
 
-            // gui.handleEvent(event);
-            if (auto camera = CameraManager::getMainCamera())
-                CanvasManager::handleEvent(event, {camera->getPosition().x*PIXELS_PER_METER, camera->getPosition().y*PIXELS_PER_METER});
-            else
-                CanvasManager::handleEvent(event, {(float)WindowHandler::getRenderWindow()->getSize().x/2, (float)WindowHandler::getRenderWindow()->getSize().y/2});
+            CanvasManager::handleEvent(event);
 
             //! Required for LiveVar and CommandPrompt to work as intended
             LiveVar::UpdateLiveVars(event);
@@ -370,14 +371,13 @@ int main()
         WindowHandler::Display();
     }
 
-    ObjectManager::destroyAllObjects();
-
     //! Required so that VarDisplay and CommandPrompt release all data
     VarDisplay::close();
     Command::Prompt::close();
     TFuncDisplay::close();
     //! --------------------------------------------------------------
 
+    ObjectManager::destroyAllObjects();
     window.close();
 
     return 0;
@@ -428,9 +428,4 @@ void tryLoadTheme(std::list<std::string> themes, std::list<std::string> director
             }
         }
     }
-}
-
-std::string vecToStr(b2Vec2 vec)
-{
-    return std::to_string(vec.x) + ", " + std::to_string(vec.x);
 }

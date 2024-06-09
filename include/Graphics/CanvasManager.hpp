@@ -14,10 +14,13 @@ public:
     /// @note call this AFTER the window handler has it's render window set
     static void initGUI();
     /// @note call this for each event
-    /// @param center the global position for the center of the screen
-    static void handleEvent(sf::Event event, b2Vec2 center);
+    /// @note this changes the tgui AbsoluteView and RelativeViewport
+    static void handleEvent(sf::Event event);
+    /// @warning do NOT remove any widgets from this only use canvases for adding widgets 
     static tgui::Gui& getGui();
+    /// @brief this also updates the gui time
     static void drawOverlayGUI();
+    /// @brief updates the gui view for the given camera
     static void updateViewForCamera(Camera* camera);
 
 protected:

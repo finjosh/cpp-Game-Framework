@@ -147,15 +147,15 @@ void Object::addChild(Object* child)
 
 b2Vec2 Object::getLocalPoint(const b2Vec2& point) const
 {
-    return b2Mul(m_transform, point);
+    return b2MulT(m_transform, point);
 }
 
 b2Vec2 Object::getGlobalPoint(const b2Vec2& point) const
 {
-    return b2MulT(m_transform, point);
+    return b2Mul(m_transform, point);
 }
 
-b2Vec2 Object::getWorldVector(const b2Vec2& vec) const
+b2Vec2 Object::getGlobalVector(const b2Vec2& vec) const
 {
     return b2Mul(m_transform.q, vec);
 }
@@ -178,10 +178,10 @@ void Object::rotateAround(const b2Vec2& center, float rot)
     }
 }
 
-b2Vec2 Object::rotateAround(const b2Vec2& vec, const b2Vec2& center, float rot)
+b2Vec2 Object::rotateAround(const b2Vec2& pos, const b2Vec2& center, float rot)
 {
     auto polar = std::polar<float>(1.0, rot);
-    std::complex<float> temp(vec.x - center.x, vec.y - center.y);
+    std::complex<float> temp(pos.x - center.x, pos.y - center.y);
     temp *= polar;
     return {temp.real() + center.x, temp.imag() + center.y};
 }

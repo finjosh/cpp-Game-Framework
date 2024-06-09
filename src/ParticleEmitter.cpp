@@ -59,12 +59,12 @@ void ParticleEmitter::Particle::move(const b2Vec2& vec)
     m_position.y += vec.y;
 }
 
-void ParticleEmitter::Particle::draw(sf::Shape* shape, sf::RenderWindow& window)
+void ParticleEmitter::Particle::draw(sf::Shape* shape, sf::RenderTarget* target)
 {
     shape->setPosition({m_position.x * PIXELS_PER_METER, m_position.y * PIXELS_PER_METER});
     shape->setRotation(m_rotation);
     shape->setFillColor(m_color);
-    window.draw(*shape);
+    target->draw(*shape);
 }
 
 void ParticleEmitter::Particle::update(float deltaTime)
@@ -277,14 +277,14 @@ void ParticleEmitter::Update(float deltaTime)
     }
 }
 
-void ParticleEmitter::Draw(sf::RenderWindow& window)
+void ParticleEmitter::Draw(sf::RenderTarget* target)
 {
     if (m_particleShape == nullptr)
         return;
 
     for (auto particle: m_particles)
     {
-        particle.draw(m_particleShape, window);
+        particle.draw(m_particleShape, target);
     }
 }
 

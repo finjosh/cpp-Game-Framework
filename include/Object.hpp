@@ -281,25 +281,24 @@ public:
     /// @param vec local point
     /// @return the equivalent global point
     b2Vec2 getGlobalPoint(const b2Vec2& point) const;
-    /// @param vec global vector
-    /// @note only rotates
-    /// @returns the equivalent local vector
-    b2Vec2 getWorldVector(const b2Vec2& vec) const;
     /// @param vec local vector
     /// @note only rotates
     /// @return the equivalent global vector
-    b2Vec2 getLocalVector(const b2Vec2& vec) const;
-    /// @brief rotates the given b2Vec2 around this object
+    b2Vec2 getGlobalVector(const b2Vec2& vec) const;
     /// @param vec global vector
-    /// @param rot rotation in RAD
-    /// @returns the rotated vector
+    /// @note only rotates
+    /// @returns the equivalent local vector
+    b2Vec2 getLocalVector(const b2Vec2& vec) const;
+    /// @brief rotates the this object around the given center
+    /// @param center the point to rotate around
+    /// @param rot rotation in radians
     void rotateAround(const b2Vec2& center, float rot);
     /// @brief rotates the given b2Vec2 around the given center
-    /// @param vec the point to rotate
+    /// @param pos the point that will be rotated
     /// @param center the point to rotate around
-    /// @param rot rotation in RAD
+    /// @param rot rotation in radians
     /// @returns the rotated vector
-    b2Vec2 rotateAround(const b2Vec2& vec, const b2Vec2& center, float rot);
+    b2Vec2 rotateAround(const b2Vec2& pos, const b2Vec2& center, float rot);
     void setPosition(const b2Vec2& position);
     void setPosition(float x, float y);
     /// @brief if this is a child then the position will be set according to the parent

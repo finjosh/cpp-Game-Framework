@@ -16,6 +16,8 @@
 /// @note layer and drawStage work with drawableObjects if drawing in global space
 /// @note if in screen space layer and drawStage are between canvases only
 /// @note defaults to drawing in screen space (screen overlay)
+/// @note when a canvas is in screen space the position, rotation, and origin does not affect the canvas
+/// @warning all functions defined in the Canvas class return values in pixels not meters
 class Canvas : public virtual Object, public DrawableObject
 {
 public:
@@ -26,14 +28,17 @@ public:
     void setScreenSpace();
     /// @brief draws with other drawable objects
     void setGlobalSpace();
-    bool isScreenSpace();
+    bool isScreenSpace() const;
+
+    void setRotationLocked(bool locked = true);
+    bool isRotationLocked() const;
 
     /// @note position, rotation, transform, and is enabled are controlled by this object DONT edit them
     /// @returns the group widget that stores all widgets in this canvas 
-    tgui::Group::Ptr getWidget();
+    tgui::Group::Ptr getGroup();
     /// @note position, rotation, transform, and is enabled are controlled by this object DONT edit them
     /// @returns the group widget that stores all widgets in this canvas
-    tgui::Group::ConstPtr getWidget() const;
+    tgui::Group::ConstPtr getGroup() const;
 
     /// @brief Changes the size of the group
     /// @param size  The new size of the group
@@ -109,13 +114,14 @@ public:
     /// @brief Removes all widgets that were added to the container
     void removeAllWidgets();
 
-    void Draw(sf::RenderWindow& window) override;
+    void Draw(sf::RenderTarget* target) override;
 
 protected:
 
 private:
     tgui::Group::Ptr m_group = nullptr;
     bool m_screenSpace = true;
+    bool m_rotationLock = false;
 
     createDestroy();
 };

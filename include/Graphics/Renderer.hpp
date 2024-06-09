@@ -46,11 +46,11 @@ public:
     }
 
 protected:
-    inline void Draw(sf::RenderWindow& window) override
+    inline void Draw(sf::RenderTarget* target) override
     {
         T::setPosition(Object::getPosition().x*PIXELS_PER_METER, Object::getPosition().y*PIXELS_PER_METER);
         T::setRotation(Object::getRotation()*180/PI);
-        window.draw(*this);
+        target->draw(*this);
     }
 
 private:

@@ -28,21 +28,27 @@ int Camera::getLayer() const
 void Camera::setMainCamera()
 {
     m_layer = -1;
+    m_screenRect = {0,0,1,1};
+    m_size = {WindowHandler::getRenderWindow()->getSize().x / PIXELS_PER_METER, WindowHandler::getRenderWindow()->getSize().y / PIXELS_PER_METER};
     CameraManager::setMainCamera(this);
 }
 
-bool Camera::isMainCamera()
+bool Camera::isMainCamera() const
 {
     return (this == CameraManager::getMainCamera());
 }
 
 void Camera::setViewSize(b2Vec2 size)
 {
+    if (isMainCamera())
+        return;
     m_size = size;
 }
 
 void Camera::setViewSize(float x, float y)
 {
+    if (isMainCamera())
+        return;
     m_size = {x,y};
 }
 
@@ -58,16 +64,18 @@ void Camera::zoom(float factor)
 
 void Camera::setDisplaying(bool displaying)
 {
-    m_enabled = displaying;
+    m_displaying = displaying;
 }
 
 bool Camera::isDisplaying() const
 {
-    return m_enabled;
+    return (isEnabled() && m_displaying);
 }
 
 void Camera::setScreenRect(const sf::FloatRect& screenRect)
 {
+    if (isMainCamera())
+        return;
     m_screenRect = screenRect;
 }
 
@@ -79,9 +87,9 @@ sf::FloatRect Camera::getScreenRect() const
 sf::View Camera::getCameraView() const
 {
     sf::View temp(sf::Vector2f(Object::getPosition().x*PIXELS_PER_METER, Object::getPosition().y*PIXELS_PER_METER), {m_size.x*PIXELS_PER_METER, m_size.y*PIXELS_PER_METER});
+    temp.setViewport(m_screenRect);
     if (!m_rotationLock)
         temp.setRotation(Object::getRotation() * 180 / PI);
-    temp.setViewport(m_screenRect);
     return temp;
 }
 
@@ -90,7 +98,7 @@ void Camera::setRotationLocked(bool locked)
     m_rotationLock = locked;
 }
 
-bool Camera::isRotationLocked()
+bool Camera::isRotationLocked() const
 {
     return m_rotationLock;
 }

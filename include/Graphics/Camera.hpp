@@ -31,11 +31,14 @@ public:
     int getLayer() const;
     /// @brief sets the layer to -1
     /// @note sets this as the main camera in CameraManager
+    /// @note main cameras have a fixed screenRect (0,0,1,1)
     void setMainCamera();
-    bool isMainCamera();
+    bool isMainCamera() const;
     /// @brief sets the size of the view
+    /// @note nothing happens if this is the main camera
     void setViewSize(b2Vec2 size);
     /// @brief sets the size of the view
+    /// @note nothing happens if this is the main camera
     void setViewSize(float x, float y);
     /// @returns the size in terms of meters
     b2Vec2 getSize() const;
@@ -49,6 +52,7 @@ public:
     bool isDisplaying() const;
     /// @brief sets the rect where this camera will display on the screen
     /// @note each value is from 0-1
+    /// @note nothing happens if this is the main camera
     void setScreenRect(const sf::FloatRect& screenRect);
     sf::FloatRect getScreenRect() const;
     /// @returns the data stored in this object as an sfml view object
@@ -56,7 +60,7 @@ public:
     /// @note this is only for camera NOT object
     void setRotationLocked(bool locked = true);
     /// @note this is only for camera NOT object
-    bool isRotationLocked();
+    bool isRotationLocked() const;
 
     /// @brief called when starting to render this camera
     /// @note gives pointer to the window that should be rendered to
@@ -86,6 +90,7 @@ private:
     bool m_enabled = true;
     bool m_rotationLock = false;
     sf::FloatRect m_screenRect = {0,0,1,1};
+    bool m_displaying = true;
     /// @brief canvases to ignore when drawing to this camera
     std::list<Object::Ptr<Canvas>> m_canvases;
     createDestroy();

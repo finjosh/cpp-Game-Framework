@@ -13,7 +13,7 @@ class DrawableManager
 {
 public:
     /// @brief draws all drawable objs
-    static void draw(sf::RenderWindow& window);
+    static void draw(sf::RenderTarget* target);
     static size_t getNumberOfObjects();
 
     /// @warning dont use this unless you know what you are doing

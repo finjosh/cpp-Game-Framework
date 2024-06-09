@@ -28,10 +28,13 @@ void WindowHandler::Display()
     event.type = sf::Event::MouseMoved;
     event.mouseMove.x = sf::Mouse::getPosition(*m_renderWindow).x;
     event.mouseMove.y = sf::Mouse::getPosition(*m_renderWindow).y;
-    // CanvasManager::handleEvent(event);
+    CanvasManager::handleEvent(event);
 
     for (auto camera: CameraManager::m_cameras) //* Note this can not be multithreaded simply (camera uses regular events that could lead to memory races)
     {
+        if (!camera->isDisplaying())
+            return;
+
         if (camera->DrawBackground.getNumCallbacks() > 0)
         {
             // reseting the view first
@@ -41,10 +44,10 @@ void WindowHandler::Display()
             camera->DrawBackground.invoke(m_renderWindow, camera->getPixelSize());
         }
         
-        m_renderWindow->setView(camera->getCameraView());
+        m_renderWindow->setView(camera->getCameraView()); // updates drawable objects view
         camera->disableBlacklistedCanvases();
-        CanvasManager::updateViewForCamera(camera);
-        DrawableManager::draw(*m_renderWindow);
+        CanvasManager::updateViewForCamera(camera); // updates the UI view
+        DrawableManager::draw(m_renderWindow);
         camera->enableBlacklistedCanvases();
         WorldHandler::getWorld().DebugDraw();
         
@@ -59,16 +62,6 @@ void WindowHandler::Display()
     }
 
     CanvasManager::drawOverlayGUI();
-    // draw for tgui
-    // auto camera = CameraManager::getMainCamera(); // TODO main camera can be nullptr
-    // gui.setAbsoluteViewport(tgui::FloatRect{-camera->getPosition().x*PIXELS_PER_METER + camera->getPixelSize().x/2, -camera->getPosition().y*PIXELS_PER_METER + camera->getPixelSize().y/2, camera->getPixelSize().x, camera->getPixelSize().y});
-    // tgui::Event mouseMoveEvent;
-    // mouseMoveEvent.type = tgui::Event::Type::MouseMoved;
-    // mouseMoveEvent.mouseMove.x = sf::Mouse::getPosition(*m_renderWindow).x;
-    // mouseMoveEvent.mouseMove.y = sf::Mouse::getPosition(*m_renderWindow).y;
-    // gui.handleEvent(mouseMoveEvent);
-    // gui.draw(); // TODO make canvases
-    // display for sfml window
     m_renderWindow->display();
     m_renderWindow->clear();
 }

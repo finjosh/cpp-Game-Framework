@@ -2,12 +2,12 @@
 
 std::set<DrawableObject*, _drawableComp> DrawableManager::m_drawables;
 
-void DrawableManager::draw(sf::RenderWindow& window)
+void DrawableManager::draw(sf::RenderTarget* target)
 {
     for (auto drawable: m_drawables)    
     {
         if (drawable->isEnabled())
-            drawable->m_draw(window);
+            drawable->m_draw(target);
     }
 }
 

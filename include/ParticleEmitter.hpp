@@ -98,7 +98,7 @@ public:
 
 protected:
     virtual void Update(float deltaTime) override;
-    virtual void Draw(sf::RenderWindow& window) override;
+    virtual void Draw(sf::RenderTarget* target) override;
 
     /// @returns a random float from 0 to the given x
     float randX(float x);
@@ -122,7 +122,7 @@ protected:
         void setAlpha(int8_t alpha);
 
         void move(const b2Vec2& vec);
-        void draw(sf::Shape* shape, sf::RenderWindow& window);
+        void draw(sf::Shape* shape, sf::RenderTarget* target);
 
     protected:
         /// @brief updates position based on velocity
