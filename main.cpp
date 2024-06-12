@@ -85,34 +85,40 @@ public:
         m_hitParticle.set(new ParticleEmitter(&m_particle, {0,0}, 10, 0, 0, 1, 10, 0.5, 360));
 
         setMainCamera();
-        Camera::setRotationLocked(true); // TODO remove this and make the canvases update properly
+        // Camera::setRotationLocked(true);
     }
 
     inline virtual void Update(float deltaTime) override
     {
         if (sf::Keyboard::isKeyPressed(sf::Keyboard::Key::W))
         {
-            applyForceToCenter({0,-120000*deltaTime});
+            move(0, -75*deltaTime);
+            // applyForceToCenter({0,-120000*deltaTime});
         }
         if (sf::Keyboard::isKeyPressed(sf::Keyboard::Key::A))
         {
-            applyForceToCenter({-120000*deltaTime,0});
+            move(-75*deltaTime, 0);
+            // applyForceToCenter({-120000*deltaTime,0});
         }
         if (sf::Keyboard::isKeyPressed(sf::Keyboard::Key::S))
         {
-            applyForceToCenter({0,120000*deltaTime});
+            move(0, 75*deltaTime);
+            // applyForceToCenter({0,120000*deltaTime});
         }
         if (sf::Keyboard::isKeyPressed(sf::Keyboard::Key::D))
         {
-            applyForceToCenter({120000*deltaTime,0});
+            move(75*deltaTime, 0);
+            // applyForceToCenter({120000*deltaTime,0});
         }
         if (sf::Keyboard::isKeyPressed(sf::Keyboard::Key::E))
         {
-            applyTorque(500000*deltaTime);
+            rotate(PI * deltaTime);
+            // applyTorque(500000*deltaTime);
         }
         if (sf::Keyboard::isKeyPressed(sf::Keyboard::Key::Q))
         {
-            applyTorque(-500000*deltaTime);
+            rotate(-PI * deltaTime);
+            // applyTorque(-500000*deltaTime);
         }
     }
 
@@ -228,7 +234,6 @@ private:
     std::set<const Collider*> m_freeFlow;
 };
 
-// TODO implement contact filter callback
 int main()
 {
     // setup for sfml and tgui
@@ -287,20 +292,23 @@ int main()
 
     new OneWay({40,25}, {40,10});
 
-    auto camera = new Camera(10);
-    camera->setScreenRect({0,0,0.25,0.25});
-    camera->setPosition(window.getSize().x/PIXELS_PER_METER/2, window.getSize().y/PIXELS_PER_METER/2);
-    camera->zoom(2);
-    camera->DrawBackground.connect([](sf::RenderWindow* win, sf::Vector2f size){
-        sf::RectangleShape temp(size);
-        temp.setFillColor(sf::Color(100,100,100,75));
-        win->draw(temp);
-    });
+    // auto camera = new Camera(10);
+    // camera->setScreenRect({0,0,0.25,0.25});
+    // camera->setPosition(window.getSize().x/PIXELS_PER_METER/2, window.getSize().y/PIXELS_PER_METER/2);
+    // camera->zoom(2);
+    // camera->DrawBackground.connect([](sf::RenderTarget* target, sf::Vector2f size){
+    //     sf::RectangleShape temp(size);
+    //     temp.setFillColor(sf::Color(100,100,100,75));
+    //     target->draw(temp);
+    // });
 
     auto gui2 = new Canvas();
     gui2->setGlobalSpace();
     gui2->setPosition(50,50);
-    gui2->add(tgui::ChildWindow::create("Test window"));
+    auto panel = tgui::Panel::create();
+    panel->getRenderer()->setBackgroundColor(tgui::Color::applyOpacity(panel->getSharedRenderer()->getBackgroundColor(), 0.5));
+    panel->add(tgui::ChildWindow::create("Test window"));
+    gui2->add(panel);
     // camera->blacklistCanvas(gui2);
 
     float secondTimer = 0;

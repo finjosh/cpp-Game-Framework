@@ -34,7 +34,7 @@ protected:
 private:
     inline CanvasManager() = default;
 
-    static tgui::Gui m_gui;
+    static tgui::Gui m_gui;// TODO try storing this as a pointer to stop crashing at close
     /// @brief list of canvases that are drawn to the main screen
     static std::set<Canvas*, _drawableComp> m_canvases;
 };

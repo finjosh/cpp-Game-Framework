@@ -7,11 +7,11 @@ PROJECT:=main
 # the directory in which all .o and .d files will be made
 OBJ_O_DIR:=bin
 # the include flags for compilation by default includes the project directory and include directory
-INCLUDE_DIRS=/VSCodeFolder/Libraries/SFML-2.6.1/include /VSCodeFolder/Libraries/TGUI-1.2/include \VSCodeFolder\Libraries\Box2d-3.0\include /Git_projects/cpp-Utilities/include /VSCodeFolder/Libraries/thread-pool-4.1.0/include
+INCLUDE_DIRS=/VSCodeFolder/Libraries/SFML-2.6.1/include /VSCodeFolder/Libraries/TGUI-1.3/include \VSCodeFolder\Libraries\Box2d-3.0\include /Git_projects/cpp-Utilities/include /VSCodeFolder/Libraries/thread-pool-4.1.0/include
 # extra include flags
 INCLUDE_FLAGS=-D SFML_STATIC
 # the paths to libs for linking
-LIB_DIRS=/VSCodeFolder/Libraries/SFML-2.6.1/lib /VSCodeFolder/Libraries/TGUI-1.2/lib /Git_projects/cpp-Utilities/libs \VSCodeFolder\Libraries\Box2d-3.0\bin
+LIB_DIRS=/VSCodeFolder/Libraries/SFML-2.6.1/lib /VSCodeFolder/Libraries/TGUI-1.3/lib /Git_projects/cpp-Utilities/libs \VSCodeFolder\Libraries\Box2d-3.0\bin
 # source files directory (the project directory is automatically added)
 SRC:=src
 # the directory for lib files that are made with "make lib"
@@ -76,7 +76,7 @@ DEPFILES=$(patsubst %.o,%.d,${OBJECTS})
 BIN_DIRS=$(foreach dir,$(call FIXPATH,$(SOURCEDIRS)),$(patsubst $(call FIXPATH,$(PROJECT_DIR)%),$(call FIXPATH,$(PROJECT_DIR)/$(OBJ_O_DIR)%),$(dir)))
 
 # so there is no file that gets mistaked with the tasks listed
-.PHONY = all info clean lib time
+.PHONY = all info clean lib run
 
 all: ${BIN_DIRS} ${PROJECT}
 

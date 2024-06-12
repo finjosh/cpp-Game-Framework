@@ -35,30 +35,17 @@ void WindowHandler::Display()
         if (!camera->isDisplaying())
             return;
 
-        if (camera->DrawBackground.getNumCallbacks() > 0)
-        {
-            // reseting the view first
-            auto view = camera->getCameraView();
-            view.setCenter(view.getSize().x/2, view.getSize().y/2);
-            m_renderWindow->setView(view);
-            camera->DrawBackground.invoke(m_renderWindow, camera->getPixelSize());
-        }
-        
         m_renderWindow->setView(camera->getCameraView()); // updates drawable objects view
-        camera->disableBlacklistedCanvases();
         CanvasManager::updateViewForCamera(camera); // updates the UI view
+        
+        camera->m_drawBackground((sf::RenderTarget*)m_renderWindow);
+        
+        camera->disableBlacklistedCanvases();
         DrawableManager::draw(m_renderWindow);
         camera->enableBlacklistedCanvases();
         WorldHandler::getWorld().DebugDraw();
-        
-        if (camera->DrawOverlay.getNumCallbacks() > 0)
-        {
-            // reseting the view first
-            sf::View view = camera->getCameraView();
-            view.setCenter(view.getSize().x/2, view.getSize().y/2);
-            m_renderWindow->setView(view);
-            camera->DrawOverlay.invoke(m_renderWindow, camera->getPixelSize());
-        }
+
+        camera->m_drawOverlay((sf::RenderTarget*)m_renderWindow);
     }
 
     CanvasManager::drawOverlayGUI();

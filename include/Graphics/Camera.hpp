@@ -65,11 +65,11 @@ public:
     /// @brief called when starting to render this camera
     /// @note gives pointer to the window that should be rendered to
     /// @note gives the size of the camera in pixels
-    EventHelper::EventDynamic2<sf::RenderWindow*, sf::Vector2f> DrawBackground;
+    EventHelper::EventDynamic2<sf::RenderTarget*, sf::Vector2f> DrawBackground;
     /// @brief called after rendering everything BUT UI
     /// @note gives pointer to the window that should be rendered to
     /// @note gives the size of the camera in pixels
-    EventHelper::EventDynamic2<sf::RenderWindow*, sf::Vector2f> DrawOverlay;
+    EventHelper::EventDynamic2<sf::RenderTarget*, sf::Vector2f> DrawOverlay;
 
     /// @brief stops the given canvas from being displayed in this camera
     void blacklistCanvas(Canvas* canvas);
@@ -81,6 +81,11 @@ public:
 protected:
     void disableBlacklistedCanvases();
     void enableBlacklistedCanvases();
+
+    /// @brief sets the targets view calls the DrawBackground event and resets view to what it was before
+    void m_drawBackground(sf::RenderTarget* target);
+    /// @brief sets the targets view calls the DrawOverlay event and resets view to what it was before
+    void m_drawOverlay(sf::RenderTarget* target);
 
     friend WindowHandler;
 

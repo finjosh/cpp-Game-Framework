@@ -7,12 +7,8 @@
 #include "Graphics/DrawableObject.hpp"
 #include "TGUI/Widgets/Group.hpp"
 
-// TODO camera options
-// - screen overlay
-// - camera drawing (derive from drawable object)
-//     - has layering with drawable objects
-//     - has drawing state with drawable objects
-
+// TODO make this work when the camera is rotated
+/// @bug when the camera is rotated UI is not drawn properly
 /// @note layer and drawStage work with drawableObjects if drawing in global space
 /// @note if in screen space layer and drawStage are between canvases only
 /// @note defaults to drawing in screen space (screen overlay)

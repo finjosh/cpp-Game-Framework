@@ -15,7 +15,7 @@ Canvas::Canvas() : DrawableObject(0, DrawStage::UI)
     m_onDestroy([this](){ 
         this->m_group = nullptr;
         CanvasManager::m_gui.remove(m_group);
-        if (m_screenSpace)
+        // if (m_screenSpace)
             CanvasManager::removeCanvas(this);
     });
     m_onTransformUpdated([this](){
@@ -64,14 +64,14 @@ void Canvas::Draw(sf::RenderTarget* target)
 void Canvas::setScreenSpace()
 {
     m_screenSpace = true;
-    CanvasManager::addCanvas(this);
+    // CanvasManager::addCanvas(this);
     DrawableManager::removeDrawable(this);
 }
 
 void Canvas::setGlobalSpace()
 {
     m_screenSpace = false;
-    CanvasManager::removeCanvas(this);
+    // CanvasManager::removeCanvas(this);
     DrawableManager::addDrawable(this);
 }
 

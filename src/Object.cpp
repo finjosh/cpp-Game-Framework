@@ -21,8 +21,6 @@ void Object::m_setID(unsigned long long id)
     m_id = id;
 }
 
-// TODO add a way to search through objects based on heirarchy 
-// TODO handle deletion of objects properly (should not be able to find object after it is added to deletion queue)
 Object::~Object()
 {
     // this is not a real object
@@ -246,6 +244,11 @@ void Object::move(const b2Vec2& move)
     {
         child->move(move);
     }
+}
+
+void Object::move(float x, float y)
+{
+    move(b2Vec2(x,y));
 }
 
 void Object::rotate(float rot)

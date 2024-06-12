@@ -11,6 +11,9 @@
 
 #include "box2d/b2_math.h"
 
+// TODO add a way to search through objects based on heirarchy 
+// TODO handle deletion of objects properly (should not be able to find object after it is added to deletion queue)
+
 class ObjectManager;
 
 /// @note anything after this will be private unless specifying scope
@@ -327,6 +330,7 @@ public:
     void setTransform(const b2Transform& transform);
     b2Transform getTransform() const;
     void move(const b2Vec2& move);
+    void move(float x, float y);
     /// @param rot in radians
     void rotate(float rot);
 

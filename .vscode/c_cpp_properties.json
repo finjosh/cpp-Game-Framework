@@ -7,8 +7,8 @@
                 "${workspaceFolder}",
                 "${workspaceFolder}/include",
                 "/Git_projects/cpp-Utilities/include",
-                "${workspaceFolder}/VisualizeData/include",
-                "/VSCodeFolder/Libraries/thread-pool-4.1.0/include"
+                "/VSCodeFolder/Libraries/thread-pool-4.1.0/include",
+                "/VSCodeFolder/Libraries/TGUI-1.3/include"
             ],
             "defines": [
                 "_DEBUG",

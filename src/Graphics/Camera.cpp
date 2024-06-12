@@ -144,3 +144,31 @@ bool Camera::isBlacklisted(Canvas* canvas)
 {
     return (std::find(m_canvases.begin(), m_canvases.end(), canvas) != m_canvases.end());
 }
+
+void Camera::m_drawBackground(sf::RenderTarget* target)
+{
+    if (DrawBackground.getNumCallbacks() > 0)
+    {
+        const sf::View oldView = target->getView();
+        const sf::Vector2f size = getPixelSize();
+        sf::View view({size.x/2, size.y/2}, size);
+        view.setViewport(m_screenRect);
+        target->setView(view);
+        DrawBackground.invoke(target, size);
+        target->setView(oldView);
+    }
+}
+
+void Camera::m_drawOverlay(sf::RenderTarget* target)
+{
+    if (DrawBackground.getNumCallbacks() > 0)
+    {
+        const sf::View oldView = target->getView();
+        const sf::Vector2f size = getPixelSize();
+        sf::View view({size.x/2, size.y/2}, size);
+        view.setViewport(m_screenRect);
+        target->setView(view);
+        DrawBackground.invoke(target, size);
+        target->setView(oldView);
+    }
+}
