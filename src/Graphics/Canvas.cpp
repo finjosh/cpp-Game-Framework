@@ -8,14 +8,14 @@ Canvas::Canvas() : DrawableObject(0, DrawStage::UI)
     DrawableManager::removeDrawable(this);
 
     m_group = tgui::Group::create();
-    CanvasManager::m_gui.add(m_group);
+    CanvasManager::m_gui->add(m_group);
     CanvasManager::addCanvas(this);
 
     // removing the UI component as soon as object is added to queue
     m_onDestroy([this](){ 
         this->m_group = nullptr;
-        CanvasManager::m_gui.remove(m_group);
-        // if (m_screenSpace)
+        CanvasManager::m_gui->remove(m_group);
+        if (m_screenSpace)
             CanvasManager::removeCanvas(this);
     });
     m_onTransformUpdated([this](){
@@ -58,7 +58,7 @@ void Canvas::Draw(sf::RenderTarget* target)
             widgetStates.transform.scale(m_group->getScale(), scaleOrigin);
         }
     }
-    CanvasManager::getGui().getBackendRenderTarget()->drawWidget(widgetStates, m_group);
+    CanvasManager::getGui()->getBackendRenderTarget()->drawWidget(widgetStates, m_group);
 }
 
 void Canvas::setScreenSpace()

@@ -1,10 +1,10 @@
 #include "Object.hpp"
 #include "ObjectManager.hpp"
 
-bool _objectComp::operator()(const Object* lhs, const Object* rhs) const
-{
-    return lhs->getID() < rhs->getID();
-}
+// bool _objectComp::operator()(const Object* lhs, const Object* rhs) const
+// {
+//     return lhs->getID() < rhs->getID();
+// }
 
 std::atomic_ullong Object::m_lastID = 1;
 

@@ -12,7 +12,7 @@ enum DrawStage
 {
     Particles = 0,
     Default = 10,
-    UI = 20
+    UI = 20,
 };
 
 #endif

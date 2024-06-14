@@ -8,11 +8,10 @@
 #include <list>
 
 #include "Utils/EventHelper.hpp"
+#include "Settings.hpp"
+#include "Vector2.hpp"
 
 #include "box2d/b2_math.h"
-
-// TODO add a way to search through objects based on heirarchy 
-// TODO handle deletion of objects properly (should not be able to find object after it is added to deletion queue)
 
 class ObjectManager;
 
@@ -243,18 +242,7 @@ public:
     template<typename type>
     type* cast()
     {
-        type* temp = nullptr;
-    
-        try
-        {
-            temp = dynamic_cast<type*>(this);    
-        }
-        catch(const std::exception& e)
-        {
-            temp = nullptr;
-        }
-
-        return temp;
+        return dynamic_cast<type*>(this);
     }
 
     /// @brief tries to cast this object to a given type
@@ -262,20 +250,9 @@ public:
     template<typename type>
     const type* cast() const
     {
-        const type* temp = nullptr;
-    
-        try
-        {
-            temp = dynamic_cast<const type*>(this);    
-        }
-        catch(const std::exception& e)
-        {
-            temp = nullptr;
-        }
-
-        return temp;
+        return dynamic_cast<const type*>(this);
     }
-    
+
     void destroy();
 
     /// @param vec global point
@@ -382,11 +359,11 @@ private:
     friend ObjectManager;
 };
 
-class _objectComp
-{
-public:
-    bool operator()(const Object* lhs, const Object* rhs) const;
-};
+// class _objectComp
+// {
+// public:
+//     bool operator()(const Object* lhs, const Object* rhs) const;
+// };
 
 namespace std {
     template <>

@@ -8,7 +8,7 @@
 class Collider;
 class ContactData;
 class PreSolveData;
-// TODO implement a enum used for easy comparison of fixtures
+
 /// @note this does not update when the collider is destroyed (only store in the colliders object or keep track if it is still alive)
 class Fixture
 {

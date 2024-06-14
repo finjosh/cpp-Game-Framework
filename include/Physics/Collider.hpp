@@ -162,21 +162,10 @@ public:
     /// @param ContactData the collision data
     inline virtual void EndContact(ContactData ContactData) {};
     /// @brief This can be called multiple times in one frame (called before any collision is handled)
+    /// @note try to make this efficient as it can be called many times per frame
     /// @warning do NOT DESTROY OR EDIT the ANY colliders during this callback
     /// @param PreContactData the pre solve contact data
     inline virtual void PreSolve(PreSolveData data) {};
-    // /// @brief This can be called multiple times in one frame (called before the collision is handled)
-    // /// @note to get the collider get the userdata from the body and cast to Collider
-    // /// @warning do not destroy or edit the collider during this callback
-    // /// @param contact the contact data
-    // /// @param oldManifold the old manifold data
-    // inline virtual void PreSolve(b2Contact* contact, const b2Manifold* oldManifold) {};
-    // /// @brief This can be called multiple times in one frame (called after the collision is handled)
-    // /// @note to get the collider get the userdata from the body and cast to Collider
-    // /// @warning do not destroy or edit the collider during this callback
-    // /// @param contact the contact data
-    // /// @param impulse the impulse data
-    // inline virtual void PostSolve(b2Contact* contact, const b2ContactImpulse* impulse) {};
     /// @brief called every frame until the two objects are no longer colliding
     /// @note this will also be called on start of contact
     /// @note these are called for each fixture

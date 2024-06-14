@@ -28,7 +28,7 @@ Collider::~Collider()
 
 void Collider::m_destroyBody()
 {
-    WorldHandler::getWorld().DestroyBody(m_body);
+    WorldHandler::getWorld().DestroyBody(m_body); // No need to delete user data as it just points to this collider
     // m_body = nullptr;
 }
 

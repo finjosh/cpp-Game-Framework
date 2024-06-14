@@ -13,11 +13,13 @@ class CanvasManager
 public:
     /// @note call this AFTER the window handler has it's render window set
     static void initGUI();
+    /// @brief frees up memory used by the gui
+    static void closeGUI();
     /// @note call this for each event
     /// @note this changes the tgui AbsoluteView and RelativeViewport
     static void handleEvent(sf::Event event);
     /// @warning do NOT remove any widgets from this only use canvases for adding widgets 
-    static tgui::Gui& getGui();
+    static tgui::Gui* getGui();
     /// @brief this also updates the gui time
     static void drawOverlayGUI();
     /// @brief updates the gui view for the given camera
@@ -34,7 +36,7 @@ protected:
 private:
     inline CanvasManager() = default;
 
-    static tgui::Gui m_gui;// TODO try storing this as a pointer to stop crashing at close
+    static tgui::Gui* m_gui;
     /// @brief list of canvases that are drawn to the main screen
     static std::set<Canvas*, _drawableComp> m_canvases;
 };

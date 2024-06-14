@@ -10,7 +10,7 @@
 #include "Graphics/DrawableObject.hpp"
 // #include "Physics/WorldHandler.hpp"
 
-// TODO manually override all the sfml drawing classes (maybe)
+// TODO make renderers for other sfml drawables
 
 /// @brief renderer for any sf::Shape
 /// @warning if derived from do NOT forget to use "createDestroy()"

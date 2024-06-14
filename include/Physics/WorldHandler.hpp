@@ -5,7 +5,6 @@
 
 #include "box2d/Box2D.h"
 
-// TODO setup box2d multithreading steps (have to make collision Manager thread safe also)
 class WorldHandler
 {
 public:

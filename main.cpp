@@ -85,40 +85,40 @@ public:
         m_hitParticle.set(new ParticleEmitter(&m_particle, {0,0}, 10, 0, 0, 1, 10, 0.5, 360));
 
         setMainCamera();
-        // Camera::setRotationLocked(true);
+        Camera::setRotationLocked(true);
     }
 
     inline virtual void Update(float deltaTime) override
     {
         if (sf::Keyboard::isKeyPressed(sf::Keyboard::Key::W))
         {
-            move(0, -75*deltaTime);
-            // applyForceToCenter({0,-120000*deltaTime});
+            // move(0, -75*deltaTime);
+            applyForceToCenter({0,-120000*deltaTime});
         }
         if (sf::Keyboard::isKeyPressed(sf::Keyboard::Key::A))
         {
-            move(-75*deltaTime, 0);
-            // applyForceToCenter({-120000*deltaTime,0});
+            // move(-75*deltaTime, 0);
+            applyForceToCenter({-120000*deltaTime,0});
         }
         if (sf::Keyboard::isKeyPressed(sf::Keyboard::Key::S))
         {
-            move(0, 75*deltaTime);
-            // applyForceToCenter({0,120000*deltaTime});
+            // move(0, 75*deltaTime);
+            applyForceToCenter({0,120000*deltaTime});
         }
         if (sf::Keyboard::isKeyPressed(sf::Keyboard::Key::D))
         {
-            move(75*deltaTime, 0);
-            // applyForceToCenter({120000*deltaTime,0});
+            // move(75*deltaTime, 0);
+            applyForceToCenter({120000*deltaTime,0});
         }
         if (sf::Keyboard::isKeyPressed(sf::Keyboard::Key::E))
         {
-            rotate(PI * deltaTime);
-            // applyTorque(500000*deltaTime);
+            // rotate(PI * deltaTime);
+            applyTorque(500000*deltaTime);
         }
         if (sf::Keyboard::isKeyPressed(sf::Keyboard::Key::Q))
         {
-            rotate(-PI * deltaTime);
-            // applyTorque(-500000*deltaTime);
+            // rotate(-PI * deltaTime);
+            applyTorque(-500000*deltaTime);
         }
     }
 
@@ -292,16 +292,6 @@ int main()
 
     new OneWay({40,25}, {40,10});
 
-    // auto camera = new Camera(10);
-    // camera->setScreenRect({0,0,0.25,0.25});
-    // camera->setPosition(window.getSize().x/PIXELS_PER_METER/2, window.getSize().y/PIXELS_PER_METER/2);
-    // camera->zoom(2);
-    // camera->DrawBackground.connect([](sf::RenderTarget* target, sf::Vector2f size){
-    //     sf::RectangleShape temp(size);
-    //     temp.setFillColor(sf::Color(100,100,100,75));
-    //     target->draw(temp);
-    // });
-
     auto gui2 = new Canvas();
     gui2->setGlobalSpace();
     gui2->setPosition(50,50);
@@ -386,6 +376,7 @@ int main()
     //! --------------------------------------------------------------
 
     ObjectManager::destroyAllObjects();
+    CanvasManager::closeGUI();
     window.close();
 
     return 0;
