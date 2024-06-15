@@ -4,7 +4,6 @@
 #pragma once
 
 #include <atomic>
-#include <complex>
 #include <list>
 
 #include "Utils/EventHelper.hpp"
@@ -273,12 +272,6 @@ public:
     /// @param center the point to rotate around
     /// @param rot rotation in radians
     void rotateAround(const b2Vec2& center, float rot);
-    /// @brief rotates the given b2Vec2 around the given center
-    /// @param pos the point that will be rotated
-    /// @param center the point to rotate around
-    /// @param rot rotation in radians
-    /// @returns the rotated vector
-    b2Vec2 rotateAround(const b2Vec2& pos, const b2Vec2& center, float rot);
     void setPosition(const b2Vec2& position);
     void setPosition(float x, float y);
     /// @brief if this is a child then the position will be set according to the parent

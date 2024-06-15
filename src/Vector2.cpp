@@ -1,7 +1,7 @@
 #include "Vector2.hpp"
+#include <complex>
 
 Vector2::Vector2(float x, float y) : x(x), y(y) {}
-Vector2::Vector2(const b2Vec2& box2DVector) : x(box2DVector.x), y(box2DVector.y) {}
 
 Vector2::Vector2(tgui::String str)
 {
@@ -93,48 +93,25 @@ void Vector2::operator=(const Vector2& vector)
     y = vector.y;
 }
 
-void Vector2::operator+=(const b2Vec2& vector)
-{
-    x += vector.x;
-    y += vector.y;
-}
-
-void Vector2::operator-=(const b2Vec2& vector)
-{
-    x -= vector.x;
-    y -= vector.y;
-}
-
-void Vector2::operator=(const b2Vec2& vector)
-{
-    x = vector.x;
-    y = vector.y;
-}
-
-b2Vec2 Vector2::getb2Vec2() const
-{
-    return b2Vec2{x,y};
-}
-
-bool Vector2::IsValid() const
+bool Vector2::isValid() const
 {
     return std::isfinite(x) && std::isfinite(y);
 }
 
-float Vector2::Length() const
+float Vector2::length() const
 {
     return std::sqrt(x * x + y * y);
 }
 
-float Vector2::LengthSquared() const
+float Vector2::lengthSquared() const
 {
     return x * x + y * y;
 }
 
-float Vector2::Normalize()
+float Vector2::normalize()
 {
-    float length = Length();
-    if (length < b2_epsilon)
+    float length = this->length();
+    if (length < __FLT_EPSILON__)
     {
         return 0.0f;
     }
@@ -149,3 +126,94 @@ tgui::String Vector2::toString() const
 {
     return "(" + tgui::String::fromNumber(x) + ", " + tgui::String::fromNumber(y) + ")";
 }
+
+Vector2 Vector2::rotateAround(const Vector2& point, const Vector2& center, float rot)
+{
+    std::complex<float> polar = std::polar<float>(1.0, rot);
+    std::complex<float> temp(point.x - center.x, point.y - center.y);
+    temp *= polar;
+    return {temp.real() + center.x, temp.imag() + center.y};
+}
+
+void Vector2::rotateAround(const Vector2& center, float rot)
+{
+    std::complex<float> polar = std::polar<float>(1.0, rot);
+    std::complex<float> temp(this->x - center.x, this->y - center.y);
+    temp *= polar;
+    this->x = temp.real() + center.x;
+    this->y = temp.imag() + center.y;
+}
+
+float Vector2::dot(const Vector2& a, const Vector2& b)
+{
+    return a.x*b.x + a.y*b.y;
+}
+
+float Vector2::distance(const Vector2& a, const Vector2& b)
+{
+    return (a-b).length();
+}
+
+float Vector2::distance(const Vector2& vector) const
+{
+    return (vector-(*this)).length();
+}
+
+float Vector2::angle(const Vector2& a, const Vector2& b)
+{
+    return std::atan2(a.x*b.y - a.y*b.x, a.x*b.x + a.y*b.y);
+}
+
+Vector2 Vector2::lerp(const Vector2& a, const Vector2& b, float relativeDistance)
+{
+    Vector2 rtn(a-b); // finding the vector from a to b
+    rtn *= relativeDistance; // only getting the part we want
+    rtn += a; // moving origin back to a
+    return rtn;
+}
+
+Vector2 Vector2::max(const Vector2& a, const Vector2& b)
+{ return Vector2{std::max(a.x, b.x), std::max(a.y, b.y)}; }
+
+Vector2 Vector2::min(const Vector2& a, const Vector2& b)
+{ return Vector2{std::min(a.x, b.x), std::min(a.y, b.y)}; }
+
+Vector2 Vector2::moveTowards(const Vector2& current, const Vector2& target, float maxDistance)
+{
+    Vector2 rtn(current-target); // finding the vector from a to b
+    if (rtn.lengthSquared() > maxDistance*maxDistance) // if distance is too far
+    {
+        rtn.normalize();
+        rtn *= maxDistance; // making the vector have length maxDistance
+    }
+    rtn += current;
+    return rtn;
+}
+
+Vector2 Vector2::rotateTowards(const Vector2& current, const Vector2& target, float maxRadians, float maxMagnitude)
+{
+    Vector2 rtn(current-target); // finding the vector from a to b
+    if (rtn.lengthSquared() > maxMagnitude*maxMagnitude) // if distance is too far
+    {
+        rtn.normalize();
+        rtn *= maxMagnitude; // making the vector have length maxDistance
+    }
+    rtn += current;
+
+    float angle = Vector2::angle(current, target);
+    angle = angle > maxRadians ? maxRadians : angle;
+
+    return Vector2::rotate(rtn, angle);
+}
+
+Vector2 Vector2::scale(const Vector2& a, const Vector2& b)
+{ return Vector2{a.x*b.x, a.y*b.y}; }
+
+void Vector2::scale(const Vector2& vector)
+{ x *= vector.x; y *= vector.y; }
+
+Vector2 Vector2::rotate(const Vector2& vector, float rot)
+{ return Vector2{vector.x * std::cos(rot) - vector.y * std::sin(rot), vector.y * std::cos(rot) + vector.x * std::sin(rot)}; }
+
+void Vector2::setZero()
+{ x = 0; y = 0; }

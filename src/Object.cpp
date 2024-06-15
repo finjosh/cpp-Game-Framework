@@ -165,7 +165,7 @@ b2Vec2 Object::getLocalVector(const b2Vec2& vec) const
 
 void Object::rotateAround(const b2Vec2& center, float rot)
 {
-    b2Vec2 posChange = rotateAround(m_transform.p, center, rot) - m_transform.p;
+    b2Vec2 posChange = (Vector2::rotateAround({m_transform.p}, {center}, rot) - m_transform.p).operator b2Vec2();
     m_transform.p += posChange;
     m_onTransformUpdated.invoke();
 
@@ -174,14 +174,6 @@ void Object::rotateAround(const b2Vec2& center, float rot)
         child->move(posChange);
         child->rotateAround(m_transform.p, rot);
     }
-}
-
-b2Vec2 Object::rotateAround(const b2Vec2& pos, const b2Vec2& center, float rot)
-{
-    auto polar = std::polar<float>(1.0, rot);
-    std::complex<float> temp(pos.x - center.x, pos.y - center.y);
-    temp *= polar;
-    return {temp.real() + center.x, temp.imag() + center.y};
 }
 
 void Object::setPosition(const b2Vec2& position)
