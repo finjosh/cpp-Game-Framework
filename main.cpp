@@ -32,10 +32,6 @@ void addThemeCommands();
 /// @param themes in order of most wanted
 /// @param directories directories to check in ("" for current)
 void tryLoadTheme(std::list<std::string> themes, std::list<std::string> directories);
-std::string vecToStr(b2Vec2 vec)
-{
-    return std::to_string(vec.x) + ", " + std::to_string(vec.x);
-}
 
 class Wall : public virtual Object, public Collider, public Renderer<sf::RectangleShape>
 {

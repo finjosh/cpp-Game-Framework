@@ -15,7 +15,7 @@ Collider::Collider()
     // initializing the body in box2d
     b2BodyDef bodyDef;
     bodyDef.type = b2_dynamicBody;
-    bodyDef.position = Object::getPosition();
+    bodyDef.position = (b2Vec2)Object::getPosition();
     bodyDef.angle = Object::getRotation();
     m_body = WorldHandler::getWorld().CreateBody(&bodyDef);
     m_body->GetUserData().pointer = (uintptr_t)this;
@@ -78,7 +78,7 @@ void Collider::m_updatePhysicsState()
 
 void Collider::m_updateTransform()
 {
-    m_body->SetTransform(Object::getPosition(), Object::getRotation());
+    m_body->SetTransform((b2Vec2)Object::getPosition(), Object::getRotation());
 }
 
 void Collider::m_update()

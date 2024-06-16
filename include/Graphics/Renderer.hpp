@@ -36,13 +36,13 @@ public:
 
     inline void setScale(float x, float y)
     {
-        T::setScale(PIXELS_PER_METER + x, PIXELS_PER_METER + y);
+        T::setScale(PIXELS_PER_METER * x, PIXELS_PER_METER * y);
     }
 
     inline b2Vec2 getScale() const
     {
         sf::Vector2f temp = T::getScale();
-        return {temp.x - PIXELS_PER_METER, temp.y - PIXELS_PER_METER};
+        return {temp.x / PIXELS_PER_METER, temp.y / PIXELS_PER_METER};
     }
 
 protected:

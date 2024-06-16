@@ -3,9 +3,9 @@
 
 #pragma once
 
-#include "SFML/System/Vector2.hpp"
-#include "TGUI/Vector2.hpp"
-#include "Box2D/b2_math.h"
+// #include "SFML/System/Vector2.hpp" (SFML_VECTOR2_HPP)
+// #include "TGUI/Vector2.hpp" (TGUI_VECTOR2_HPP)
+// #include "Box2D/b2_math.h" (B2_MATH_H)
 
 #include "TGUI/String.hpp"
 
@@ -15,6 +15,7 @@ class Vector2
 public:
     inline Vector2() = default;
     Vector2(float x, float y);
+    Vector2(const Vector2& vector);
     /// @brief attempts to convert the given string to a vector2 and initializes this
     Vector2(tgui::String str);
 
@@ -26,6 +27,8 @@ public:
     void operator-=(const Vector2& vector);
     /// @note if you call this a lot do think about using the -= operator
     Vector2 operator-(const Vector2& vector) const;
+    /// @returns a vector with this vectors components negated
+    Vector2 operator-() const;
     /// @brief multiplies this vector by a scalar
     void operator*=(float scaler);
     /// @note if you call this a lot do think about using the *= operator
@@ -40,6 +43,8 @@ public:
     bool operator!=(const Vector2& vector) const;
 
     //* sfml additions and subtractions
+    #ifdef SFML_VECTOR2_HPP
+    /// @note you MUST include the sfml vector header BEFORE including this Vector2 header
     /// @note converts from the given typename to a float
     template <typename T>
     inline Vector2(const sf::Vector2<T>& SFMLVector) : x(static_cast<float>(SFMLVector.x)), y(static_cast<float>(SFMLVector.y)) {}     
@@ -69,8 +74,11 @@ public:
     {
         return sf::Vector2<T>{static_cast<T>(x), static_cast<T>(y)};
     }
+    #endif
 
     //* box2d
+    #ifdef B2_MATH_H
+    /// @note you MUST include the box2d math header BEFORE including this Vector2 header
     inline Vector2(const b2Vec2& box2DVector) : x(box2DVector.x), y(box2DVector.y) {}
     inline void operator+=(const b2Vec2& vector)
     {
@@ -89,11 +97,14 @@ public:
     }
     /// @returns the equivalent b2Vec2
     explicit inline operator b2Vec2() const
-        {
+    {
         return b2Vec2{x,y};
     }
+    #endif
 
     //* tgui
+    #ifdef TGUI_VECTOR2_HPP
+    /// @note you MUST include the tgui vector header BEFORE including this Vector2 header
     /// @note converts from the given typename to a float   
     template <typename T>
     inline Vector2(const tgui::Vector2<T>& TGUIVector) : x(static_cast<float>(TGUIVector.x)), y(static_cast<float>(TGUIVector.y)) {}
@@ -123,6 +134,7 @@ public:
     {
         return tgui::Vector2<T>{static_cast<T>(x), static_cast<T>(y)};
     }
+    #endif
 
 	/// @returns true if this vector contains finite coordinates
 	bool isValid() const;

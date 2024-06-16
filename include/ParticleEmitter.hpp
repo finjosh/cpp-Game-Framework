@@ -30,7 +30,7 @@ public:
     /// @param spread the max angle of spread (degrees)
     /// @param randomColor the max random addition to the default color
     ParticleEmitter(sf::Shape* shape,
-                    const b2Vec2& pos, float vel, float rot = 0.f, float spawnRate = 0.1f, 
+                    const Vector2& pos, float vel, float rot = 0.f, float spawnRate = 0.1f, 
                     float lifetime = 1.f, int spawnAmount = 0, float fadeOutTime = 0.f, 
                     float spread = 0.f, sf::Color randomColor = sf::Color{0,0,0,0});
 
@@ -107,11 +107,11 @@ protected:
     {
     public:
         Particle() = default;
-        Particle(const b2Vec2& pos, const b2Vec2& vel, float rotation, sf::Color color);
-        void setPosition(const b2Vec2& position);
-        b2Vec2 getPosition() const;
-        void setVelocity(const b2Vec2& velocity);
-        b2Vec2 getVelocity() const;
+        Particle(const Vector2& pos, const Vector2& vel, float rotation, sf::Color color);
+        void setPosition(const Vector2& position);
+        Vector2 getPosition() const;
+        void setVelocity(const Vector2& velocity);
+        Vector2 getVelocity() const;
         /// @param rot in degrees
         void setRotation(float rot);
         /// @returns rotation in degrees
@@ -121,7 +121,7 @@ protected:
         void setColor(sf::Color color);
         void setAlpha(int8_t alpha);
 
-        void move(const b2Vec2& vec);
+        void move(const Vector2& vec);
         void draw(sf::Shape* shape, sf::RenderTarget* target);
 
     protected:
@@ -131,8 +131,8 @@ protected:
         friend ParticleEmitter;
 
     private:
-        b2Vec2 m_position = {0,0};
-        b2Vec2 m_velocity = {0,0};
+        Vector2 m_position = {0,0};
+        Vector2 m_velocity = {0,0};
         /// @brief in degrees
         float m_rotation = 0.f;
         float m_lifetime = 0.f;

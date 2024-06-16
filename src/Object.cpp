@@ -143,30 +143,30 @@ void Object::addChild(Object* child)
     child->setParent(this);
 }
 
-b2Vec2 Object::getLocalPoint(const b2Vec2& point) const
+Vector2 Object::getLocalPoint(const Vector2& point) const
 {
-    return b2MulT(m_transform, point);
+    return b2MulT(m_transform, (b2Vec2)point);
 }
 
-b2Vec2 Object::getGlobalPoint(const b2Vec2& point) const
+Vector2 Object::getGlobalPoint(const Vector2& point) const
 {
-    return b2Mul(m_transform, point);
+    return b2Mul(m_transform, (b2Vec2)point);
 }
 
-b2Vec2 Object::getGlobalVector(const b2Vec2& vec) const
+Vector2 Object::getGlobalVector(const Vector2& vec) const
 {
-    return b2Mul(m_transform.q, vec);
+    return b2Mul(m_transform.q, (b2Vec2)vec);
 }
 
-b2Vec2 Object::getLocalVector(const b2Vec2& vec) const
+Vector2 Object::getLocalVector(const Vector2& vec) const
 {
-    return b2MulT(m_transform.q, vec);
+    return b2MulT(m_transform.q, (b2Vec2)vec);
 }
 
-void Object::rotateAround(const b2Vec2& center, float rot)
+void Object::rotateAround(const Vector2& center, float rot)
 {
-    b2Vec2 posChange = (Vector2::rotateAround({m_transform.p}, {center}, rot) - m_transform.p).operator b2Vec2();
-    m_transform.p += posChange;
+    Vector2 posChange(Vector2::rotateAround({m_transform.p}, {center}, rot) - m_transform.p);
+    m_transform.p += (b2Vec2)posChange;
     m_onTransformUpdated.invoke();
 
     for (auto child: m_children)
@@ -176,10 +176,10 @@ void Object::rotateAround(const b2Vec2& center, float rot)
     }
 }
 
-void Object::setPosition(const b2Vec2& position)
+void Object::setPosition(const Vector2& position)
 {   
-    b2Vec2 posChange = position - m_transform.p;
-    m_transform.p = position;
+    Vector2 posChange(position - m_transform.p);
+    m_transform.p = (b2Vec2)position;
     m_onTransformUpdated.invoke();
 
     for (auto child: m_children)
@@ -193,7 +193,7 @@ void Object::setPosition(float x, float y)
     setPosition({x,y});
 }
 
-b2Vec2 Object::getPosition() const
+Vector2 Object::getPosition() const
 {   
     return m_transform.p;
 }
@@ -227,9 +227,9 @@ b2Transform Object::getTransform() const
     return m_transform;
 }
 
-void Object::move(const b2Vec2& move)
+void Object::move(const Vector2& move)
 {
-    m_transform.p += move;
+    m_transform.p += (b2Vec2)move;
     m_onTransformUpdated.invoke();
 
     for (auto child: m_children)
@@ -240,7 +240,7 @@ void Object::move(const b2Vec2& move)
 
 void Object::move(float x, float y)
 {
-    move(b2Vec2(x,y));
+    move(Vector2(x,y));
 }
 
 void Object::rotate(float rot)
@@ -254,7 +254,7 @@ void Object::rotate(float rot)
     }
 }
 
-void Object::setLocalPosition(const b2Vec2& position)
+void Object::setLocalPosition(const Vector2& position)
 {
     if (m_parent)
     {
@@ -266,7 +266,7 @@ void Object::setLocalPosition(const b2Vec2& position)
     }
 }
 
-b2Vec2 Object::getLocalPosition() const
+Vector2 Object::getLocalPosition() const
 {
     if (m_parent)
     {

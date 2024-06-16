@@ -16,9 +16,11 @@ LIB_DIRS=/VSCodeFolder/Libraries/SFML-2.6.1/lib /VSCodeFolder/Libraries/TGUI-1.3
 SRC:=src
 # the directory for lib files that are made with "make lib"
 # this should be the full path
-LIB_DIR:=${PROJECT_DIR_TEMP}/lib
+# this can NOT be "lib"
+LIB_DIR:=libs
 # the directory where all the source files that you want in the lib are
 LIB_SOURCE:=src
+LIB_NAME:=libgameFramework
 
 # compiler command
 CC:=g++
@@ -90,7 +92,7 @@ ${PROJECT_DIR}/${OBJ_O_DIR}%.o:${PROJECT_DIR}%.cpp
 
 # build the lib with the same compile options
 lib: ${BIN_DIRS} ${LIB_DIR} ${LIBOBJECTS}
-	ar rcs $(call FIXPATH,${PROJECT_DIR}/${LIB_DIR}/${PROJECT}.a) ${LIBOBJECTS}
+	ar rcs $(call FIXPATH,${PROJECT_DIR}/${LIB_DIR}/${LIB_NAME}.a) ${LIBOBJECTS}
 	@echo Libs created
 
 # include the dependencies

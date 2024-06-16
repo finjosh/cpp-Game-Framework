@@ -24,7 +24,7 @@ void CanvasManager::closeGUI()
 
 void CanvasManager::handleEvent(sf::Event event)
 {
-    b2Vec2 screenPosition; // left, top in pixels
+    Vector2 screenPosition; // left, top in pixels
     if (auto camera = CameraManager::getMainCamera())
     {
         screenPosition = camera->getPosition();
@@ -33,7 +33,7 @@ void CanvasManager::handleEvent(sf::Event event)
         screenPosition.y -= (float)m_gui->getWindow()->getSize().y/2;
     }
     else
-        screenPosition = {0,0};
+        screenPosition = Vector2{0,0};
 
     // first update all screen space canvases to have the proper position for events to be handled
     for (auto canvas: m_canvases)

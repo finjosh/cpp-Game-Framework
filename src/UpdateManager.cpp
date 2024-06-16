@@ -22,109 +22,109 @@ std::unordered_set<UpdateInterface*>::iterator getIterator(std::unordered_set<Up
     return start;
 }
 
-void UpdateManager::Update(float deltaTime, BS::thread_pool& pool)
-{
-    std::list<std::future<void>> threads;
+// void UpdateManager::Update(float deltaTime, BS::thread_pool& pool)
+// {
+//     std::list<std::future<void>> threads;
 
-    size_t partitionSize = m_objects.size()/pool.get_thread_count();
-    size_t extra = m_objects.size()%pool.get_thread_count();
-    size_t temp = 0;
-    std::unordered_set<UpdateInterface*>::iterator current = m_objects.begin();
-    std::unordered_set<UpdateInterface*>::iterator next;
-    for (int i = 0; i < pool.get_thread_count(); i++)
-    {
-        temp = (extra > 0 ? 1 : 0);
-        next = getIterator(current, partitionSize + temp);
-        threads.emplace_back(pool.submit_task([deltaTime, current, next]{ _update(deltaTime, current, next); }));
-        current = next;
-        extra -= temp;
-    }
+//     size_t partitionSize = m_objects.size()/pool.get_thread_count();
+//     size_t extra = m_objects.size()%pool.get_thread_count();
+//     size_t temp = 0;
+//     std::unordered_set<UpdateInterface*>::iterator current = m_objects.begin();
+//     std::unordered_set<UpdateInterface*>::iterator next;
+//     for (int i = 0; i < pool.get_thread_count(); i++)
+//     {
+//         temp = (extra > 0 ? 1 : 0);
+//         next = getIterator(current, partitionSize + temp);
+//         threads.emplace_back(pool.submit_task([deltaTime, current, next]{ _update(deltaTime, current, next); }));
+//         current = next;
+//         extra -= temp;
+//     }
 
-    for (auto& thread: threads)
-    {
-        thread.wait();
-    }
+//     for (auto& thread: threads)
+//     {
+//         thread.wait();
+//     }
 
-    threads.clear();
-}
+//     threads.clear();
+// }
 
-void UpdateManager::LateUpdate(float deltaTime, BS::thread_pool& pool)
-{
-    std::list<std::future<void>> threads;
+// void UpdateManager::LateUpdate(float deltaTime, BS::thread_pool& pool)
+// {
+//     std::list<std::future<void>> threads;
 
-    size_t partitionSize = m_objects.size()/pool.get_thread_count();
-    size_t extra = m_objects.size()%pool.get_thread_count();
-    size_t temp = 0;
-    std::unordered_set<UpdateInterface*>::iterator current = m_objects.begin();
-    std::unordered_set<UpdateInterface*>::iterator next;
-    for (int i = 0; i < pool.get_thread_count(); i++)
-    {
-        temp = (extra > 0 ? 1 : 0);
-        next = getIterator(current, partitionSize + temp);
-        threads.emplace_back(pool.submit_task([deltaTime, current, next]{ _lateUpdate(deltaTime, current, next); }));
-        current = next;
-        extra -= temp;
-    }
+//     size_t partitionSize = m_objects.size()/pool.get_thread_count();
+//     size_t extra = m_objects.size()%pool.get_thread_count();
+//     size_t temp = 0;
+//     std::unordered_set<UpdateInterface*>::iterator current = m_objects.begin();
+//     std::unordered_set<UpdateInterface*>::iterator next;
+//     for (int i = 0; i < pool.get_thread_count(); i++)
+//     {
+//         temp = (extra > 0 ? 1 : 0);
+//         next = getIterator(current, partitionSize + temp);
+//         threads.emplace_back(pool.submit_task([deltaTime, current, next]{ _lateUpdate(deltaTime, current, next); }));
+//         current = next;
+//         extra -= temp;
+//     }
 
-    for (auto& thread: threads)
-    {
-        thread.wait();
-    }
+//     for (auto& thread: threads)
+//     {
+//         thread.wait();
+//     }
 
-    threads.clear();
-}
+//     threads.clear();
+// }
 
-void UpdateManager::FixedUpdate(BS::thread_pool& pool)
-{
-    std::list<std::future<void>> threads;
+// void UpdateManager::FixedUpdate(BS::thread_pool& pool)
+// {
+//     std::list<std::future<void>> threads;
 
-    size_t partitionSize = m_objects.size()/pool.get_thread_count();
-    size_t extra = m_objects.size()%pool.get_thread_count();
-    size_t temp = 0;
-    std::unordered_set<UpdateInterface*>::iterator current = m_objects.begin();
-    std::unordered_set<UpdateInterface*>::iterator next;
-    for (int i = 0; i < pool.get_thread_count(); i++)
-    {
-        temp = (extra > 0 ? 1 : 0);
-        next = getIterator(current, partitionSize + temp);
-        threads.emplace_back(pool.submit_task([current, next]{ _fixedUpdate(current, next); }));
-        current = next;
-        extra -= temp;
-    }
+//     size_t partitionSize = m_objects.size()/pool.get_thread_count();
+//     size_t extra = m_objects.size()%pool.get_thread_count();
+//     size_t temp = 0;
+//     std::unordered_set<UpdateInterface*>::iterator current = m_objects.begin();
+//     std::unordered_set<UpdateInterface*>::iterator next;
+//     for (int i = 0; i < pool.get_thread_count(); i++)
+//     {
+//         temp = (extra > 0 ? 1 : 0);
+//         next = getIterator(current, partitionSize + temp);
+//         threads.emplace_back(pool.submit_task([current, next]{ _fixedUpdate(current, next); }));
+//         current = next;
+//         extra -= temp;
+//     }
 
-    for (auto& thread: threads)
-    {
-        thread.wait();
-    }
+//     for (auto& thread: threads)
+//     {
+//         thread.wait();
+//     }
 
-    threads.clear();
-}
+//     threads.clear();
+// }
 
-void UpdateManager::Start(BS::thread_pool& pool)
-{
-    std::list<std::future<void>> threads;
+// void UpdateManager::Start(BS::thread_pool& pool)
+// {
+//     std::list<std::future<void>> threads;
 
-    size_t partitionSize = m_objects.size()/pool.get_thread_count();
-    size_t extra = m_objects.size()%pool.get_thread_count();
-    size_t temp = 0;
-    std::unordered_set<UpdateInterface*>::iterator current = m_objects.begin();
-    std::unordered_set<UpdateInterface*>::iterator next;
-    for (int i = 0; i < pool.get_thread_count(); i++)
-    {
-        temp = (extra > 0 ? 1 : 0);
-        next = getIterator(current, partitionSize + temp);
-        threads.emplace_back(pool.submit_task([current, next]{ _start(current, next); }));
-        current = next;
-        extra -= temp;
-    }
+//     size_t partitionSize = m_objects.size()/pool.get_thread_count();
+//     size_t extra = m_objects.size()%pool.get_thread_count();
+//     size_t temp = 0;
+//     std::unordered_set<UpdateInterface*>::iterator current = m_objects.begin();
+//     std::unordered_set<UpdateInterface*>::iterator next;
+//     for (int i = 0; i < pool.get_thread_count(); i++)
+//     {
+//         temp = (extra > 0 ? 1 : 0);
+//         next = getIterator(current, partitionSize + temp);
+//         threads.emplace_back(pool.submit_task([current, next]{ _start(current, next); }));
+//         current = next;
+//         extra -= temp;
+//     }
 
-    for (auto& thread: threads)
-    {
-        thread.wait();
-    }
+//     for (auto& thread: threads)
+//     {
+//         thread.wait();
+//     }
 
-    threads.clear();
-}
+//     threads.clear();
+// }
 
 void UpdateManager::_update(float deltaTime, std::unordered_set<UpdateInterface*>::iterator begin, std::unordered_set<UpdateInterface*>::iterator end)
 {

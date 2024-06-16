@@ -8,9 +8,9 @@
 
 #include "Utils/EventHelper.hpp"
 #include "Settings.hpp"
+#include "box2d/b2_math.h" // TODO make a transform and angle class
 #include "Vector2.hpp"
 
-#include "box2d/b2_math.h"
 
 class ObjectManager;
 
@@ -256,33 +256,33 @@ public:
 
     /// @param vec global point
     /// @returns the equivalent local point
-    b2Vec2 getLocalPoint(const b2Vec2& point) const;
+    Vector2 getLocalPoint(const Vector2& point) const;
     /// @param vec local point
     /// @return the equivalent global point
-    b2Vec2 getGlobalPoint(const b2Vec2& point) const;
+    Vector2 getGlobalPoint(const Vector2& point) const;
     /// @param vec local vector
     /// @note only rotates
     /// @return the equivalent global vector
-    b2Vec2 getGlobalVector(const b2Vec2& vec) const;
+    Vector2 getGlobalVector(const Vector2& vec) const;
     /// @param vec global vector
     /// @note only rotates
     /// @returns the equivalent local vector
-    b2Vec2 getLocalVector(const b2Vec2& vec) const;
+    Vector2 getLocalVector(const Vector2& vec) const;
     /// @brief rotates the this object around the given center
     /// @param center the point to rotate around
     /// @param rot rotation in radians
-    void rotateAround(const b2Vec2& center, float rot);
-    void setPosition(const b2Vec2& position);
+    void rotateAround(const Vector2& center, float rot);
+    void setPosition(const Vector2& position);
     void setPosition(float x, float y);
     /// @brief if this is a child then the position will be set according to the parent
     /// @note if "canSetTransform" is false then this does nothing
     /// @note if this is not a child then position is set according to global
     /// @param position according to the parent position
-    void setLocalPosition(const b2Vec2& position);
-    b2Vec2 getPosition() const;
+    void setLocalPosition(const Vector2& position);
+    Vector2 getPosition() const;
     /// @note if no parent returns global position
     /// @returns position according to parent
-    b2Vec2 getLocalPosition() const;
+    Vector2 getLocalPosition() const;
     /// @param rotation in radians
     void setRotation(float rotation);
     /// @brief if this is a child then the rotation will be set according to the parent
@@ -299,7 +299,7 @@ public:
     float getLocalRotation() const;
     void setTransform(const b2Transform& transform);
     b2Transform getTransform() const;
-    void move(const b2Vec2& move);
+    void move(const Vector2& move);
     void move(float x, float y);
     /// @param rot in radians
     void rotate(float rot);

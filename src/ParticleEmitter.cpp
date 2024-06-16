@@ -1,24 +1,24 @@
 #include "ParticleEmitter.hpp"
 
-ParticleEmitter::Particle::Particle(const b2Vec2& pos, const b2Vec2& vel, float rotation, sf::Color color) 
+ParticleEmitter::Particle::Particle(const Vector2& pos, const Vector2& vel, float rotation, sf::Color color) 
     : m_position(pos), m_velocity(vel), m_rotation(rotation), m_color(color) {}
 
-void ParticleEmitter::Particle::setPosition(const b2Vec2& position)
+void ParticleEmitter::Particle::setPosition(const Vector2& position)
 {
     m_position = position;
 }
 
-b2Vec2 ParticleEmitter::Particle::getPosition() const
+Vector2 ParticleEmitter::Particle::getPosition() const
 {
     return m_position;
 }
 
-void ParticleEmitter::Particle::setVelocity(const b2Vec2& velocity)
+void ParticleEmitter::Particle::setVelocity(const Vector2& velocity)
 {
     m_velocity = velocity;
 }
 
-b2Vec2 ParticleEmitter::Particle::getVelocity() const
+Vector2 ParticleEmitter::Particle::getVelocity() const
 {
     return m_velocity;
 }
@@ -53,7 +53,7 @@ void ParticleEmitter::Particle::setAlpha(int8_t alpha)
     m_color.a = alpha;
 }
 
-void ParticleEmitter::Particle::move(const b2Vec2& vec)
+void ParticleEmitter::Particle::move(const Vector2& vec)
 {
     m_position.x += vec.x;
     m_position.y += vec.y;
@@ -77,7 +77,7 @@ void ParticleEmitter::Particle::update(float deltaTime)
 ParticleEmitter::ParticleEmitter(sf::Shape* shape) : m_particleShape(shape)
 {}
 
-ParticleEmitter::ParticleEmitter(sf::Shape* shape, const b2Vec2& pos, 
+ParticleEmitter::ParticleEmitter(sf::Shape* shape, const Vector2& pos, 
                     float vel, float rot, float spawnRate,
                     float lifetime, int spawnAmount, float fadeOutTime, 
                     float spread, sf::Color randomColor)
@@ -233,6 +233,7 @@ sf::Color ParticleEmitter::getDefaultColor() const
     return m_defaultColor;
 }
 
+#include <complex> // TODO rremove this after making and implementing the rotation class
 void ParticleEmitter::emit()
 {
     for (unsigned int i = 0; i < m_spawnAmount - (rand()%m_randomSpawnAmount); i++)
@@ -241,7 +242,7 @@ void ParticleEmitter::emit()
         float rotation = randX(m_randomRotation);
         sf::Color color(m_defaultColor.r + rand()%(m_randomColor.r+1), m_defaultColor.g + rand()%(m_randomColor.g+1),
                         m_defaultColor.b + rand()%(m_randomColor.b+1), m_defaultColor.a + rand()%(m_randomColor.a+1));
-        auto polar = std::polar<float>(m_velocity, this->getRotation() + spread);
+        auto polar = std::polar<float>(m_velocity, this->getRotation() + spread); // TODO make an rotation class that does this
 
         m_particles.push_back({this->getPosition(), 
                             {polar.real(), polar.imag()}, 

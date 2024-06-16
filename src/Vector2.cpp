@@ -2,6 +2,7 @@
 #include <complex>
 
 Vector2::Vector2(float x, float y) : x(x), y(y) {}
+Vector2::Vector2(const Vector2& vector) : x(vector.x), y(vector.y) {}
 
 Vector2::Vector2(tgui::String str)
 {
@@ -53,6 +54,11 @@ void Vector2::operator-=(const Vector2& vector)
 Vector2 Vector2::operator-(const Vector2& vector) const
 {
     return Vector2{x-vector.x, y-vector.y};
+}
+
+Vector2 Vector2::operator-() const
+{
+    return Vector2{-x,-y};
 }
 
 void Vector2::operator*=(float scaler)

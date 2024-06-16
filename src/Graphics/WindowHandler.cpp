@@ -53,9 +53,10 @@ void WindowHandler::Display()
     m_renderWindow->clear();
 }
 
-b2Vec2 WindowHandler::getMousePos()
+Vector2 WindowHandler::getMousePos()
 {
-    auto temp = convertVec2<int>(sf::Mouse::getPosition(*m_renderWindow)) - b2Vec2(m_renderWindow->getSize().x/2, m_renderWindow->getSize().y/2);
+    Vector2 temp(sf::Mouse::getPosition(*m_renderWindow));
+    temp -= Vector2(m_renderWindow->getSize().x/2, m_renderWindow->getSize().y/2);
     temp *= 1/PIXELS_PER_METER;
     if (auto camera = CameraManager::getMainCamera())
     {

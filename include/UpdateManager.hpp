@@ -5,7 +5,7 @@
 
 #include <unordered_set>
 
-#include "BS_thread_pool.hpp"
+// #include "BS_thread_pool.hpp"
 
 #include "UpdateInterface.hpp"
 
@@ -14,14 +14,14 @@ class UpdateInterface;
 class UpdateManager
 {
 public:
-    /// @brief called once every frame
-    static void Update(float deltaTime, BS::thread_pool& pool);
-    /// @brief called after update
-    static void LateUpdate(float deltaTime, BS::thread_pool& pool);
-    /// @brief called up to 50 times a second
-    static void FixedUpdate(BS::thread_pool& pool);
-    /// @brief called just before opening the window
-    static void Start(BS::thread_pool& pool);
+    // /// @brief called once every frame
+    // static void Update(float deltaTime, BS::thread_pool& pool);
+    // /// @brief called after update
+    // static void LateUpdate(float deltaTime, BS::thread_pool& pool);
+    // /// @brief called up to 50 times a second
+    // static void FixedUpdate(BS::thread_pool& pool);
+    // /// @brief called just before opening the window
+    // static void Start(BS::thread_pool& pool);
 
     /// @note use this for single threaded updates
     static inline void Update(float deltaTime)

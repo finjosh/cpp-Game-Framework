@@ -5,7 +5,8 @@
 
 #include <SFML/Graphics/RenderWindow.hpp>
 // #include "TGUI/Backend/SFML-Graphics.hpp"
-#include "Box2D/b2_math.h"
+// #include "Box2D/b2_math.h"
+#include "Vector2.hpp"
 
 class WindowHandler
 {
@@ -18,7 +19,7 @@ public:
 
     /// @note based off of mainCamera
     /// @returns mouse position in global position 
-    static b2Vec2 getMousePos();
+    static Vector2 getMousePos();
 
 private:
     inline WindowHandler() = default;
