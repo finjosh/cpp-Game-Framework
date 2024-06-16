@@ -41,14 +41,16 @@ public:
         /// @returns how many contact points there are
         int32 getPointCount() const;
 
-        /// @returns returns the first point in a list that is the size of contact points
-        const b2Vec2* getContactPoints() const;
+        /// @warning does not check if index is in range
+        /// @returns returns the point at the given index (size of point count)
+        const Vector2 getContactPoint(uint8 index) const;
 
+        /// @warning does not check if index is in range
         /// @note negative distance is overlap in meters
-        /// @returns returns the first distance in a list that is the size of contact points
-        const float* getSeparations() const;
+        /// @returns returns the distance at the given index (size of point count)
+        const float getSeparations(uint8 index) const;
         /// @returns the normal of the collision
-        b2Vec2 getNormal() const;
+        Vector2 getNormal() const;
 
     protected:
         b2WorldManifold m_data;
@@ -175,14 +177,14 @@ public:
 
     void setAwake(bool awake = true);
     /// @returns world position of the center of mass.
-	const b2Vec2& getWorldCenter() const;
+	Vector2 getWorldCenter() const;
     /// @returns local position of the center of mass.
-	const b2Vec2& getLocalCenter() const;
+	Vector2 getLocalCenter() const;
     /// @brief Set the linear velocity of the center of mass.
 	/// @param v the new linear velocity of the center of mass.
-	void setLinearVelocity(const b2Vec2& v);
+	void setLinearVelocity(const Vector2& v);
 	/// @returns linear velocity of the center of mass.
-	const b2Vec2& getLinearVelocity() const;
+	Vector2 getLinearVelocity() const;
     /// @brief Set the angular velocity.
 	/// @param omega the new angular velocity in radians/second.
 	void setAngularVelocity(float omega);
@@ -193,11 +195,11 @@ public:
 	/// @param force the world force vector, usually in Newtons (N).
 	/// @param point the world position of the point of application.
 	/// @param wake also wake up the body
-	void applyForce(const b2Vec2& force, const b2Vec2& point, bool wake = true);
+	void applyForce(const Vector2& force, const Vector2& point, bool wake = true);
     /// @brief Apply a force to the center of mass. This wakes up the body.
 	/// @param force the world force vector, usually in Newtons (N).
 	/// @param wake also wake up the body
-	void applyForceToCenter(const b2Vec2& force, bool wake = true);
+	void applyForceToCenter(const Vector2& force, bool wake = true);
     /// @brief Apply a torque. 
     /// @note This affects the angular velocity without affecting the linear velocity of the center of mass.
 	/// @param torque about the z-axis (out of the screen), usually in N-m.
@@ -208,11 +210,11 @@ public:
 	/// @param impulse the world impulse vector, usually in N-seconds or kg-m/s.
 	/// @param point the world position of the point of application.
 	/// @param wake also wake up the body
-	void applyLinearImpulse(const b2Vec2& impulse, const b2Vec2& point, bool wake = true);
+	void applyLinearImpulse(const Vector2& impulse, const Vector2& point, bool wake = true);
     /// @brief Apply an impulse to the center of mass. This immediately modifies the velocity.
 	/// @param impulse the world impulse vector, usually in N-seconds or kg-m/s.
 	/// @param wake also wake up the body
-	void applyLinearImpulseToCenter(const b2Vec2& impulse, bool wake = true);
+	void applyLinearImpulseToCenter(const Vector2& impulse, bool wake = true);
     /// @brief Apply an angular impulse.
 	/// @param impulse the angular impulse in units of kg*m*m/s
 	/// @param wake also wake up the body

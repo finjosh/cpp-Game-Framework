@@ -4,6 +4,7 @@
 #pragma once
 
 #include "Box2D/b2_fixture.h"
+#include "Vector2.hpp"
 
 class Collider;
 class ContactData;
@@ -31,7 +32,7 @@ public:
 	const Collider* getCollider() const;
 	/// Test a point for containment in this fixture.
 	/// @param p a point in world coordinates.
-	bool testPoint(const b2Vec2& p) const;
+	bool testPoint(const Vector2& p) const;
 	/// Get the mass data for this fixture. The mass data is based on the density and
 	/// the shape. The rotational inertia is about the shape's origin. This operation
 	/// may be expensive.

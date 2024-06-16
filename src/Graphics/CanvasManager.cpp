@@ -38,18 +38,18 @@ void CanvasManager::handleEvent(sf::Event event)
     // first update all screen space canvases to have the proper position for events to be handled
     for (auto canvas: m_canvases)
     {
-        if (!canvas->isScreenSpace())
-        {
-            if (CameraManager::getMainCamera()->isRotationLocked())
-                continue;
-            // b2Vec2 cameraPositionRelative = CameraManager::getMainCamera()->getPosition();
-            // cameraPositionRelative *= PIXELS_PER_METER;
-            // cameraPositionRelative.x /= canvas->getGroup()->getSize().x;
-            // cameraPositionRelative.y /= canvas->getGroup()->getSize().y;
-            // cameraPositionRelative -= {canvas->getGroup()->getOrigin().x, canvas->getGroup()->getOrigin().y};
-            // canvas->getGroup()->setRotation(-CameraManager::getMainCamera()->getRotation()*180/PI);
-            continue;
-        }
+        // if (!canvas->isScreenSpace())
+        // {
+        //     if (CameraManager::getMainCamera()->isRotationLocked())
+        //         continue;
+        //     // Vector2 cameraPositionRelative = CameraManager::getMainCamera()->getPosition();
+        //     // cameraPositionRelative *= PIXELS_PER_METER;
+        //     // cameraPositionRelative.x /= canvas->getGroup()->getSize().x;
+        //     // cameraPositionRelative.y /= canvas->getGroup()->getSize().y;
+        //     // cameraPositionRelative -= {canvas->getGroup()->getOrigin().x, canvas->getGroup()->getOrigin().y};
+        //     // canvas->getGroup()->setRotation(-CameraManager::getMainCamera()->getRotation()*180/PI);
+        //     continue;
+        // }
 
         const tgui::Vector2f origin = {canvas->getOrigin().x * canvas->getSize().x, canvas->getOrigin().y * canvas->getSize().y};
         canvas->getGroup()->setPosition(screenPosition.x + origin.x, screenPosition.y + origin.y);
@@ -87,7 +87,7 @@ void CanvasManager::drawOverlayGUI()
     // Draw the canvases
     for (auto canvas: m_canvases)
     {
-        if (canvas->isEnabled() && canvas->isScreenSpace())
+        if (canvas->isEnabled() /* && canvas->isScreenSpace() */)
             canvas->Draw(m_gui->getTarget());
     }
 

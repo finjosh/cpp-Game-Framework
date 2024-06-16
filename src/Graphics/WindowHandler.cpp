@@ -3,7 +3,6 @@
 #include "Graphics/CameraManager.hpp"
 #include "Graphics/CanvasManager.hpp"
 #include "Physics/WorldHandler.hpp"
-#include "VectorConversions.hpp"
 #include "SFML/Window/Mouse.hpp"
 
 sf::RenderWindow* WindowHandler::m_renderWindow = nullptr;

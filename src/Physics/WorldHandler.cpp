@@ -8,9 +8,9 @@ int32 WorldHandler::m_velocityIterations = 8;
 int32 WorldHandler::m_positionIterations = 3;
 int32 WorldHandler::m_maxUpdates = 8;
 
-void WorldHandler::init(const b2Vec2& gravity)
+void WorldHandler::init(const Vector2& gravity)
 {
-    m_world.SetGravity(gravity);
+    m_world.SetGravity((b2Vec2)gravity);
     m_world.SetContactListener(new CollisionManager());
 }
 
@@ -61,12 +61,12 @@ int32 WorldHandler::getPositionIterations()
     return m_positionIterations;
 }
 
-void WorldHandler::setGravity(const b2Vec2& gravity)
+void WorldHandler::setGravity(const Vector2& gravity)
 {
-    m_world.SetGravity(gravity);
+    m_world.SetGravity((b2Vec2)gravity);
 }
 
-b2Vec2 WorldHandler::getGravity()
+Vector2 WorldHandler::getGravity()
 {
     return m_world.GetGravity();
 }

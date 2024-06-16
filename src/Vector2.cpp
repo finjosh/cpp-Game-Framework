@@ -1,5 +1,5 @@
 #include "Vector2.hpp"
-#include <complex>
+#include "math.h"
 
 Vector2::Vector2(float x, float y) : x(x), y(y) {}
 Vector2::Vector2(const Vector2& vector) : x(vector.x), y(vector.y) {}
@@ -133,21 +133,35 @@ tgui::String Vector2::toString() const
     return "(" + tgui::String::fromNumber(x) + ", " + tgui::String::fromNumber(y) + ")";
 }
 
-Vector2 Vector2::rotateAround(const Vector2& point, const Vector2& center, float rot)
+Vector2 Vector2::rotateAround(const Vector2& point, const Vector2& center, Rotation rot)
 {
-    std::complex<float> polar = std::polar<float>(1.0, rot);
-    std::complex<float> temp(point.x - center.x, point.y - center.y);
-    temp *= polar;
-    return {temp.real() + center.x, temp.imag() + center.y};
+    Vector2 temp(point);
+    temp -= center;
+    float tempX = temp.x * rot.cos - temp.y * rot.sin;
+    temp.y = temp.y * rot.cos + temp.x * rot.sin;
+    temp.x = tempX;
+    temp += center;
+    return temp;
+
+    // std::complex<float> polar = std::polar<float>(1.0, rot);
+    // std::complex<float> temp(point.x - center.x, point.y - center.y);
+    // temp *= polar;
+    // return {temp.real() + center.x, temp.imag() + center.y};
 }
 
-void Vector2::rotateAround(const Vector2& center, float rot)
+void Vector2::rotateAround(const Vector2& center, Rotation rot)
 {
-    std::complex<float> polar = std::polar<float>(1.0, rot);
-    std::complex<float> temp(this->x - center.x, this->y - center.y);
-    temp *= polar;
-    this->x = temp.real() + center.x;
-    this->y = temp.imag() + center.y;
+    (*this) -= center;
+    float tempX = x * rot.cos - y * rot.sin;
+    y = y * rot.cos + x * rot.sin;
+    x = tempX;
+    (*this) += center;
+
+    // std::complex<float> polar = std::polar<float>(1.0, rot);
+    // std::complex<float> temp(this->x - center.x, this->y - center.y);
+    // temp *= polar;
+    // this->x = temp.real() + center.x;
+    // this->y = temp.imag() + center.y;
 }
 
 float Vector2::dot(const Vector2& a, const Vector2& b)
@@ -218,8 +232,8 @@ Vector2 Vector2::scale(const Vector2& a, const Vector2& b)
 void Vector2::scale(const Vector2& vector)
 { x *= vector.x; y *= vector.y; }
 
-Vector2 Vector2::rotate(const Vector2& vector, float rot)
-{ return Vector2{vector.x * std::cos(rot) - vector.y * std::sin(rot), vector.y * std::cos(rot) + vector.x * std::sin(rot)}; }
+Vector2 Vector2::rotate(const Vector2& vector, Rotation rot)
+{ return Vector2{vector.x * rot.cos - vector.y * rot.sin, vector.y * rot.cos + vector.x * rot.sin}; }
 
 void Vector2::setZero()
 { x = 0; y = 0; }

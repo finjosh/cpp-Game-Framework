@@ -1,5 +1,5 @@
-#ifndef RECT_H
-#define RECT_H
+#ifndef RENDERER_H
+#define RENDERER_H
 
 #pragma once
 
@@ -39,17 +39,18 @@ public:
         T::setScale(PIXELS_PER_METER * x, PIXELS_PER_METER * y);
     }
 
-    inline b2Vec2 getScale() const
+    inline Vector2 getScale() const
     {
-        sf::Vector2f temp = T::getScale();
-        return {temp.x / PIXELS_PER_METER, temp.y / PIXELS_PER_METER};
+        Vector2 temp = T::getScale();
+        temp /= PIXELS_PER_METER;
+        return temp;
     }
 
 protected:
     inline void Draw(sf::RenderTarget* target) override
     {
         T::setPosition(Object::getPosition().x*PIXELS_PER_METER, Object::getPosition().y*PIXELS_PER_METER);
-        T::setRotation(Object::getRotation()*180/PI);
+        T::setRotation(Object::getRotation().getAngle()*180/PI);
         target->draw(*this);
     }
 

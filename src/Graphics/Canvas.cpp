@@ -23,7 +23,7 @@ Canvas::Canvas() : DrawableObject(0, DrawStage::UI)
             return;
 
         if (!isRotationLocked())
-            this->m_group->setRotation(getRotation()*180/PI);
+            this->m_group->setRotation(getRotation().getAngle()*180/PI);
 
         this->m_group->setPosition(getPosition().x*PIXELS_PER_METER, getPosition().y*PIXELS_PER_METER);
     });
@@ -64,14 +64,14 @@ void Canvas::Draw(sf::RenderTarget* target)
 void Canvas::setScreenSpace()
 {
     m_screenSpace = true;
-    // CanvasManager::addCanvas(this);
+    CanvasManager::addCanvas(this);
     DrawableManager::removeDrawable(this);
 }
 
 void Canvas::setGlobalSpace()
 {
     m_screenSpace = false;
-    // CanvasManager::removeCanvas(this);
+    CanvasManager::removeCanvas(this);
     DrawableManager::addDrawable(this);
 }
 

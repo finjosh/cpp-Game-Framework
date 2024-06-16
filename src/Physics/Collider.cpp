@@ -16,7 +16,7 @@ Collider::Collider()
     b2BodyDef bodyDef;
     bodyDef.type = b2_dynamicBody;
     bodyDef.position = (b2Vec2)Object::getPosition();
-    bodyDef.angle = Object::getRotation();
+    bodyDef.angle = Object::getRotation().getAngle();
     m_body = WorldHandler::getWorld().CreateBody(&bodyDef);
     m_body->GetUserData().pointer = (uintptr_t)this;
 }
@@ -78,7 +78,7 @@ void Collider::m_updatePhysicsState()
 
 void Collider::m_updateTransform()
 {
-    m_body->SetTransform((b2Vec2)Object::getPosition(), Object::getRotation());
+    m_body->SetTransform((b2Vec2)Object::getPosition(), Object::getRotation().getAngle());
 }
 
 void Collider::m_update()
@@ -93,22 +93,22 @@ void Collider::setAwake(bool awake)
     m_body->SetAwake(awake);
 }
 
-const b2Vec2& Collider::getWorldCenter() const
+Vector2 Collider::getWorldCenter() const
 {
     return m_body->GetWorldCenter();
 }
 
-const b2Vec2& Collider::getLocalCenter() const
+Vector2 Collider::getLocalCenter() const
 {
     return m_body->GetLocalCenter();
 }
 
-void Collider::setLinearVelocity(const b2Vec2& v)
+void Collider::setLinearVelocity(const Vector2& v)
 {
-    m_body->SetLinearVelocity(v);
+    m_body->SetLinearVelocity((b2Vec2)v);
 }
 
-const b2Vec2& Collider::getLinearVelocity() const
+Vector2 Collider::getLinearVelocity() const
 {
     return m_body->GetLinearVelocity();
 }
@@ -123,14 +123,14 @@ float Collider::getAngularVelocity() const
     return m_body->GetAngularVelocity();
 }
 
-void Collider::applyForce(const b2Vec2& force, const b2Vec2& point, bool wake)
+void Collider::applyForce(const Vector2& force, const Vector2& point, bool wake)
 {
-    m_body->ApplyForce(force, point, wake);
+    m_body->ApplyForce((b2Vec2)force, (b2Vec2)point, wake);
 }
 
-void Collider::applyForceToCenter(const b2Vec2& force, bool wake)
+void Collider::applyForceToCenter(const Vector2& force, bool wake)
 {
-    m_body->ApplyForceToCenter(force, wake);
+    m_body->ApplyForceToCenter((b2Vec2)force, wake);
 }
 
 void Collider::applyTorque(float torque, bool wake)
@@ -138,14 +138,14 @@ void Collider::applyTorque(float torque, bool wake)
     m_body->ApplyTorque(torque, wake);
 }
 
-void Collider::applyLinearImpulse(const b2Vec2& impulse, const b2Vec2& point, bool wake)
+void Collider::applyLinearImpulse(const Vector2& impulse, const Vector2& point, bool wake)
 {
-    m_body->ApplyLinearImpulse(impulse, point, wake);
+    m_body->ApplyLinearImpulse((b2Vec2)impulse, (b2Vec2)point, wake);
 }
 
-void Collider::applyLinearImpulseToCenter(const b2Vec2& impulse, bool wake)
+void Collider::applyLinearImpulseToCenter(const Vector2& impulse, bool wake)
 {
-    m_body->ApplyLinearImpulseToCenter(impulse, wake);
+    m_body->ApplyLinearImpulseToCenter((b2Vec2)impulse, wake);
 }
 
 void Collider::applyAngularImpulse(float impulse, bool wake)
@@ -329,17 +329,17 @@ int32 ContactData::Info::getPointCount() const
     return m_points;
 }
 
-const b2Vec2* ContactData::Info::getContactPoints() const
+const Vector2 ContactData::Info::getContactPoint(uint8 index) const
 {
-    return &m_data.points[0];
+    return Vector2{m_data.points[index]};
 }
 
-const float* ContactData::Info::getSeparations() const
+const float ContactData::Info::getSeparations(uint8 index) const
 {
-    return &m_data.separations[0];
+    return m_data.separations[index];
 }
 
-b2Vec2 ContactData::Info::getNormal() const
+Vector2 ContactData::Info::getNormal() const
 {
     return m_data.normal;
 }

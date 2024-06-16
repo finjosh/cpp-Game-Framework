@@ -8,8 +8,9 @@
 // #include "Box2D/b2_math.h" (B2_MATH_H)
 
 #include "TGUI/String.hpp"
+#include "Rotation.hpp"
 
-// TODO add functions that utilize complex for rotations
+/// @note if you want helper functions to work with tgui, sfml, and box2d vectors make sure to include them before include "Vector2"
 class Vector2
 {
 public:
@@ -148,11 +149,11 @@ public:
     /// @param center the point to rotate around
     /// @param rot rotation in radians
     /// @returns the point rotated
-    static Vector2 rotateAround(const Vector2& point, const Vector2& center, float rot);
+    static Vector2 rotateAround(const Vector2& point, const Vector2& center, Rotation rot);
     /// @brief rotates this Vector2 around the given vector
     /// @param center the point that this will be rotated around
     /// @param rot the rotation in radians
-    void rotateAround(const Vector2& center, float rot);
+    void rotateAround(const Vector2& center, Rotation rot);
     /// @returns the dot product of the two vectors
     static float dot(const Vector2& a, const Vector2& b); // TODO test these functions
     /// @returns the distance between the two vectors
@@ -185,7 +186,7 @@ public:
     void scale(const Vector2& vector);
     /// @param rot rotation in radians
     /// @returns the rotated vector
-    static Vector2 rotate(const Vector2& vector, float rot);
+    static Vector2 rotate(const Vector2& vector, Rotation rot);
     /// @brief sets this vector to (0,0)
     void setZero();
 

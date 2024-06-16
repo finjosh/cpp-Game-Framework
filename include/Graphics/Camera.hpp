@@ -4,13 +4,11 @@
 #pragma once
 
 #include <list>
-#include "SFML/Graphics/Transformable.hpp"
-#include "SFML/Graphics/View.hpp"
-#include "Object.hpp"
-#include "Settings.hpp"
+#include "SFML/System/Vector2.hpp"
 #include "Utils/EventHelper.hpp"
 #include "SFML/Graphics/RenderWindow.hpp"
 #include "Graphics/Canvas.hpp"
+#include "Object.hpp" // have to inlcude after sfml vector is
 
 class WindowHandler;
 
@@ -36,14 +34,14 @@ public:
     bool isMainCamera() const;
     /// @brief sets the size of the view
     /// @note nothing happens if this is the main camera
-    void setViewSize(b2Vec2 size);
+    void setViewSize(Vector2 size);
     /// @brief sets the size of the view
     /// @note nothing happens if this is the main camera
     void setViewSize(float x, float y);
     /// @returns the size in terms of meters
-    b2Vec2 getSize() const;
+    Vector2 getSize() const;
     /// @returns the size in terms of pixels
-    sf::Vector2f getPixelSize() const;
+    Vector2 getPixelSize() const;
     /// @brief resizes the camera from the current size
     void zoom(float factor);
     /// @brief sets if this camera is displaying anything
@@ -91,7 +89,7 @@ protected:
 
 private:
     int m_layer = 0;
-    b2Vec2 m_size;
+    Vector2 m_size;
     bool m_enabled = true;
     bool m_rotationLock = false;
     sf::FloatRect m_screenRect = {0,0,1,1};

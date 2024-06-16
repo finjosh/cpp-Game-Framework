@@ -4,11 +4,12 @@
 #pragma once
 
 #include "box2d/Box2D.h"
+#include "Vector2.hpp"
 
 class WorldHandler
 {
 public:
-    static void init(const b2Vec2& gravity);
+    static void init(const Vector2& gravity);
     static b2World& getWorld();
     static void updateWorld(double deltaTime);
     /// @note only call this before using any physics
@@ -24,8 +25,8 @@ public:
     /// @brief The max steps per frame
     static void setMaxUpdates(int32 maxUpdates = 8);
     static int32 getMaxUpdates();
-    static void setGravity(const b2Vec2& gravity);
-    static b2Vec2 getGravity();
+    static void setGravity(const Vector2& gravity);
+    static Vector2 getGravity();
 
 private:
     inline WorldHandler() = default;

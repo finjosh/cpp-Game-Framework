@@ -54,9 +54,9 @@ const Collider* Fixture::getCollider() const
     return static_cast<Collider*>((void*)m_fixture->GetBody()->GetUserData().pointer);
 }
 
-bool Fixture::testPoint(const b2Vec2& p) const
+bool Fixture::testPoint(const Vector2& p) const
 {
-    return m_fixture->TestPoint(p);
+    return m_fixture->TestPoint((b2Vec2)p);
 }
 
 void Fixture::getMassData(b2MassData* massData) const

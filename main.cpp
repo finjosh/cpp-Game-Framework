@@ -12,7 +12,6 @@
 #include "ObjectManager.hpp"
 #include "UpdateManager.hpp"
 #include "ParticleEmitter.hpp"
-#include "VectorConversions.hpp"
 
 #include "Graphics/Renderer.hpp"
 #include "Graphics/WindowHandler.hpp"
@@ -36,7 +35,7 @@ void tryLoadTheme(std::list<std::string> themes, std::list<std::string> director
 class Wall : public virtual Object, public Collider, public Renderer<sf::RectangleShape>
 {
 public:
-    inline Wall(const b2Vec2& pos, const b2Vec2& size)
+    inline Wall(const Vector2& pos, const Vector2& size)
     {
         setPosition(pos);
 
@@ -121,9 +120,9 @@ public:
     void BeginContact(ContactData data) override
     {
         auto info = data.getInfo();
-        if (info.getPointCount() > 0 && getLinearVelocity().LengthSquared() > 250 && data.getCollider()->cast<Wall>())
+        if (info.getPointCount() > 0 && getLinearVelocity().lengthSquared() > 250 && data.getCollider()->cast<Wall>())
         {
-            m_hitParticle->setPosition(info.getContactPoints()[0]);
+            m_hitParticle->setPosition(info.getContactPoint(0));
             m_hitParticle->emit();
         }
     }
@@ -169,7 +168,7 @@ private:
 class OneWay : public virtual Object, public Renderer<sf::RectangleShape>, public Collider, public UpdateInterface
 {
 public:
-    inline OneWay(const b2Vec2& pos, const b2Vec2& size)
+    inline OneWay(const Vector2& pos, const Vector2& size)
     {
         b2PolygonShape b2shape;
         b2shape.SetAsBox(size.x/2, size.y/2);

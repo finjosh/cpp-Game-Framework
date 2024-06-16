@@ -1,6 +1,7 @@
 #include "Graphics/Camera.hpp"
 #include "Graphics/CameraManager.hpp"
 #include "Graphics/WindowHandler.hpp"
+#include "SFML/Graphics/View.hpp"
 
 Camera::Camera(int layer) : m_layer(layer)
 {
@@ -38,7 +39,7 @@ bool Camera::isMainCamera() const
     return (this == CameraManager::getMainCamera());
 }
 
-void Camera::setViewSize(b2Vec2 size)
+void Camera::setViewSize(Vector2 size)
 {
     if (isMainCamera())
         return;
@@ -52,7 +53,7 @@ void Camera::setViewSize(float x, float y)
     m_size = {x,y};
 }
 
-b2Vec2 Camera::getSize() const
+Vector2 Camera::getSize() const
 {
     return m_size;
 }
@@ -89,7 +90,7 @@ sf::View Camera::getCameraView() const
     sf::View temp(sf::Vector2f(Object::getPosition().x*PIXELS_PER_METER, Object::getPosition().y*PIXELS_PER_METER), {m_size.x*PIXELS_PER_METER, m_size.y*PIXELS_PER_METER});
     temp.setViewport(m_screenRect);
     if (!m_rotationLock)
-        temp.setRotation(Object::getRotation() * 180 / PI);
+        temp.setRotation(Object::getRotation().getAngle() * 180 / PI);
     return temp;
 }
 
@@ -103,9 +104,9 @@ bool Camera::isRotationLocked() const
     return m_rotationLock;
 }
 
-sf::Vector2f Camera::getPixelSize() const
+Vector2 Camera::getPixelSize() const
 {
-    return {m_size.x*PIXELS_PER_METER, m_size.y*PIXELS_PER_METER};
+    return Vector2{m_size.x*PIXELS_PER_METER, m_size.y*PIXELS_PER_METER};
 }
 
 void Camera::disableBlacklistedCanvases()
@@ -150,7 +151,7 @@ void Camera::m_drawBackground(sf::RenderTarget* target)
     if (DrawBackground.getNumCallbacks() > 0)
     {
         const sf::View oldView = target->getView();
-        const sf::Vector2f size = getPixelSize();
+        const sf::Vector2f size = (sf::Vector2f)getPixelSize();
         sf::View view({size.x/2, size.y/2}, size);
         view.setViewport(m_screenRect);
         target->setView(view);
@@ -164,7 +165,7 @@ void Camera::m_drawOverlay(sf::RenderTarget* target)
     if (DrawBackground.getNumCallbacks() > 0)
     {
         const sf::View oldView = target->getView();
-        const sf::Vector2f size = getPixelSize();
+        const sf::Vector2f size = (sf::Vector2f)getPixelSize();
         sf::View view({size.x/2, size.y/2}, size);
         view.setViewport(m_screenRect);
         target->setView(view);

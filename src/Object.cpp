@@ -145,41 +145,41 @@ void Object::addChild(Object* child)
 
 Vector2 Object::getLocalPoint(const Vector2& point) const
 {
-    return b2MulT(m_transform, (b2Vec2)point);
+    return m_transform.getLocalPoint(point);
 }
 
 Vector2 Object::getGlobalPoint(const Vector2& point) const
 {
-    return b2Mul(m_transform, (b2Vec2)point);
+    return m_transform.getGlobalPoint(point);
 }
 
 Vector2 Object::getGlobalVector(const Vector2& vec) const
 {
-    return b2Mul(m_transform.q, (b2Vec2)vec);
+    return m_transform.getGlobalVector(vec);
 }
 
 Vector2 Object::getLocalVector(const Vector2& vec) const
 {
-    return b2MulT(m_transform.q, (b2Vec2)vec);
+    return m_transform.getLocalVector(vec);
 }
 
-void Object::rotateAround(const Vector2& center, float rot)
+void Object::rotateAround(const Vector2& center, Rotation rot)
 {
-    Vector2 posChange(Vector2::rotateAround({m_transform.p}, {center}, rot) - m_transform.p);
-    m_transform.p += (b2Vec2)posChange;
+    Vector2 posChange(Vector2::rotateAround({m_transform.position}, {center}, rot) - m_transform.position);
+    m_transform.position += posChange;
     m_onTransformUpdated.invoke();
 
     for (auto child: m_children)
     {
         child->move(posChange);
-        child->rotateAround(m_transform.p, rot);
+        child->rotateAround(m_transform.position, rot);
     }
 }
 
 void Object::setPosition(const Vector2& position)
 {   
-    Vector2 posChange(position - m_transform.p);
-    m_transform.p = (b2Vec2)position;
+    Vector2 posChange(position - m_transform.position);
+    m_transform.position = position;
     m_onTransformUpdated.invoke();
 
     for (auto child: m_children)
@@ -195,41 +195,41 @@ void Object::setPosition(float x, float y)
 
 Vector2 Object::getPosition() const
 {   
-    return m_transform.p;
+    return m_transform.position;
 }
 
-void Object::setRotation(float rotation)
+void Object::setRotation(Rotation rotation)
 {
-    float rotChange = rotation - m_transform.q.GetAngle();
-    m_transform.q.Set(rotation);
+    Rotation rotChange = rotation - m_transform.rotation;
+    m_transform.rotation = rotation;
     m_onTransformUpdated.invoke();
 
     for (auto child: m_children)
     {
-        child->rotateAround(m_transform.p, rotChange);
+        child->rotateAround(m_transform.position, rotChange);
         child->rotate(rotChange);
     }
 }
 
-float Object::getRotation() const
+Rotation Object::getRotation() const
 {
-    return m_transform.q.GetAngle();
+    return m_transform.rotation;
 }
 
-void Object::setTransform(const b2Transform& transform)
+void Object::setTransform(const Transform& transform)
 {
-    Object::setPosition(transform.p);
-    Object::setRotation(transform.q.GetAngle());
+    Object::setPosition(transform.position);
+    Object::setRotation(transform.rotation);
 }
 
-b2Transform Object::getTransform() const
+Transform Object::getTransform() const
 {
     return m_transform;
 }
 
 void Object::move(const Vector2& move)
 {
-    m_transform.p += (b2Vec2)move;
+    m_transform.position += move;
     m_onTransformUpdated.invoke();
 
     for (auto child: m_children)
@@ -243,9 +243,9 @@ void Object::move(float x, float y)
     move(Vector2(x,y));
 }
 
-void Object::rotate(float rot)
+void Object::rotate(Rotation rot)
 {
-    m_transform.q.Set(m_transform.q.GetAngle() + rot);
+    m_transform.rotation = m_transform.rotation + rot;
     m_onTransformUpdated.invoke();
 
     for (auto child: m_children)
@@ -275,7 +275,7 @@ Vector2 Object::getLocalPosition() const
     return this->getPosition();
 }
 
-void Object::setLocalRotation(float rotation)
+void Object::setLocalRotation(Rotation rotation)
 {
     if (m_parent)
     {
@@ -287,18 +287,13 @@ void Object::setLocalRotation(float rotation)
     }
 }
 
-float Object::getLocalRotation() const
+Rotation Object::getLocalRotation() const
 {
     if (m_parent)
     {
         return this->getRotation() - m_parent->getRotation();
     }
     return this->getRotation();
-}
-
-b2Rot Object::getRotation_b2() const
-{
-    return m_transform.q;
 }
 
 void Object::m_addChild(Object* object)

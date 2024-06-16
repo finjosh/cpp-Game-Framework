@@ -8,16 +8,17 @@
 
 #include "Utils/EventHelper.hpp"
 #include "Settings.hpp"
-#include "box2d/b2_math.h" // TODO make a transform and angle class
+// #include "box2d/b2_math.h" // TODO make a transform and angle class
+#include "Rotation.hpp"
 #include "Vector2.hpp"
-
+#include "Transform.hpp"
 
 class ObjectManager;
 
 /// @note anything after this will be private unless specifying scope
 #define createDestroy() private: inline virtual void m_destroy() override { delete(this); }
 
-#define PI b2_pi
+#define PI 3.14159265359f
 
 /// @note the pure virtual "destroy" function must only handle the destruction of the derived object
 /// @warning no thread safe if not acceded through a pointer or Object::Ptr
@@ -255,23 +256,26 @@ public:
     void destroy();
 
     /// @param vec global point
+    /// @note same as getting the transform and using the equivelent functions
     /// @returns the equivalent local point
     Vector2 getLocalPoint(const Vector2& point) const;
     /// @param vec local point
+    /// @note same as getting the transform and using the equivelent functions
     /// @return the equivalent global point
     Vector2 getGlobalPoint(const Vector2& point) const;
     /// @param vec local vector
+    /// @note same as getting the transform and using the equivelent functions
     /// @note only rotates
     /// @return the equivalent global vector
     Vector2 getGlobalVector(const Vector2& vec) const;
     /// @param vec global vector
+    /// @note same as getting the transform and using the equivelent functions
     /// @note only rotates
     /// @returns the equivalent local vector
     Vector2 getLocalVector(const Vector2& vec) const;
     /// @brief rotates the this object around the given center
     /// @param center the point to rotate around
-    /// @param rot rotation in radians
-    void rotateAround(const Vector2& center, float rot);
+    void rotateAround(const Vector2& center, Rotation rot);
     void setPosition(const Vector2& position);
     void setPosition(float x, float y);
     /// @brief if this is a child then the position will be set according to the parent
@@ -283,26 +287,21 @@ public:
     /// @note if no parent returns global position
     /// @returns position according to parent
     Vector2 getLocalPosition() const;
-    /// @param rotation in radians
-    void setRotation(float rotation);
+    void setRotation(Rotation rotation);
     /// @brief if this is a child then the rotation will be set according to the parent
     /// @note if "canSetTransform" is false then this does nothing
     /// @note if this is not a child then rotation is set according to global
     /// @param rotation according to the parent rotation
-    void setLocalRotation(float rotation);
-    /// @returns rotation in radians
-    float getRotation() const;
-    /// @returns the rotation in terms of b2Rot
-    b2Rot getRotation_b2() const;
+    void setLocalRotation(Rotation rotation);
+    Rotation getRotation() const;
     /// @note if no parent returns global rotation
     /// @returns rotation according to parent
-    float getLocalRotation() const;
-    void setTransform(const b2Transform& transform);
-    b2Transform getTransform() const;
+    Rotation getLocalRotation() const;
+    void setTransform(const Transform& transform);
+    Transform getTransform() const;
     void move(const Vector2& move);
     void move(float x, float y);
-    /// @param rot in radians
-    void rotate(float rot);
+    void rotate(Rotation rot);
 
 protected:
     inline virtual void OnEnable() {};
@@ -342,7 +341,7 @@ private:
     std::atomic_bool m_enabled = true;
     size_t m_id = 0;
 
-    b2Transform m_transform = b2Transform(b2Vec2(0,0), b2Rot(0));
+    Transform m_transform;
 
     Object* m_parent = nullptr;
     std::list<Object*> m_children;
