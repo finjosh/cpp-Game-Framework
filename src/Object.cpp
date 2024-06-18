@@ -145,22 +145,44 @@ void Object::addChild(Object* child)
 
 Vector2 Object::getLocalPoint(const Vector2& point) const
 {
-    return m_transform.getLocalPoint(point);
+    if (m_parent)
+    {
+        return Object::getGlobalTransform().getLocalPoint(point);
+    }
+    else
+        return m_transform.getLocalPoint(point);
 }
 
 Vector2 Object::getGlobalPoint(const Vector2& point) const
 {
-    return m_transform.getGlobalPoint(point);
+    if (m_parent)
+    {
+        return Object::getGlobalTransform().getGlobalPoint(point);
+    }
+    else
+        return m_transform.getGlobalPoint(point);
 }
 
 Vector2 Object::getGlobalVector(const Vector2& vec) const
 {
-    return m_transform.getGlobalVector(vec);
+    if (m_parent)
+    {
+        Rotation rot = Object::getGlobalRotation(); // since we only need rotation to do this calculation 
+        return Vector2{rot.cos * vec.x - rot.sin * vec.y, rot.sin * vec.x + rot.cos * vec.y};
+    }
+    else
+        return m_transform.getGlobalVector(vec);
 }
 
 Vector2 Object::getLocalVector(const Vector2& vec) const
 {
-    return m_transform.getLocalVector(vec);
+    if (m_parent)
+    {
+        Rotation rot = Object::getGlobalRotation(); // since we only need rotation to do this calculation 
+        return Vector2{rot.cos * vec.x + rot.sin * vec.y, -rot.sin * vec.x + rot.cos * vec.y};
+    }
+    else
+        return m_transform.getLocalVector(vec);
 }
 
 void Object::rotateAround(const Vector2& center, Rotation rot)
@@ -323,6 +345,18 @@ void Object::setGlobalTransform(const Transform& transform)
     else
     {
         Object::setTransform(transform);
+    }
+}
+
+const Transform Object::getGlobalTransform() const
+{
+    if (m_parent)
+    {
+        return Transform(Object::getGlobalPosition(), Object::getGlobalRotation());
+    }
+    else
+    {
+        return m_transform;
     }
 }
 

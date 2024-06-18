@@ -100,7 +100,7 @@ public:
 
 protected:
     virtual void Update(float deltaTime) override;
-    virtual void Draw(sf::RenderTarget* target) override;
+    virtual void Draw(sf::RenderTarget* target, const Transform& parentTransform) override;
 
     /// @returns a random float from 0 to the given x
     float randX(float x);

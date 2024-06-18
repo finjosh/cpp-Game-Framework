@@ -3,9 +3,9 @@
 
 #pragma once
 
-#include "Object.hpp"
 #include "Graphics/DrawableObject.hpp"
 #include "TGUI/Widgets/Group.hpp"
+#include "Object.hpp"
 
 // TODO make this work when the camera is rotated
 /// @bug when the camera is rotated UI is not drawn properly
@@ -112,7 +112,7 @@ public:
     /// @brief Removes all widgets that were added to the container
     void removeAllWidgets();
 
-    void Draw(sf::RenderTarget* target) override;
+    void Draw(sf::RenderTarget* target, const Transform& parentTransform) override;
 
 protected:
 

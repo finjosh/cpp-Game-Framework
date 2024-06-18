@@ -23,9 +23,10 @@ Canvas::Canvas() : DrawableObject(0, DrawStage::UI)
             return;
 
         if (!isRotationLocked())
-            this->m_group->setRotation(getRotation().getAngle()*180/PI);
+            this->m_group->setRotation(getGlobalRotation().getAngle()*180/PI);
 
-        this->m_group->setPosition(getPosition().x*PIXELS_PER_METER, getPosition().y*PIXELS_PER_METER);
+        Vector2 globalPos = Object::getGlobalPosition()*PIXELS_PER_METER;
+        this->m_group->setPosition(globalPos.x, globalPos.y);
     });
     m_onEnabled([this](){
         this->m_group->setEnabled(true); //! MUST call set enabled first (something in tgui backend stops it from registering events otherwise)
@@ -41,7 +42,7 @@ Canvas::~Canvas()
 {
 }
 
-void Canvas::Draw(sf::RenderTarget* target)
+void Canvas::Draw(sf::RenderTarget* target, const Transform& parentTransform)
 {
     tgui::RenderStates widgetStates;
     if (!isScreenSpace()) // only draw in the set position and rotation IF not in screen space

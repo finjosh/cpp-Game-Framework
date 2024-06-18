@@ -149,20 +149,20 @@ Vector2 Vector2::rotateAround(const Vector2& point, const Vector2& center, Rotat
     // return {temp.real() + center.x, temp.imag() + center.y};
 }
 
-void Vector2::rotateAround(const Vector2& center, Rotation rot)
-{
-    (*this) -= center;
-    float tempX = x * rot.cos - y * rot.sin;
-    y = y * rot.cos + x * rot.sin;
-    x = tempX;
-    (*this) += center;
+// void Vector2::rotateAround(const Vector2& center, Rotation rot)
+// {
+//     (*this) -= center;
+//     float tempX = x * rot.cos - y * rot.sin;
+//     y = y * rot.cos + x * rot.sin;
+//     x = tempX;
+//     (*this) += center;
 
-    // std::complex<float> polar = std::polar<float>(1.0, rot);
-    // std::complex<float> temp(this->x - center.x, this->y - center.y);
-    // temp *= polar;
-    // this->x = temp.real() + center.x;
-    // this->y = temp.imag() + center.y;
-}
+//     // std::complex<float> polar = std::polar<float>(1.0, rot);
+//     // std::complex<float> temp(this->x - center.x, this->y - center.y);
+//     // temp *= polar;
+//     // this->x = temp.real() + center.x;
+//     // this->y = temp.imag() + center.y;
+// }
 
 float Vector2::dot(const Vector2& a, const Vector2& b)
 {

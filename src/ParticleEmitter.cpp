@@ -238,12 +238,12 @@ void ParticleEmitter::emit()
     for (unsigned int i = 0; i < m_spawnAmount - (rand()%m_randomSpawnAmount); i++)
     {
         Rotation direction((randX(m_spread) - m_spread/2)*PI/180); // starting with spread
-        direction += Object::getRotation(); // adding the current rotation
+        direction += Object::getGlobalRotation(); // adding the current rotation
         float rotation = randX(m_randomRotation);
         sf::Color color(m_defaultColor.r + rand()%(m_randomColor.r+1), m_defaultColor.g + rand()%(m_randomColor.g+1),
                         m_defaultColor.b + rand()%(m_randomColor.b+1), m_defaultColor.a + rand()%(m_randomColor.a+1));
 
-        m_particles.push_back({this->getPosition(), 
+        m_particles.push_back({this->getGlobalPosition(), 
                             {direction.cos * m_velocity, direction.sin * m_velocity}, 
                             rotation, color});
     }
@@ -277,7 +277,7 @@ void ParticleEmitter::Update(float deltaTime)
     }
 }
 
-void ParticleEmitter::Draw(sf::RenderTarget* target)
+void ParticleEmitter::Draw(sf::RenderTarget* target, const Transform& parentTransform)
 {
     if (m_particleShape == nullptr)
         return;

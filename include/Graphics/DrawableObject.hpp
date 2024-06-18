@@ -40,9 +40,13 @@ public:
 
     /// @brief should be used to draw the obj
     /// @note called before children draw
-    inline virtual void Draw(sf::RenderTarget* target) {}; // Take in parent transform so that it is easier to interpolate
+    /// @note it is suggested that you use the this transform that is given to reduce repeated calculations to get global position
+    /// @note you need to draw in global position
+    inline virtual void Draw(sf::RenderTarget* target, const Transform& thisTransform) {};
     /// @brief this is called after children draw
-    inline virtual void LateDraw(sf::RenderTarget* target) {};
+    /// @note it is suggested that you use the this transform that is given to reduce repeated calculations to get global position
+    /// @note you need to draw in global position
+    inline virtual void LateDraw(sf::RenderTarget* target, const Transform& thisTransform) {};
 
 protected:
     /// @brief attempts to set parent given the current object parent
@@ -54,7 +58,7 @@ protected:
 
     /// @brief draws the objects recursively 
     /// @note only use this if you know what you are doing
-    void m_draw(sf::RenderTarget* target);
+    void m_draw(sf::RenderTarget* target, const Transform& stateTransform);
 
     friend DrawableManager;
 

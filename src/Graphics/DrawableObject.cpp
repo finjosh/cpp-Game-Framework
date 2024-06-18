@@ -64,6 +64,13 @@ DrawStage DrawableObject::getDrawStage() const
 void DrawableObject::m_setParent()
 {
     auto curParent = this->getParent();
+
+    if (curParent == nullptr)
+    {
+        m_removeParent();
+        return;
+    }
+
     DrawableObject* drawableParent = curParent->cast<DrawableObject>();
 
     while (drawableParent == nullptr && curParent != nullptr)
@@ -78,24 +85,31 @@ void DrawableObject::m_setParent()
         drawableParent->m_drawableChildren.insert({this});
         m_drawableParent = drawableParent;
     }
+    else
+    {
+        m_removeParent();
+    }
 }
 
 void DrawableObject::m_removeParent()
 {
-    m_drawableParent->m_drawableChildren.erase(this);
-    m_drawableParent = nullptr;
+    if (m_drawableParent != nullptr)
+    {
+        m_drawableParent->m_drawableChildren.erase(this);
+        m_drawableParent = nullptr;
+    }
     DrawableManager::addDrawable(this);
 }
 
-// TODO take in the parent position (either regular or interpolated)
-// TODO make objects children store local instead of global position?
-// TODO update all object functions to work with local instead of global?
-void DrawableObject::m_draw(sf::RenderTarget* target) 
+void DrawableObject::m_draw(sf::RenderTarget* target, const Transform& stateTransform) 
 {
-    this->Draw(target);
+    this->Draw(target, stateTransform);
     for (auto child: m_drawableChildren)
     {
-        child->m_draw(target);
+        Transform childTransform(stateTransform);
+        childTransform.position += Vector2::rotateAround(child->getPosition(), {0,0}, stateTransform.rotation);
+        childTransform.rotation += child->getRotation();
+        child->m_draw(target, childTransform);
     }
-    this->LateDraw(target);
+    this->LateDraw(target, stateTransform);
 }

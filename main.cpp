@@ -267,7 +267,7 @@ int main()
     WorldHandler::init({0.f,0.f});
     DebugDraw debugDraw(&window);
     debugDraw.initCommands();
-    WorldHandler::getWorld().SetDebugDraw(&debugDraw);
+    WorldHandler::getWorld().SetDebugDraw(&debugDraw); // TODO implement ray cast system
 
     Canvas* gui = new Canvas();
 

@@ -49,10 +49,12 @@ public:
     }
 
 protected:
-    inline void Draw(sf::RenderTarget* target) override
+    inline void Draw(sf::RenderTarget* target, const Transform& thisTransform) override
     {
-        T::setPosition((sf::Vector2f)Object::getGlobalPosition()*PIXELS_PER_METER);
-        T::setRotation(Object::getGlobalRotation().getAngle()*180/PI);
+        // T::setPosition((sf::Vector2f)Object::getGlobalPosition()*PIXELS_PER_METER);
+        // T::setRotation(Object::getGlobalRotation().getAngle()*180/PI);
+        T::setPosition((sf::Vector2f)thisTransform.position*PIXELS_PER_METER);
+        T::setRotation(thisTransform.rotation.getAngle()*180/PI);
         target->draw(*this);
     }
 

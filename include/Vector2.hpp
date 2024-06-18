@@ -150,10 +150,10 @@ public:
     /// @param rot rotation in radians
     /// @returns the point rotated
     static Vector2 rotateAround(const Vector2& point, const Vector2& center, Rotation rot);
-    /// @brief rotates this Vector2 around the given vector
-    /// @param center the point that this will be rotated around
-    /// @param rot the rotation in radians
-    void rotateAround(const Vector2& center, Rotation rot);
+    // /// @brief rotates this Vector2 around the given vector
+    // /// @param center the point that this will be rotated around
+    // /// @param rot the rotation in radians
+    // void rotateAround(const Vector2& center, Rotation rot);
     /// @returns the dot product of the two vectors
     static float dot(const Vector2& a, const Vector2& b); // TODO test these functions
     /// @returns the distance between the two vectors

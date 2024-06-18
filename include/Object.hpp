@@ -261,20 +261,18 @@ public:
     void destroy();
 
     /// @param vec global point
-    /// @note same as getting the transform and using the equivelent functions
+    /// @note rotates around and transforms position
     /// @returns the equivalent local point
     Vector2 getLocalPoint(const Vector2& point) const;
     /// @param vec local point
-    /// @note same as getting the transform and using the equivelent functions
+    /// @note rotates around and transforms position
     /// @return the equivalent global point
     Vector2 getGlobalPoint(const Vector2& point) const;
     /// @param vec local vector
-    /// @note same as getting the transform and using the equivelent functions
     /// @note only rotates
     /// @return the equivalent global vector
     Vector2 getGlobalVector(const Vector2& vec) const;
     /// @param vec global vector
-    /// @note same as getting the transform and using the equivelent functions
     /// @note only rotates
     /// @returns the equivalent local vector
     Vector2 getLocalVector(const Vector2& vec) const;
@@ -296,13 +294,15 @@ public:
     /// @returns rotation according to parent
     Rotation getGlobalRotation() const;
     void setTransform(const Transform& transform);
-    void setGlobalTransform(const Transform& transform);
     const Transform& getTransform() const;
+    void setGlobalTransform(const Transform& transform);
+    const Transform getGlobalTransform() const;
     void move(const Vector2& move);
     void move(float x, float y);
     void rotate(Rotation rot);
 
 protected:
+    virtual Transform getInterpolatedTransform() const; // TODO DO THIS
     inline virtual void OnEnable() {};
     inline virtual void OnDisable() {};
     /// @warning do NOT disconnect all EVER
@@ -338,7 +338,7 @@ private:
     std::atomic_bool m_enabled = true;
     size_t m_id = 0;
 
-    Transform m_transform; // TODO make this local not global
+    Transform m_transform;
 
     Object* m_parent = nullptr;
     std::list<Object*> m_children;
