@@ -78,14 +78,14 @@ void Collider::m_updatePhysicsState()
 
 void Collider::m_updateTransform()
 {
-    m_body->SetTransform((b2Vec2)Object::getPosition(), Object::getRotation().getAngle());
+    m_body->SetTransform((b2Vec2)Object::getGlobalPosition(), Object::getGlobalRotation().getAngle() /*using atan2 then cos and sin*/); // This could lead to slow downs since we are using lots of trig functions here
 }
 
 void Collider::m_update()
 {
-    Object::m_onTransformUpdated.setEnabled(false);
-    Object::setTransform(m_body->GetTransform());
-    Object::m_onTransformUpdated.setEnabled(true);
+    // Object::m_onTransformUpdated.setEnabled(false);
+    Object::setGlobalTransform(m_body->GetTransform()); // Note this could lead to slow downs due to the callback which results in 3 trig function calls (also required for other class)
+    // Object::m_onTransformUpdated.setEnabled(true);
 }
 
 void Collider::setAwake(bool awake)

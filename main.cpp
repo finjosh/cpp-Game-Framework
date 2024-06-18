@@ -53,13 +53,14 @@ public:
     createDestroy();
 };
 
-class Player : public virtual Object, public Collider, public Renderer<sf::RectangleShape>, public UpdateInterface, public Camera
+class Player : public virtual Object, public Collider, public Renderer<sf::RectangleShape>, public UpdateInterface
 {
 public:
     std::string name = "Random Name";
     // sf::Texture temp;
     Object::Ptr<ParticleEmitter> m_hitParticle;
     sf::RectangleShape m_particle;
+    static Camera::Ptr m_camera; // default is nullptr
 
     inline Player()
     {
@@ -79,8 +80,24 @@ public:
         m_particle.setOrigin({2.5,2.5});
         m_hitParticle.set(new ParticleEmitter(&m_particle, {0,0}, 10, 0, 0, 1, 10, 0.5, 360));
 
-        setMainCamera();
-        Camera::setRotationLocked(true);
+        auto tempRectangle = new Renderer<sf::RectangleShape>();
+        tempRectangle->setSize({5,5});
+        tempRectangle->setOrigin({2.5,2.5});
+        tempRectangle->setPosition({0,5});
+        tempRectangle->setParent(this);
+        auto tempRectangle2 = new Renderer<sf::RectangleShape>();
+        tempRectangle2->setSize({5,5});
+        tempRectangle2->setOrigin({2.5,2.5});
+        tempRectangle2->setPosition({0,5});
+        tempRectangle2->setParent(tempRectangle);
+
+        if (!m_camera)
+        {
+            m_camera = new Camera();
+            // m_camera->setParent(this);
+            m_camera->setMainCamera();
+            m_camera->setRotationLocked(true);
+        }
     }
 
     inline virtual void Update(float deltaTime) override
@@ -117,6 +134,11 @@ public:
         }
     }
 
+    inline void LateUpdate(float delta) override
+    {
+        m_camera->setPosition(Vector2::lerp(m_camera->getPosition(), Object::getPosition(), 0.97*delta)); // since late update is called after physics update
+    }
+
     void BeginContact(ContactData data) override
     {
         auto info = data.getInfo();
@@ -129,6 +151,8 @@ public:
 
     createDestroy();
 };
+
+Camera::Ptr Player::m_camera = nullptr;
 
 class Sensor : public virtual Object, public Renderer<sf::RectangleShape>, public Collider
 {
@@ -237,8 +261,6 @@ int main()
     WindowHandler::setRenderWindow(&window);
     CanvasManager::initGUI();
 
-    // tgui::Gui gui{window};
-    // gui.setRelativeView({0, 0, 1920/(float)window.getSize().x, 1080/(float)window.getSize().y});
     tryLoadTheme({"Dark.txt", "Black.txt"}, {"", "Assets/", "themes/", "Themes/", "assets/", "Assets/Themes/", "Assets/themes/", "assets/themes/", "assets/Themes/"});
     // -----------------------
 
@@ -333,7 +355,6 @@ int main()
             UpdateManager::FixedUpdate();
             fixedUpdate = 0;
         }
-        UpdateManager::LateUpdate(deltaTime.asSeconds());
         //! Updates all the vars being displayed
         VarDisplay::Update();
         //! ------------------------------=-----
@@ -347,6 +368,7 @@ int main()
         WorldHandler::updateWorld(deltaTime.asSeconds()); // updates the world physics
         CollisionManager::Update(); // updates the collision callbacks
         //! Draw after this
+        UpdateManager::LateUpdate(deltaTime.asSeconds());
 
         //* Write code here
 

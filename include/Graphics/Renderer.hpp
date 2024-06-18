@@ -20,6 +20,8 @@ template <typename T, typename std::enable_if_t<std::is_base_of<sf::Shape, T>::v
 class Renderer : public virtual Object, public DrawableObject, public T
 {
 public:
+    using Ptr = Object::Ptr<Renderer<T>>;
+
     inline Renderer()
     {
         T::setScale(PIXELS_PER_METER, PIXELS_PER_METER);
@@ -49,8 +51,8 @@ public:
 protected:
     inline void Draw(sf::RenderTarget* target) override
     {
-        T::setPosition(Object::getPosition().x*PIXELS_PER_METER, Object::getPosition().y*PIXELS_PER_METER);
-        T::setRotation(Object::getRotation().getAngle()*180/PI);
+        T::setPosition((sf::Vector2f)Object::getGlobalPosition()*PIXELS_PER_METER);
+        T::setRotation(Object::getGlobalRotation().getAngle()*180/PI);
         target->draw(*this);
     }
 

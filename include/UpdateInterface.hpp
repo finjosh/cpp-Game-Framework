@@ -8,6 +8,7 @@
 class UpdateInterface : public virtual Object
 {
 public:
+    using Ptr = Object::Ptr<UpdateInterface>;
 
     UpdateInterface();
     ~UpdateInterface();

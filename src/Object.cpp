@@ -168,12 +168,13 @@ void Object::rotateAround(const Vector2& center, Rotation rot)
     Vector2 posChange(Vector2::rotateAround({m_transform.position}, {center}, rot) - m_transform.position);
     m_transform.position += posChange;
     m_onTransformUpdated.invoke();
+    onTransformUpdated.invoke();
 
-    for (auto child: m_children)
-    {
-        child->move(posChange);
-        child->rotateAround(m_transform.position, rot);
-    }
+    // for (auto child: m_children)
+    // {
+    //     child->move(posChange);
+    //     child->rotateAround({0,0}, rot);
+    // }
 }
 
 void Object::setPosition(const Vector2& position)
@@ -181,11 +182,12 @@ void Object::setPosition(const Vector2& position)
     Vector2 posChange(position - m_transform.position);
     m_transform.position = position;
     m_onTransformUpdated.invoke();
+    onTransformUpdated.invoke();
 
-    for (auto child: m_children)
-    {
-        child->move(posChange);
-    }
+    // for (auto child: m_children)
+    // {
+    //     child->move(posChange);
+    // }
 }
 
 void Object::setPosition(float x, float y)
@@ -203,12 +205,13 @@ void Object::setRotation(Rotation rotation)
     Rotation rotChange = rotation - m_transform.rotation;
     m_transform.rotation = rotation;
     m_onTransformUpdated.invoke();
+    onTransformUpdated.invoke();
 
-    for (auto child: m_children)
-    {
-        child->rotateAround(m_transform.position, rotChange);
-        child->rotate(rotChange);
-    }
+    // for (auto child: m_children)
+    // {
+    //     child->rotateAround(m_transform.position, rotChange);
+    //     child->rotate(rotChange);
+    // }
 }
 
 Rotation Object::getRotation() const
@@ -218,11 +221,17 @@ Rotation Object::getRotation() const
 
 void Object::setTransform(const Transform& transform)
 {
+    // disable events so they are only called once
+    m_onTransformUpdated.setEnabled(false);
+    onTransformUpdated.setEnabled(false);
     Object::setPosition(transform.position);
+    // enable events so they are call on set rotation
+    m_onTransformUpdated.setEnabled(true);
+    onTransformUpdated.setEnabled(true);
     Object::setRotation(transform.rotation);
 }
 
-Transform Object::getTransform() const
+const Transform& Object::getTransform() const
 {
     return m_transform;
 }
@@ -231,6 +240,7 @@ void Object::move(const Vector2& move)
 {
     m_transform.position += move;
     m_onTransformUpdated.invoke();
+    onTransformUpdated.invoke();
 
     for (auto child: m_children)
     {
@@ -247,53 +257,73 @@ void Object::rotate(Rotation rot)
 {
     m_transform.rotation = m_transform.rotation + rot;
     m_onTransformUpdated.invoke();
+    onTransformUpdated.invoke();
 
-    for (auto child: m_children)
-    {
-        child->rotate(rot);
-    }
+    // for (auto child: m_children)
+    // {
+    //     child->rotate(rot);
+    // }
 }
 
-void Object::setLocalPosition(const Vector2& position)
+void Object::setGlobalPosition(const Vector2& position)
 {
     if (m_parent)
     {
-        this->setPosition(m_parent->getPosition() + position);
+        Object::setPosition(position - m_parent->getGlobalPosition());
     }
     else
     {
-        this->setPosition(position);
+        Object::setPosition(position);
     }
 }
 
-Vector2 Object::getLocalPosition() const
+Vector2 Object::getGlobalPosition() const
 {
     if (m_parent)
     {
-        return this->getPosition() - m_parent->getPosition();
+        return (Vector2::rotateAround(Object::getPosition(), {0,0}, m_parent->getGlobalRotation()) + m_parent->getGlobalPosition());
     }
-    return this->getPosition();
+    return Object::getPosition();
 }
 
-void Object::setLocalRotation(Rotation rotation)
+void Object::setGlobalRotation(Rotation rotation)
 {
     if (m_parent)
     {
-        this->setRotation(m_parent->getRotation() + rotation);
+        Object::setRotation(rotation - m_parent->getGlobalRotation());
     }
     else
     {
-        this->setRotation(rotation);
+        Object::setRotation(rotation);
     }
 }
 
-Rotation Object::getLocalRotation() const
+Rotation Object::getGlobalRotation() const
 {
     if (m_parent)
     {
-        return this->getRotation() - m_parent->getRotation();
+        return Object::getRotation() + m_parent->getGlobalRotation();
     }
-    return this->getRotation();
+    return Object::getRotation();
+}
+
+void Object::setGlobalTransform(const Transform& transform)
+{
+    if (m_parent)
+    {
+        // disable events so they are only called once
+        m_onTransformUpdated.setEnabled(false);
+        onTransformUpdated.setEnabled(false);
+        Object::setGlobalPosition(transform.position);
+        // enable events so they are call on set rotation
+        m_onTransformUpdated.setEnabled(true);
+        onTransformUpdated.setEnabled(true);
+        Object::setGlobalRotation(transform.rotation);
+    }
+    else
+    {
+        Object::setTransform(transform);
+    }
 }
 
 void Object::m_addChild(Object* object)

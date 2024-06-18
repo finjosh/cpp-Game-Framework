@@ -21,6 +21,8 @@ struct _drawableComp
 class DrawableObject : public virtual Object
 {
 public:
+    using Ptr = Object::Ptr<DrawableObject>;
+
     DrawableObject(int layer = 0, DrawStage stage = DrawStage::Default);
     ~DrawableObject();
 
@@ -38,7 +40,7 @@ public:
 
     /// @brief should be used to draw the obj
     /// @note called before children draw
-    inline virtual void Draw(sf::RenderTarget* target) {};
+    inline virtual void Draw(sf::RenderTarget* target) {}; // Take in parent transform so that it is easier to interpolate
     /// @brief this is called after children draw
     inline virtual void LateDraw(sf::RenderTarget* target) {};
 

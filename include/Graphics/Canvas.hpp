@@ -17,6 +17,8 @@
 class Canvas : public virtual Object, public DrawableObject
 {
 public:
+    using Ptr = Object::Ptr<Canvas>;
+
     Canvas();
     ~Canvas();
 

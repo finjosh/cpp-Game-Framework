@@ -233,7 +233,6 @@ sf::Color ParticleEmitter::getDefaultColor() const
     return m_defaultColor;
 }
 
-#include <complex> // TODO rremove this after making and implementing the rotation class
 void ParticleEmitter::emit()
 {
     for (unsigned int i = 0; i < m_spawnAmount - (rand()%m_randomSpawnAmount); i++)

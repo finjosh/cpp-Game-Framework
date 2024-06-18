@@ -8,7 +8,6 @@
 
 #include "Utils/EventHelper.hpp"
 #include "Settings.hpp"
-// #include "box2d/b2_math.h" // TODO make a transform and angle class
 #include "Rotation.hpp"
 #include "Vector2.hpp"
 #include "Transform.hpp"
@@ -25,7 +24,8 @@ class ObjectManager;
 class Object
 {
 public:
-    template <typename T = Object, typename std::enable_if_t<std::is_base_of<Object, T>::value>* = nullptr>
+    /// @warning the type must have the base class Object
+    template <typename T = Object>
     class Ptr
     {
     public:
@@ -68,15 +68,17 @@ public:
             return m_ptr;
         }
         
+        /// @note same thing as using Object::Ptr<T>::set()
         inline Object::Ptr<T>& operator=(const Object::Ptr<T>& Ptr)
         {
             this->set(Ptr.m_ptr);
             return *this;
         }
 
-        inline Object::Ptr<T>& operator=(const T* Ptr)
+        /// @note same thing as using Object::Ptr<T>::set()
+        inline Object::Ptr<T>& operator=(T* rawPtr)
         {
-            this->set(Ptr.m_ptr);
+            this->set(rawPtr);
             return *this;
         }
         
@@ -236,6 +238,9 @@ public:
     /// @note this is called when the parent is set to nullptr
     /// @note not called when this object is destroyed
     EventHelper::Event onParentRemoved;
+    /// @brief called when ever the transform of this object is updated
+    /// @note only called if the local position is updated
+    EventHelper::Event onTransformUpdated;
 
     /// @brief tries to cast this object to a given type
     /// @returns nullptr if cast was unsuccessful  
@@ -274,31 +279,25 @@ public:
     /// @returns the equivalent local vector
     Vector2 getLocalVector(const Vector2& vec) const;
     /// @brief rotates the this object around the given center
+    /// @note in local space
     /// @param center the point to rotate around
     void rotateAround(const Vector2& center, Rotation rot);
     void setPosition(const Vector2& position);
     void setPosition(float x, float y);
-    /// @brief if this is a child then the position will be set according to the parent
-    /// @note if "canSetTransform" is false then this does nothing
-    /// @note if this is not a child then position is set according to global
-    /// @param position according to the parent position
-    void setLocalPosition(const Vector2& position);
+    void setGlobalPosition(const Vector2& position);
     Vector2 getPosition() const;
     /// @note if no parent returns global position
     /// @returns position according to parent
-    Vector2 getLocalPosition() const;
+    Vector2 getGlobalPosition() const;
     void setRotation(Rotation rotation);
-    /// @brief if this is a child then the rotation will be set according to the parent
-    /// @note if "canSetTransform" is false then this does nothing
-    /// @note if this is not a child then rotation is set according to global
-    /// @param rotation according to the parent rotation
-    void setLocalRotation(Rotation rotation);
+    void setGlobalRotation(Rotation rotation);
     Rotation getRotation() const;
     /// @note if no parent returns global rotation
     /// @returns rotation according to parent
-    Rotation getLocalRotation() const;
+    Rotation getGlobalRotation() const;
     void setTransform(const Transform& transform);
-    Transform getTransform() const;
+    void setGlobalTransform(const Transform& transform);
+    const Transform& getTransform() const;
     void move(const Vector2& move);
     void move(float x, float y);
     void rotate(Rotation rot);
@@ -321,9 +320,7 @@ protected:
     /// @brief called when ever the transform of this object is updated
     /// @warning do NOT disconnect all EVER
     EventHelper::Event m_onTransformUpdated;
-    /// @brief adds this object to the destroy queue
-    /// @note same as using destroy
-    void m_addToDestroyQueue();
+    // virtual Vector2 getInterpolatedPosition();
 
 private:
     /// @brief this should actually delete the object
@@ -341,7 +338,7 @@ private:
     std::atomic_bool m_enabled = true;
     size_t m_id = 0;
 
-    Transform m_transform;
+    Transform m_transform; // TODO make this local not global
 
     Object* m_parent = nullptr;
     std::list<Object*> m_children;

@@ -184,11 +184,11 @@ float Vector2::angle(const Vector2& a, const Vector2& b)
     return std::atan2(a.x*b.y - a.y*b.x, a.x*b.x + a.y*b.y);
 }
 
-Vector2 Vector2::lerp(const Vector2& a, const Vector2& b, float relativeDistance)
+Vector2 Vector2::lerp(const Vector2& current, const Vector2& target, float relativeDistance)
 {
-    Vector2 rtn(a-b); // finding the vector from a to b
+    Vector2 rtn(target-current); // finding the vector from a to b
     rtn *= relativeDistance; // only getting the part we want
-    rtn += a; // moving origin back to a
+    rtn += current; // moving origin back to current
     return rtn;
 }
 
@@ -237,3 +237,8 @@ Vector2 Vector2::rotate(const Vector2& vector, Rotation rot)
 
 void Vector2::setZero()
 { x = 0; y = 0; }
+
+Vector2 Vector2::round() const
+{
+    return Vector2{std::round(x), std::round(y)};
+}

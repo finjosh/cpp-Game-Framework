@@ -163,11 +163,11 @@ public:
     /// @note returns the angle between 0 and PI
     /// @returns the angle between the two vectors in radians
     static float angle(const Vector2& a, const Vector2& b); // TODO test these functions
-    /// @note a relativeDistance of 0 will return a, 1 will return b, and 0.5 will return the point midway between a and b
+    /// @note a relativeDistance of 0 will return current, 1 will return target, and 0.5 will return the point midway between current and target
     /// @note relativeDistance can be outside of the range (0-1)
     /// @param relativeDistance the relative distance the returned vector will be (0-1)
     /// @returns a point between the two points
-    static Vector2 lerp(const Vector2& a, const Vector2& b, float relativeDistance); // TODO test these functions
+    static Vector2 lerp(const Vector2& current, const Vector2& target, float relativeDistance); // TODO test these functions
     /// @returns a vector with the max components from a and b
     static Vector2 max(const Vector2& a, const Vector2& b);
     /// @returns a vector with the min components from a and b
@@ -189,6 +189,8 @@ public:
     static Vector2 rotate(const Vector2& vector, Rotation rot);
     /// @brief sets this vector to (0,0)
     void setZero();
+    /// @returns a Vector with each component of this vector rounded to the nearest whole value
+    Vector2 round() const;
 
     float x = 0;
     float y = 0;

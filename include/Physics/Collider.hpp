@@ -129,6 +129,8 @@ typedef ContactData CollisionData;
 // TODO make a gui editor for making bodies over an image (prints the code that will produce the given effect) (should also be able to load based on given code)
 // TODO make a wrapper for creating fixtures of different shapes
 // TODO implement contact filtering
+// TODO make parent and child colliders have defined behaviour
+/// @warning If there is a parent and child that have a Collider there is undefined behaviour (try using fixtures instead)
 class Collider : public virtual Object
 {
 public:

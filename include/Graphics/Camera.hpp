@@ -18,6 +18,8 @@ class WindowHandler;
 class Camera : virtual public Object
 {
 public:
+    using Ptr = Object::Ptr<Camera>;
+
     Camera(int layer = 0);
     ~Camera();
 

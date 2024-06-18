@@ -17,6 +17,8 @@
 class ParticleEmitter : virtual public Object, public UpdateInterface, public DrawableObject
 {
 public:
+    using Ptr = Object::Ptr<ParticleEmitter>;
+
     /// @param shape make sure that the given drawable is accessible over the lifetime of this object
     ParticleEmitter(sf::Shape* shape);
     /// @param shape make sure that the given drawable is accessible over the lifetime of this object
