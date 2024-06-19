@@ -1,5 +1,6 @@
 #include "Physics/Collider.hpp"
 #include "Physics/CollisionManager.hpp"
+#include "Physics/WorldHandler.hpp"
 
 Collider::Collider()
 {
@@ -256,6 +257,21 @@ bool Collider::isFixedRotation() const
 Fixture Collider::getFixtureList()
 {
     return Fixture(m_body->GetFixtureList());
+}
+
+Transform Collider::getInterpolatedTransform() const
+{
+    return {getInterpolatedPosition(), getInterpolatedRotation()};
+}
+
+Vector2 Collider::getInterpolatedPosition() const
+{
+    return Object::getPosition() + WorldHandler::getLeftOverTime() * m_body->GetLinearVelocity();
+}
+
+Rotation Collider::getInterpolatedRotation() const
+{
+    return Object::getRotation() + m_body->GetAngularVelocity() * WorldHandler::getLeftOverTime();
 }
 
 //* Collision Data

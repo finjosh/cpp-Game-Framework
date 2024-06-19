@@ -371,3 +371,18 @@ void Object::m_removeChild(Object* object)
     if (object == nullptr) return;
     m_children.remove_if([object](const Object* obj){ return obj == object; });
 }
+
+Transform Object::getInterpolatedTransform() const
+{
+    return m_transform;
+}
+
+Vector2 Object::getInterpolatedPosition() const
+{
+    return m_transform.position;
+}
+
+Rotation Object::getInterpolatedRotation() const
+{
+    return m_transform.rotation;
+}

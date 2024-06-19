@@ -107,8 +107,8 @@ void DrawableObject::m_draw(sf::RenderTarget* target, const Transform& stateTran
     for (auto child: m_drawableChildren)
     {
         Transform childTransform(stateTransform);
-        childTransform.position += Vector2::rotateAround(child->getPosition(), {0,0}, stateTransform.rotation);
-        childTransform.rotation += child->getRotation();
+        childTransform.position += Vector2::rotateAround(child->getInterpolatedPosition(), {0,0}, stateTransform.rotation);
+        childTransform.rotation += child->getInterpolatedRotation();
         child->m_draw(target, childTransform);
     }
     this->LateDraw(target, stateTransform);

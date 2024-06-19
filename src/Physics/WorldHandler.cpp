@@ -31,6 +31,11 @@ void WorldHandler::updateWorld(double deltaTime)
     }
 }
 
+float WorldHandler::getLeftOverTime()
+{
+    return m_accumulate;
+}
+
 void WorldHandler::setTickRate(int32 interval)
 {
     m_tickRate = interval;

@@ -7,7 +7,6 @@
 
 #include "box2d/box2d.h"
 
-#include "Physics/WorldHandler.hpp"
 #include "Physics/Fixture.hpp"
 #include "Object.hpp"
 #include "Settings.hpp"
@@ -280,6 +279,9 @@ public:
 	// const b2JointEdge* GetJointList() const;
 
 protected:
+    Transform getInterpolatedTransform() const override;
+    Vector2 getInterpolatedPosition() const override;
+    Rotation getInterpolatedRotation() const override;
 
 private:
     friend CollisionManager;

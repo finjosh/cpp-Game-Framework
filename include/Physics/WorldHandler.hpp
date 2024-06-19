@@ -27,6 +27,8 @@ public:
     static int32 getMaxUpdates();
     static void setGravity(const Vector2& gravity);
     static Vector2 getGravity();
+    /// @returns the time that was not able to be calculated this frame
+    static float getLeftOverTime();
 
 private:
     inline WorldHandler() = default;

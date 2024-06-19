@@ -59,11 +59,14 @@ public:
     std::string name = "Random Name";
     // sf::Texture temp;
     Object::Ptr<ParticleEmitter> m_hitParticle;
-    sf::RectangleShape m_particle;
+    static sf::RectangleShape m_particle;
     static Camera::Ptr m_camera; // default is nullptr
+    static std::set<Object*> m_players;
 
     inline Player()
     {
+        m_players.emplace(this);
+
         b2PolygonShape b2shape;
         b2shape.SetAsBox(2.5,2.5);
 
@@ -80,16 +83,16 @@ public:
         m_particle.setOrigin({2.5,2.5});
         m_hitParticle.set(new ParticleEmitter(&m_particle, {0,0}, 10, 0, 0, 1, 10, 0.5, 360));
 
-        auto tempRectangle = new Renderer<sf::RectangleShape>();
-        tempRectangle->setSize({5,5});
-        tempRectangle->setOrigin({2.5,2.5});
-        tempRectangle->setPosition({0,5});
-        tempRectangle->setParent(this);
-        auto tempRectangle2 = new Renderer<sf::RectangleShape>();
-        tempRectangle2->setSize({5,5});
-        tempRectangle2->setOrigin({2.5,2.5});
-        tempRectangle2->setPosition({0,5});
-        tempRectangle2->setParent(tempRectangle);
+        // auto tempRectangle = new Renderer<sf::RectangleShape>();
+        // tempRectangle->setSize({5,5});
+        // tempRectangle->setOrigin({2.5,2.5});
+        // tempRectangle->setPosition({0,5});
+        // tempRectangle->setParent(this);
+        // auto tempRectangle2 = new Renderer<sf::RectangleShape>();
+        // tempRectangle2->setSize({5,5});
+        // tempRectangle2->setOrigin({2.5,2.5});
+        // tempRectangle2->setPosition({0,5});
+        // tempRectangle2->setParent(tempRectangle);
 
         if (!m_camera)
         {
@@ -98,6 +101,11 @@ public:
             m_camera->setMainCamera();
             m_camera->setRotationLocked(true);
         }
+    }
+
+    inline ~Player()
+    {
+        m_players.erase(this);
     }
 
     inline virtual void Update(float deltaTime) override
@@ -136,7 +144,15 @@ public:
 
     inline void LateUpdate(float delta) override
     {
-        m_camera->setPosition(Vector2::lerp(m_camera->getPosition(), Object::getPosition(), 0.97*delta)); // since late update is called after physics update
+        Vector2 pos(0,0);
+
+        for (auto player: m_players)
+        {
+            pos += player->getPosition();
+        }
+        pos /= m_players.size();
+
+        m_camera->setPosition(Vector2::lerp(m_camera->getPosition(), pos, 0.97*delta)); // since late update is called after physics update
     }
 
     void BeginContact(ContactData data) override
@@ -153,6 +169,8 @@ public:
 };
 
 Camera::Ptr Player::m_camera = nullptr;
+sf::RectangleShape Player::m_particle;
+std::set<Object*> Player::m_players;
 
 class Sensor : public virtual Object, public Renderer<sf::RectangleShape>, public Collider
 {
@@ -286,8 +304,8 @@ int main()
     new Wall({96,0}, {192,10});
     new Wall({192, 54}, {10, 108});
     new Wall({0, 54}, {10, 108});
-    // for (int i = 0; i < 100; i++)
-    //     (new Player())->setPosition({50,50});
+    for (int i = 0; i < 100; i++)
+        (new Player())->setPosition({50,50});
     auto p = new Player();
     p->setPosition({15,10});
     p->setRotation(45);
@@ -309,13 +327,13 @@ int main()
 
     new OneWay({40,25}, {40,10});
 
-    auto gui2 = new Canvas();
-    gui2->setGlobalSpace();
-    gui2->setPosition(50,50);
-    auto panel = tgui::Panel::create();
-    panel->getRenderer()->setBackgroundColor(tgui::Color::applyOpacity(panel->getSharedRenderer()->getBackgroundColor(), 0.5));
-    panel->add(tgui::ChildWindow::create("Test window"));
-    gui2->add(panel);
+    // auto gui2 = new Canvas();
+    // gui2->setGlobalSpace();
+    // gui2->setPosition(50,50);
+    // auto panel = tgui::Panel::create();
+    // panel->getRenderer()->setBackgroundColor(tgui::Color::applyOpacity(panel->getSharedRenderer()->getBackgroundColor(), 0.5));
+    // panel->add(tgui::ChildWindow::create("Test window"));
+    // gui2->add(panel);
     // camera->blacklistCanvas(gui2);
 
     float secondTimer = 0;

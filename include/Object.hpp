@@ -302,7 +302,12 @@ public:
     void rotate(Rotation rot);
 
 protected:
-    virtual Transform getInterpolatedTransform() const; // TODO DO THIS
+    /// @returns the locally interpolated transform
+    virtual Transform getInterpolatedTransform() const;
+    /// @returns the locally interpolated position
+    virtual Vector2 getInterpolatedPosition() const;
+    /// @returns the locally interpolated rotation
+    virtual Rotation getInterpolatedRotation() const;
     inline virtual void OnEnable() {};
     inline virtual void OnDisable() {};
     /// @warning do NOT disconnect all EVER
