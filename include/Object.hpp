@@ -17,8 +17,6 @@ class ObjectManager;
 /// @note anything after this will be private unless specifying scope
 #define createDestroy() private: inline virtual void m_destroy() override { delete(this); }
 
-#define PI 3.14159265359f
-
 /// @note the pure virtual "destroy" function must only handle the destruction of the derived object
 /// @warning no thread safe if not acceded through a pointer or Object::Ptr
 class Object

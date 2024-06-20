@@ -88,7 +88,7 @@ void CanvasManager::drawOverlayGUI()
     for (auto canvas: m_canvases)
     {
         if (canvas->isEnabled() /* && canvas->isScreenSpace() */)
-            canvas->Draw(m_gui->getTarget(), {}); // is does not matter what transform is inputted canvases DONT use it
+            canvas->m_draw(m_gui->getTarget(), {}); // should be the default transform as screen space canvases dont care about pos or rotation
     }
 
     m_gui->updateTime();

@@ -128,6 +128,18 @@ float Vector2::normalize()
     return length;
 }
 
+Vector2 Vector2::normalize(const Vector2& vector)
+{
+    float length = vector.length();
+    if (length < __FLT_EPSILON__)
+    {
+        return {0,0};
+    }
+    float invLength = 1.0f / length;
+
+    return Vector2{vector.x * invLength, vector.y * invLength};
+}
+
 tgui::String Vector2::toString() const
 {
     return "(" + tgui::String::fromNumber(x) + ", " + tgui::String::fromNumber(y) + ")";
@@ -181,7 +193,10 @@ float Vector2::distance(const Vector2& vector) const
 
 float Vector2::angle(const Vector2& a, const Vector2& b)
 {
-    return std::atan2(a.x*b.y - a.y*b.x, a.x*b.x + a.y*b.y);
+    // TODO optimize this
+    float pa = std::atan2(a.x,a.y);
+    float pb = std::atan2(b.x,b.y);
+    return std::min(pa + pb, pb - pa);
 }
 
 Vector2 Vector2::lerp(const Vector2& current, const Vector2& target, float relativeDistance)

@@ -5,6 +5,8 @@
 
 // #include "Box2D/b2_math.h" (B2_MATH_H)
 
+#define PI 3.14159265359f
+
 class Vector2;
 
 /// @note if you want helper functions to work with tgui, sfml, and box2d vectors make sure to include them before include "Vector2"

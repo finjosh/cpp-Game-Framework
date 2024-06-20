@@ -36,6 +36,11 @@ public:
     using Object::move;
     using Object::rotate;
 
+    inline void setScale(Vector2 scale)
+    {
+        T::setScale(PIXELS_PER_METER * scale.x, PIXELS_PER_METER * scale.y);
+    }
+
     inline void setScale(float x, float y)
     {
         T::setScale(PIXELS_PER_METER * x, PIXELS_PER_METER * y);
@@ -59,13 +64,43 @@ protected:
     }
 
 private:
-    float m_xScale = 1, m_yScale = 1;
-
     using T::setScale;
     using T::getScale;
     using T::scale;
 
     createDestroy();
 };
+
+// TODO finish this 
+// template <typename T, typename std::enable_if_t<std::is_same<sf::VertexArray, T>::value || std::is_same<sf::VertexBuffer, T>::value>* = nullptr>
+// class Renderer : public virtual Object, public DrawableObject, public T
+// {
+// public:
+//     using Ptr = Object::Ptr<Renderer<T>>;
+
+//     inline Renderer() = default;
+
+//     inline void setScale(Vector2 scale) {  }
+
+// protected:
+//     inline void Draw(sf::RenderTarget* target, const Transform& thisTransform) override
+//     {
+//         // T::setPosition((sf::Vector2f)Object::getGlobalPosition()*PIXELS_PER_METER);
+//         // T::setRotation(Object::getGlobalRotation().getAngle()*180/PI);
+//         T::setPosition((sf::Vector2f)thisTransform.position*PIXELS_PER_METER);
+//         T::setRotation(thisTransform.rotation.getAngle()*180/PI);
+//         target->draw(*this);
+//     }
+
+// private:
+//     Vector2 m_scale;
+//     Vector2 m_origin;
+//     Vector2 m_bounds;
+//     Transform m_lastTransform;
+//     size_t m_lastVertexCount = 0;
+//     bool m_updated = false;
+
+//     createDestroy();
+// };
 
 #endif

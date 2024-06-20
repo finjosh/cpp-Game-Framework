@@ -34,7 +34,7 @@ public:
     // ----------------
 
     Vector2 position = Vector2(0,0);
-    Rotation rotation = Rotation(0);
+    Rotation rotation; // defaults to 0 dont init with 0 as that uses trig functions
 protected:
 
 private:

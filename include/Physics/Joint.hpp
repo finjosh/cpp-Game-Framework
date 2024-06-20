@@ -7,6 +7,7 @@
 
 class Collider;
 
+/// @note this does not update when the collider is destroyed (only store in the colliders object or keep track if it is still alive)
 class Joint
 {
 public:

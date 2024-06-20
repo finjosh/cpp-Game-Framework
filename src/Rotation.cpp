@@ -27,7 +27,7 @@ float Rotation::getAngle() const
 void Rotation::setZero()
 {
     sin = 0.f;
-    cos = 0.f;
+    cos = 1.f;
 }
 
 Vector2 Rotation::GetXAxis() const
@@ -47,8 +47,9 @@ Rotation Rotation::operator + (Rotation rotation) const
 
 void Rotation::operator += (Rotation rotation)
 {
-    cos = cos*rotation.cos - sin*rotation.sin;
+    float cosTemp = cos*rotation.cos - sin*rotation.sin;
     sin = sin*rotation.cos + cos*rotation.sin;
+    cos = cosTemp;
 }
 
 Rotation Rotation::operator - (Rotation rotation) const
@@ -58,8 +59,9 @@ Rotation Rotation::operator - (Rotation rotation) const
 
 void Rotation::operator -= (Rotation rotation)
 {
-    cos = cos*rotation.cos + sin*rotation.sin;
+    float cosTemp = cos*rotation.cos + sin*rotation.sin;
     sin = sin*rotation.cos - cos*rotation.sin;
+    cos = cosTemp;
 }
 
 void Rotation::operator = (Rotation rotation)

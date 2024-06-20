@@ -11,6 +11,7 @@
 #include <set>
 
 class DrawableManager;
+class CanvasManager;
 class DrawableObject;
 
 struct _drawableComp
@@ -61,6 +62,7 @@ protected:
     void m_draw(sf::RenderTarget* target, const Transform& stateTransform);
 
     friend DrawableManager;
+    friend CanvasManager;
 
 private:
     int m_layer = 0;

@@ -50,13 +50,13 @@ void Canvas::Draw(sf::RenderTarget* target, const Transform& parentTransform)
         widgetStates.transform.translate(m_group->getPosition() - tgui::Vector2f{m_group->getOrigin().x * m_group->getSize().x, m_group->getOrigin().y * m_group->getSize().y});
         if (m_group->getRotation() != 0)
         {
-            const tgui::Vector2f rotOrigin{m_group->getRotationOrigin().x * m_group->getSize().x, m_group->getRotationOrigin().y * m_group->getSize().y};
-            widgetStates.transform.rotate(m_group->getRotation(), rotOrigin);
+            const Vector2 rotOrigin{m_group->getRotationOrigin().x * m_group->getSize().x, m_group->getRotationOrigin().y * m_group->getSize().y};
+            widgetStates.transform.rotate(m_group->getRotation(), (tgui::Vector2f)rotOrigin);
         }
         if ((m_group->getScale().x != 1) || (m_group->getScale().y != 1))
         {
-            const tgui::Vector2f scaleOrigin{m_group->getScaleOrigin().x * m_group->getSize().x, m_group->getScaleOrigin().y * m_group->getSize().y};
-            widgetStates.transform.scale(m_group->getScale(), scaleOrigin);
+            const Vector2 scaleOrigin{m_group->getScaleOrigin().x * m_group->getSize().x, m_group->getScaleOrigin().y * m_group->getSize().y};
+            widgetStates.transform.scale(m_group->getScale(), (tgui::Vector2f)scaleOrigin);
         }
     }
     CanvasManager::getGui()->getBackendRenderTarget()->drawWidget(widgetStates, m_group);
@@ -106,9 +106,9 @@ void Canvas::setSize(const tgui::Layout2d& size)
     m_group->setSize(size);
 }
 
-TGUI_NODISCARD tgui::Vector2f Canvas::getSize() const
+TGUI_NODISCARD Vector2 Canvas::getSize() const
 {
-    return m_group->getSize();
+    return Vector2{m_group->getSize()};
 }
 
 void Canvas::setOrigin(float x, float y)
@@ -116,29 +116,29 @@ void Canvas::setOrigin(float x, float y)
     setOrigin({x, y});
 }
 
-void Canvas::setOrigin(tgui::Vector2f origin)
+void Canvas::setOrigin(Vector2 origin)
 {
-    m_group->setOrigin(origin);
+    m_group->setOrigin((tgui::Vector2f)origin);
 }
 
-TGUI_NODISCARD tgui::Vector2f Canvas::getOrigin() const
+TGUI_NODISCARD Vector2 Canvas::getOrigin() const
 {
-    return m_group->getOrigin();
+    return (tgui::Vector2f)m_group->getOrigin();
 }
 
-TGUI_NODISCARD tgui::Vector2f Canvas::getFullSize() const
+TGUI_NODISCARD Vector2 Canvas::getFullSize() const
 {
-    return m_group->getFullSize();
+    return (tgui::Vector2f)m_group->getFullSize();
 }
 
-TGUI_NODISCARD tgui::Vector2f Canvas::getInnerSize() const
+TGUI_NODISCARD Vector2 Canvas::getInnerSize() const
 {
-    return m_group->getInnerSize();
+    return (tgui::Vector2f)m_group->getInnerSize();
 }
 
-TGUI_NODISCARD tgui::Vector2f Canvas::getChildWidgetsOffset() const
+TGUI_NODISCARD Vector2 Canvas::getChildWidgetsOffset() const
 {
-    return m_group->getChildWidgetsOffset(); 
+    return (tgui::Vector2f)m_group->getChildWidgetsOffset(); 
 }
 
 TGUI_NODISCARD const std::vector<tgui::Widget::Ptr>& Canvas::getWidgets() const

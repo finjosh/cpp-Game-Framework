@@ -261,7 +261,7 @@ Fixture Collider::getFixtureList()
 
 Transform Collider::getInterpolatedTransform() const
 {
-    return {getInterpolatedPosition(), getInterpolatedRotation()};
+    return Transform{getInterpolatedPosition(), getInterpolatedRotation()};
 }
 
 Vector2 Collider::getInterpolatedPosition() const

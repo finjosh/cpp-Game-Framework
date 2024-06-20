@@ -201,7 +201,7 @@ void Object::rotateAround(const Vector2& center, Rotation rot)
 
 void Object::setPosition(const Vector2& position)
 {   
-    Vector2 posChange(position - m_transform.position);
+    // Vector2 posChange(position - m_transform.position);
     m_transform.position = position;
     m_onTransformUpdated.invoke();
     onTransformUpdated.invoke();
@@ -224,7 +224,7 @@ Vector2 Object::getPosition() const
 
 void Object::setRotation(Rotation rotation)
 {
-    Rotation rotChange = rotation - m_transform.rotation;
+    // Rotation rotChange = rotation - m_transform.rotation;
     m_transform.rotation = rotation;
     m_onTransformUpdated.invoke();
     onTransformUpdated.invoke();

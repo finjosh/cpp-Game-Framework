@@ -3,8 +3,8 @@
 
 #pragma once
 
-#include "Graphics/DrawableObject.hpp"
 #include "TGUI/Widgets/Group.hpp"
+#include "Graphics/DrawableObject.hpp"
 #include "Object.hpp"
 
 // TODO make this work when the camera is rotated
@@ -13,7 +13,7 @@
 /// @note if in screen space layer and drawStage are between canvases only
 /// @note defaults to drawing in screen space (screen overlay)
 /// @note when a canvas is in screen space the position, rotation, and origin does not affect the canvas
-/// @warning all functions defined in the Canvas class return values in pixels not meters
+/// @warning all functions defined in the Canvas class return values in pixels NOT meters
 class Canvas : public virtual Object, public DrawableObject
 {
 public:
@@ -42,8 +42,8 @@ public:
     /// @param size  The new size of the group
     void setSize(const tgui::Layout2d& size);
     /// @brief Returns the size of the widget
-    /// @return Size of the widget
-    TGUI_NODISCARD tgui::Vector2f getSize() const;
+    /// @return Size of the widget in pixels
+    TGUI_NODISCARD Vector2 getSize() const;
     /// @brief Sets the origin point on which the position, scale and rotation is based
     /// @param x  Relative horizontal position of the origin point
     /// @param y  Relative vertical position of the origin point
@@ -54,22 +54,22 @@ public:
     /// @param origin  Relative position of the origin point
     /// @note Valid x and y values range from 0 to 1, with 0 representing the left/top of the widget and 1 being right/bottom
     /// @warning This function should not be used if the AutoLayout is set to something other than Manual
-    void setOrigin(tgui::Vector2f origin);
+    void setOrigin(Vector2 origin);
     /// @brief Returns the relative origin point on which the position, scale and rotation is based
     /// @return Relative origin point of the widget (0 for left/top, 1 for right/bottom)
-    TGUI_NODISCARD tgui::Vector2f getOrigin() const;
+    TGUI_NODISCARD Vector2 getOrigin() const;
     /// @brief Returns the entire size that the widget is using
     /// This function will return a value equal or greater than what getSize returns.
     /// If the widget would e.g. have borders around it then this function will return the size, including these borders.
     /// @return Full size of the widget
-    TGUI_NODISCARD tgui::Vector2f getFullSize() const;
+    TGUI_NODISCARD Vector2 getFullSize() const;
     /// @brief Returns the space available for widgets inside the container
     /// @return Size without padding
-    TGUI_NODISCARD tgui::Vector2f getInnerSize() const;
+    TGUI_NODISCARD Vector2 getInnerSize() const;
     /// @brief Returns the distance between the position of the container and a widget that would be drawn inside
     ///        this container on relative position (0,0)
     /// @return Offset of the widgets in the container
-    TGUI_NODISCARD tgui::Vector2f getChildWidgetsOffset() const;
+    TGUI_NODISCARD Vector2 getChildWidgetsOffset() const;
     /// @brief Returns a list of all the widgets in this container
     /// @return Vector of all widget pointers
     TGUI_NODISCARD const std::vector<tgui::Widget::Ptr>& getWidgets() const;
