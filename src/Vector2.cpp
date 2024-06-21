@@ -154,27 +154,7 @@ Vector2 Vector2::rotateAround(const Vector2& point, const Vector2& center, Rotat
     temp.x = tempX;
     temp += center;
     return temp;
-
-    // std::complex<float> polar = std::polar<float>(1.0, rot);
-    // std::complex<float> temp(point.x - center.x, point.y - center.y);
-    // temp *= polar;
-    // return {temp.real() + center.x, temp.imag() + center.y};
 }
-
-// void Vector2::rotateAround(const Vector2& center, Rotation rot)
-// {
-//     (*this) -= center;
-//     float tempX = x * rot.cos - y * rot.sin;
-//     y = y * rot.cos + x * rot.sin;
-//     x = tempX;
-//     (*this) += center;
-
-//     // std::complex<float> polar = std::polar<float>(1.0, rot);
-//     // std::complex<float> temp(this->x - center.x, this->y - center.y);
-//     // temp *= polar;
-//     // this->x = temp.real() + center.x;
-//     // this->y = temp.imag() + center.y;
-// }
 
 float Vector2::dot(const Vector2& a, const Vector2& b)
 {
@@ -190,13 +170,19 @@ float Vector2::distance(const Vector2& vector) const
 {
     return (vector-(*this)).length();
 }
-
-float Vector2::angle(const Vector2& a, const Vector2& b)
+// #include "Utils/Debug/CommandPrompt.hpp"
+Rotation Vector2::angle(Vector2 a, Vector2 b)
 {
     // TODO optimize this
-    float pa = std::atan2(a.x,a.y);
-    float pb = std::atan2(b.x,b.y);
-    return std::min(pa + pb, pb - pa);
+    a.normalize();
+    b.normalize();
+    return Rotation{b.x, b.y} - Rotation{a.x, a.y};
+}
+
+Rotation Vector2::rotation(Vector2 vector)
+{
+    vector.normalize();
+    return Rotation{vector.x, vector.y};
 }
 
 Vector2 Vector2::lerp(const Vector2& current, const Vector2& target, float relativeDistance)
@@ -215,28 +201,34 @@ Vector2 Vector2::min(const Vector2& a, const Vector2& b)
 
 Vector2 Vector2::moveTowards(const Vector2& current, const Vector2& target, float maxDistance)
 {
-    Vector2 rtn(current-target); // finding the vector from a to b
-    if (rtn.lengthSquared() > maxDistance*maxDistance) // if distance is too far
+    Vector2 rtn(target-current);
+    float length = rtn.normalize();
+    if (length > maxDistance)
     {
-        rtn.normalize();
-        rtn *= maxDistance; // making the vector have length maxDistance
+        rtn *= maxDistance;
     }
+    else
+        rtn *= length;
     rtn += current;
     return rtn;
 }
 
 Vector2 Vector2::rotateTowards(const Vector2& current, const Vector2& target, float maxRadians, float maxMagnitude)
 {
-    Vector2 rtn(current-target); // finding the vector from a to b
-    if (rtn.lengthSquared() > maxMagnitude*maxMagnitude) // if distance is too far
+    Vector2 rtn(current);
+    float length = rtn.normalize();
+    float targetLength = target.length();
+    if (length > maxMagnitude)
     {
-        rtn.normalize();
-        rtn *= maxMagnitude; // making the vector have length maxDistance
+        rtn *= length + (length < targetLength ? maxMagnitude : -maxMagnitude);
     }
-    rtn += current;
+    else
+    {
+        rtn *= target.length();
+    }
 
-    float angle = Vector2::angle(current, target);
-    angle = angle > maxRadians ? maxRadians : angle;
+    float angle = Vector2::angle(current, target).getAngle();
+    angle = angle > maxRadians ? maxRadians : (angle < -maxRadians ? -maxRadians : angle);
 
     return Vector2::rotate(rtn, angle);
 }
@@ -254,6 +246,4 @@ void Vector2::setZero()
 { x = 0; y = 0; }
 
 Vector2 Vector2::round() const
-{
-    return Vector2{std::round(x), std::round(y)};
-}
+{ return Vector2{std::round(x), std::round(y)}; }

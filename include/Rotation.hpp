@@ -10,6 +10,7 @@
 class Vector2;
 
 /// @note if you want helper functions to work with tgui, sfml, and box2d vectors make sure to include them before include "Vector2"
+/// @note if you want the to string function to be defined include this the string include
 class Rotation
 {
 public:
@@ -40,6 +41,22 @@ public:
         temp.c = cos;
         temp.s = sin;
         return temp;
+    }
+    #endif
+    // ----------------
+
+    //* string conversion function
+    #ifdef _BASIC_STRING_H
+    /// @note this calculates the angle and converts to a string
+    inline std::basic_string<char> toString()
+    {
+        return std::to_string(this->getAngle());
+    }
+    /// @brief returns this rotation in degrees as a string
+    /// @note this calculates the angle and converts to a string
+    inline std::basic_string<char> toStringDegrees()
+    {
+        return std::to_string(this->getAngle() * 180 / PI);
     }
     #endif
     // ----------------

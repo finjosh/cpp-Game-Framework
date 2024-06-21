@@ -66,3 +66,13 @@ Vector2 WindowHandler::getMousePos()
     }
     return temp;
 }
+
+Vector2 WindowHandler::getMouseScreenPos()
+{
+    return Vector2{sf::Mouse::getPosition(*m_renderWindow)}/PIXELS_PER_METER;
+}
+
+Vector2 WindowHandler::getScreenSize()
+{
+    return Vector2{m_renderWindow->getSize()} / PIXELS_PER_METER;
+}

@@ -300,13 +300,6 @@ int main()
     TFuncDisplay::init(gui->getGroup());
     //! ---------------------------------------------------
 
-    Command::Prompt::print(std::to_string(Vector2::angle({0,5}, {5,0}) * 180 / PI));
-    Command::Prompt::print(std::to_string(Vector2::angle({5,0}, {0,5}) * 180 / PI));
-    Command::Prompt::print(std::to_string(Vector2::angle({0,10}, {10,0}) * 180 / PI));
-    Command::Prompt::print(std::to_string(Vector2::angle({5,5}, {5,0}) * 180 / PI));
-    Command::Prompt::print(std::to_string(Vector2::angle({0,5}, {5,5}) * 180 / PI));
-    Command::Prompt::print(std::to_string(Vector2::angle({5,0}, {5,5}) * 180 / PI));
-
     //* init code
     new Wall({96,108}, {192,10});
     new Wall({96,0}, {192,10});
@@ -344,32 +337,25 @@ int main()
     // gui2->add(panel);
     // camera->blacklistCanvas(gui2);
 
-    auto temp = new Renderer<sf::RectangleShape>();
-    temp->setSize({5,1});
-    auto t = new Renderer<sf::RectangleShape>();
-    t->setSize({1,10});
-    t->setRotation(PI/2);
-    t->setFillColor(sf::Color::Blue);
-    t->setParent(temp);
-
     auto line1 = new Renderer<sf::RectangleShape>();
-    line1->setSize({1,10});
-    line1->setOrigin({0.5,0});
+    line1->setSize({10,1});
+    line1->setOrigin({0,0.5});
     line1->setParent(gui);
     line1->setPosition(gui->getSize()/(2*PIXELS_PER_METER));
+    line1->setFillColor(sf::Color::Red);
     auto line2 = new Renderer<sf::RectangleShape>();
-    line2->setSize({1,10});
-    line2->setOrigin({0.5,0});
-    Command::Prompt::print(std::to_string(line2->getGlobalRotation().getAngle()));
-    Command::Prompt::print(std::to_string(line2->getGlobalRotation().cos));
-    Command::Prompt::print(std::to_string(line2->getGlobalRotation().sin));
+    line2->setSize({10,1});
+    line2->setOrigin({0,0.5});
     line2->setRotation(PI/2);
-    Command::Prompt::print(std::to_string(line2->getGlobalRotation().getAngle()));
-    Command::Prompt::print(std::to_string(line2->getGlobalRotation().cos));
-    Command::Prompt::print(std::to_string(line2->getGlobalRotation().sin));
     line2->setParent(gui);
-    Command::Prompt::print(std::to_string(line2->getGlobalRotation().getAngle()));
     line2->setPosition(gui->getSize()/(2*PIXELS_PER_METER));
+    line2->setFillColor(sf::Color::Blue);
+    Vector2 a;
+    Vector2 b;
+    auto circle = new Renderer<sf::CircleShape>();
+    circle->setRadius(2.5);
+    circle->setOrigin({2.5,2.5});
+    circle->setFillColor(sf::Color::Magenta);
 
     float secondTimer = 0;
     int fps = 0;
@@ -424,6 +410,29 @@ int main()
         UpdateManager::LateUpdate(deltaTime.asSeconds());
 
         //* Write code here
+
+        if (sf::Mouse::isButtonPressed(sf::Mouse::Left))
+        {
+            Vector2 temp = WindowHandler::getMouseScreenPos() - WindowHandler::getScreenSize()/2;
+            a = temp;
+            line1->setSize({temp.normalize(),1});
+            line1->setRotation({temp.x, temp.y});
+        }
+        if (sf::Mouse::isButtonPressed(sf::Mouse::Right))
+        {
+            Vector2 temp = WindowHandler::getMouseScreenPos() - WindowHandler::getScreenSize()/2;
+            b = temp;
+            line2->setSize({temp.normalize(),1});
+            line2->setRotation({temp.x, temp.y});
+        }
+        if (sf::Keyboard::isKeyPressed(sf::Keyboard::Space))
+        {
+            a = Vector2::rotateTowards(a, b, PI/16*deltaTime.asSeconds(), 5*deltaTime.asSeconds());
+            line1->setSize({a.length(),1});
+            line1->setRotation(Vector2::rotation(a));
+        }
+
+        circle->setPosition(Vector2::moveTowards(circle->getPosition(), p->getPosition(), 5*deltaTime.asSeconds()));
 
         fps++;
         if (secondTimer >= 1)

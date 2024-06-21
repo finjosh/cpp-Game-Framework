@@ -152,19 +152,18 @@ public:
     /// @param rot rotation in radians
     /// @returns the point rotated
     static Vector2 rotateAround(const Vector2& point, const Vector2& center, Rotation rot);
-    // /// @brief rotates this Vector2 around the given vector
-    // /// @param center the point that this will be rotated around
-    // /// @param rot the rotation in radians
-    // void rotateAround(const Vector2& center, Rotation rot);
     /// @returns the dot product of the two vectors
     static float dot(const Vector2& a, const Vector2& b);
     /// @returns the distance between the two vectors
     static float distance(const Vector2& a, const Vector2& b);
     /// @returns the distance between this and the given vector
     float distance(const Vector2& vector) const;
-    /// @note returns the angle between 0 and PI
-    /// @returns the angle between the two vectors in radians
-    static float angle(const Vector2& a, const Vector2& b);
+    /// @note angle is +-[0,PI]
+    /// @returns the smallest absolute angle from a to b in radians
+    static Rotation angle(Vector2 a, Vector2 b);
+    /// @note the returned angle is from 0 to PI
+    /// @returns the rotation of this vector from the positive x axis
+    static Rotation rotation(Vector2 vector);
     /// @note a relativeDistance of 0 will return current, 1 will return target, and 0.5 will return the point midway between current and target
     /// @note relativeDistance can be outside of the range (0-1)
     /// @param relativeDistance the relative distance the returned vector will be (0-1)
@@ -176,12 +175,12 @@ public:
     static Vector2 min(const Vector2& a, const Vector2& b);
     /// @param maxDistance that max distance that the returned vector will be from current
     /// @returns a vector between current and target moving no further than maxDistance
-    static Vector2 moveTowards(const Vector2& current, const Vector2& target, float maxDistance); // TODO test these functions
+    static Vector2 moveTowards(const Vector2& current, const Vector2& target, float maxDistance);
     /// @brief rotates the vector a towards b
     /// @param maxRadians the max change in radians
     /// @param maxMagnitude the max change in magnitude
     /// @returns the new vector
-    static Vector2 rotateTowards(const Vector2& current, const Vector2& target, float maxRadians, float maxMagnitude); // TODO test these functions
+    static Vector2 rotateTowards(const Vector2& current, const Vector2& target, float maxRadians, float maxMagnitude);
     /// @returns a vector where the two vectors are multiplied component wise
     static Vector2 scale(const Vector2& a, const Vector2& b);
     /// @brief multiplies this and the given vector component wise and applies result to this vector

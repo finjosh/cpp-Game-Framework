@@ -20,6 +20,10 @@ public:
     /// @note based off of mainCamera
     /// @returns mouse position in global position 
     static Vector2 getMousePos();
+    /// @returns the mouse position in screen position (meters)
+    static Vector2 getMouseScreenPos();
+    /// @returns the screen size in meters
+    static Vector2 getScreenSize();
 
 private:
     inline WindowHandler() = default;
