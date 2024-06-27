@@ -1,5 +1,5 @@
-#ifndef ROTATION_H
-#define ROTATION_H
+#ifndef ROTATION_HPP
+#define ROTATION_HPP
 
 #pragma once
 

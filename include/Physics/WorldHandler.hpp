@@ -1,5 +1,5 @@
-#ifndef WORLDHANDLER_H
-#define WORLDHANDLER_H
+#ifndef WORLD_HANDLER_HPP
+#define WORLD_HANDLER_HPP
 
 #pragma once
 

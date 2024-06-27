@@ -1,5 +1,5 @@
-#ifndef PARTICLEEMITTER_H
-#define PARTICLEEMITTER_H
+#ifndef PARTICLE_EMITTER_HPP
+#define PARTICLE_EMITTER_HPP
 
 #pragma once
 

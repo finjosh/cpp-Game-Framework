@@ -1,5 +1,5 @@
-#ifndef COLLIDER_H
-#define COLLIDER_H
+#ifndef COLLIDER_HPP
+#define COLLIDER_HPP
 
 #pragma once
 

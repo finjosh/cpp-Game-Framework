@@ -1,5 +1,5 @@
-#ifndef UPDATEINTERFACE_H
-#define UPDATEINTERFACE_H
+#ifndef UPDATE_INTERFACE_HPP
+#define UPDATE_INTERFACE_HPP
 
 #pragma once
 

@@ -1,5 +1,5 @@
-#ifndef JOINT_H
-#define JOINT_H
+#ifndef JOINT_HPP
+#define JOINT_HPP
 
 #pragma once
 

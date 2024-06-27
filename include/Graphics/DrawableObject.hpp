@@ -1,5 +1,5 @@
-#ifndef DRAWABLE_H
-#define DRAWABLE_H
+#ifndef DRAWABLE_OBJECT_HPP
+#define DRAWABLE_OBJECT_HPP
 
 #pragma once
 

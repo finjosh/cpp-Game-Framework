@@ -8,14 +8,15 @@
                 "${workspaceFolder}/include",
                 "/Git_projects/cpp-Utilities/include",
                 "/VSCodeFolder/Libraries/thread-pool-4.1.0/include",
-                "/VSCodeFolder/Libraries/TGUI-1.3/include"
+                "/VSCodeFolder/Libraries/TGUI-1.3/include",
+                "/Git_projects/Networking-Library/include"
             ],
             "defines": [
                 "_DEBUG",
                 "UNICODE",
                 "_UNICODE"
             ],
-            "cStandard": "c20",
+            "cStandard": "c17",
             "cppStandard": "gnu++20"
         }
     ],

@@ -1,5 +1,5 @@
-#ifndef FIXTURE_H
-#define FIXTURE_H
+#ifndef FIXTURE_HPP
+#define FIXTURE_HPP
 
 #pragma once
 

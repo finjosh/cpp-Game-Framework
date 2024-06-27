@@ -1,5 +1,5 @@
-#ifndef COLLISIONMANAGER_H
-#define COLLISIONMANAGER_H
+#ifndef COLLISION_MANAGER_HPP
+#define COLLISION_MANAGER_HPP
 
 #pragma once
 

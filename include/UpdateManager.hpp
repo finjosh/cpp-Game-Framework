@@ -1,5 +1,5 @@
-#ifndef UPDATEMANAGER_H
-#define UPDATEMANAGER_H
+#ifndef UPDATE_MANAGER_HPP
+#define UPDATE_MANAGER_HPP
 
 #pragma once
 

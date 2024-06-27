@@ -105,18 +105,6 @@
     "makefile.makefilePath": "Makefile",
     "C_Cpp.default.compilerPath": "V:\\VSCodeFolder\\MSYS2\\mingw64\\bin\\gcc.exe",
     "cSpell.words": [
-        "COLLISIONCALLBACK",
-        "COLLISIONMANAGER",
-        "DRAWABLEMANAGER",
-        "GAMEOBJECT",
-        "NETWORKOBJECT",
-        "NETWORKOBJECTMANAGER",
-        "OBJECTMANAGER",
-        "PARTICLEEMITTER",
-        "SERVERSOCKET",
         "tgui",
-        "UPDATEINTERFACE",
-        "UPDATEMANAGER",
-        "WORLDHANDLER"
     ]
 }

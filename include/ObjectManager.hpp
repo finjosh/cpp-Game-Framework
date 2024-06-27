@@ -1,5 +1,5 @@
-#ifndef OBJECTMANAGER_H
-#define OBJECTMANAGER_H
+#ifndef OBJECT_MANAGER_HPP
+#define OBJECT_MANAGER_HPP
 
 #pragma once
 

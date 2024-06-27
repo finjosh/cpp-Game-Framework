@@ -1,5 +1,5 @@
-#ifndef CANVAS_MANAGER_H
-#define CANVAS_MANAGER_H
+#ifndef CANVAS_MANAGER_HPP
+#define CANVAS_MANAGER_HPP
 
 #pragma once
 

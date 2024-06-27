@@ -1,5 +1,5 @@
-#ifndef DEBUG_DRAW_H
-#define DEBUG_DRAW_H
+#ifndef DEBUG_DRAW_HPP
+#define DEBUG_DRAW_HPP
 
 #pragma once
 

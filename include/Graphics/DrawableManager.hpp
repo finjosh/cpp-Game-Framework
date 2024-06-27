@@ -1,5 +1,5 @@
-#ifndef DRAWABLEMANAGER_H
-#define DRAWABLEMANAGER_H
+#ifndef DRAWABLE_MANAGER_HPP
+#define DRAWABLE_MANAGER_HPP
 
 #pragma once
 

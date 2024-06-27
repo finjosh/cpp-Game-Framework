@@ -1,5 +1,5 @@
-#ifndef VECTOR2_H
-#define VECTOR2_H
+#ifndef VECTOR2_HPP
+#define VECTOR2_HPP
 
 #pragma once
 

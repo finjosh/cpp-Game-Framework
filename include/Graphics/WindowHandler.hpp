@@ -1,5 +1,5 @@
-#ifndef WINDOWHANDLER_H
-#define WINDOWHANDLER_H
+#ifndef WINDOW_HANDLER_HPP
+#define WINDOW_HANDLER_HPP
 
 #pragma once
 

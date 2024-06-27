@@ -1,5 +1,5 @@
-#ifndef CAMERA_MANAGER_H
-#define CAMERA_MANAGER_H
+#ifndef CAMERA_MANAGER_HPP
+#define CAMERA_MANAGER_HPP
 
 #pragma once
 
