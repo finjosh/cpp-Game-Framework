@@ -170,10 +170,9 @@ float Vector2::distance(const Vector2& vector) const
 {
     return (vector-(*this)).length();
 }
-// #include "Utils/Debug/CommandPrompt.hpp"
+
 Rotation Vector2::angle(Vector2 a, Vector2 b)
 {
-    // TODO optimize this
     a.normalize();
     b.normalize();
     return Rotation{b.x, b.y} - Rotation{a.x, a.y};

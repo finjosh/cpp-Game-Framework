@@ -6,8 +6,8 @@
 #include "SFML/Graphics/Shape.hpp"
 
 #include "Object.hpp"
-#include "Settings.hpp"
 #include "Graphics/DrawableObject.hpp"
+#include "Settings.hpp"
 // #include "Physics/WorldHandler.hpp"
 
 // TODO make renderers for other sfml drawables
@@ -58,7 +58,7 @@ protected:
     {
         // T::setPosition((sf::Vector2f)Object::getGlobalPosition()*PIXELS_PER_METER);
         // T::setRotation(Object::getGlobalRotation().getAngle()*180/PI);
-        T::setPosition((sf::Vector2f)thisTransform.position*PIXELS_PER_METER);
+        T::setPosition({thisTransform.position.x*PIXELS_PER_METER, thisTransform.position.y*PIXELS_PER_METER});
         T::setRotation(thisTransform.rotation.getAngle()*180/PI);
         target->draw(*this);
     }

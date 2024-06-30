@@ -7,13 +7,13 @@ void DrawableManager::draw(sf::RenderTarget* target)
     for (auto drawable: m_drawables)    
     {
         if (drawable->isEnabled())
-            drawable->m_draw(target, drawable->getInterpolatedTransform()); // since every object in this list is a parent
+            drawable->m_draw(target, {}); // since every object in this list is a parent
     }
 }
 
 void DrawableManager::addDrawable(DrawableObject* DrawableObject)
 {
-    m_drawables.insert({DrawableObject});
+    m_drawables.emplace(DrawableObject);
 }
 
 void DrawableManager::removeDrawable(DrawableObject* DrawableObject)

@@ -23,6 +23,13 @@ public:
     Vector2 getLocalVector(Vector2 vector) const;
     Vector2 getGlobalVector(Vector2 vector) const;
 
+    /// @brief adds a local transform to a global transform
+    /// @note left Transform will be the global and right will be the local
+    Transform operator + (const Transform& localTransform) const;
+    /// @brief adds a local transform to a global transform
+    /// @note left Transform will be the global and right will be the local
+    void operator += (const Transform& localTransform);
+
     //* box2d functions
     #ifdef B2_MATH_H
     inline Transform(b2Transform transform) : position(transform.p), rotation(transform.q) {}

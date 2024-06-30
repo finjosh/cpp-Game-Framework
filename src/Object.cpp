@@ -130,6 +130,11 @@ Object::Ptr<> Object::getParent()
     return m_parent;
 }
 
+Object* Object::getParentRaw()
+{
+    return m_parent;
+}
+
 void Object::addChild(Object::Ptr<>& child)
 {
     addChild(child.get());
@@ -377,12 +382,12 @@ Transform Object::getInterpolatedTransform() const
     return m_transform;
 }
 
-Vector2 Object::getInterpolatedPosition() const
-{
-    return m_transform.position;
+void Object::setUserType(size_t type)
+{   
+    m_userType = type;
 }
 
-Rotation Object::getInterpolatedRotation() const
+size_t Object::getUserType() const
 {
-    return m_transform.rotation;
+    return m_userType;
 }

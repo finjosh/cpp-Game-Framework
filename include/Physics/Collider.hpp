@@ -277,11 +277,9 @@ public:
     // /// Get the list of all joints attached to this body.
 	// b2JointEdge* GetJointList();
 	// const b2JointEdge* GetJointList() const;
+    Transform getInterpolatedTransform() const override;
 
 protected:
-    Transform getInterpolatedTransform() const override;
-    Vector2 getInterpolatedPosition() const override;
-    Rotation getInterpolatedRotation() const override;
 
 private:
     friend CollisionManager;

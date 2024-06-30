@@ -29,6 +29,11 @@ void WindowHandler::Display()
     event.mouseMove.y = sf::Mouse::getPosition(*m_renderWindow).y;
     CanvasManager::handleEvent(event);
 
+    if (CameraManager::m_cameras.size() == 0)
+    {   
+        DrawableManager::draw(m_renderWindow);
+        WorldHandler::getWorld().DebugDraw();
+    }
     for (auto camera: CameraManager::m_cameras) //* Note this can not be multithreaded simply (camera uses regular events that could lead to memory races)
     {
         if (!camera->isDisplaying())

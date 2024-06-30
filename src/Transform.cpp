@@ -36,3 +36,14 @@ Vector2 Transform::getGlobalVector(Vector2 vector) const
 {
     return Vector2{rotation.cos * vector.x - rotation.sin * vector.y, rotation.sin * vector.x + rotation.cos * vector.y};
 }
+
+Transform Transform::operator + (const Transform& localTransform) const
+{
+    return Transform{position + Vector2::rotateAround(localTransform.position, {0,0}, rotation), rotation + localTransform.rotation};
+}
+
+void Transform::operator += (const Transform& localTransform)
+{
+    position += Vector2::rotateAround(localTransform.position, {0,0}, rotation);
+    rotation += localTransform.rotation;
+}

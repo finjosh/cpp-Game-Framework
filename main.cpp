@@ -23,6 +23,11 @@
 #include "Physics/CollisionManager.hpp"
 #include "Physics/DebugDraw.hpp"
 
+#include "Networking/NetworkTypes.hpp"
+#include "Networking/SocketUI.hpp"
+#include "Networking/NetworkObject.hpp"
+#include "Networking/NetworkObjectManager.hpp"
+
 using namespace std;
 
 // TODO make animation class
@@ -54,7 +59,7 @@ public:
     createDestroy();
 };
 
-class Player : public virtual Object, public Collider, public Renderer<sf::RectangleShape>, public UpdateInterface
+class Player : public virtual Object, public Collider, public Renderer<sf::RectangleShape>, public UpdateInterface, public NetworkObject
 {
 public:
     std::string name = "Random Name";
@@ -64,7 +69,7 @@ public:
     static Camera::Ptr m_camera; // default is nullptr
     static std::set<Object*> m_players;
 
-    inline Player()
+    inline Player(bool owner = false) : NetworkObject(2), owner(owner)
     {
         m_players.emplace(this);
 
@@ -84,17 +89,6 @@ public:
         m_particle.setOrigin({2.5,2.5});
         m_hitParticle.set(new ParticleEmitter(&m_particle, {0,0}, 10, 0, 0, 1, 10, 0.5, 360));
 
-        // auto tempRectangle = new Renderer<sf::RectangleShape>();
-        // tempRectangle->setSize({5,5});
-        // tempRectangle->setOrigin({2.5,2.5});
-        // tempRectangle->setPosition({0,5});
-        // tempRectangle->setParent(this);
-        // auto tempRectangle2 = new Renderer<sf::RectangleShape>();
-        // tempRectangle2->setSize({5,5});
-        // tempRectangle2->setOrigin({2.5,2.5});
-        // tempRectangle2->setPosition({0,5});
-        // tempRectangle2->setParent(tempRectangle);
-
         if (!m_camera)
         {
             m_camera = new Camera();
@@ -111,36 +105,48 @@ public:
 
     inline virtual void Update(float deltaTime) override
     {
-        if (sf::Keyboard::isKeyPressed(sf::Keyboard::Key::W))
+        if (owner)
         {
-            // move(0, -75*deltaTime);
+            W = false, A = false, S = false, D = false, Q = false, E = false;
+
+            if (sf::Keyboard::isKeyPressed(sf::Keyboard::Key::W))
+            {
+                W = true;
+            }
+            if (sf::Keyboard::isKeyPressed(sf::Keyboard::Key::A))
+            {
+                A = true;
+            }
+            if (sf::Keyboard::isKeyPressed(sf::Keyboard::Key::S))
+            {
+                S = true;
+            }
+            if (sf::Keyboard::isKeyPressed(sf::Keyboard::Key::D))
+            {
+                D = true;
+            }
+            if (sf::Keyboard::isKeyPressed(sf::Keyboard::Key::E))
+            {
+                E = true;
+            }
+            if (sf::Keyboard::isKeyPressed(sf::Keyboard::Key::Q))
+            {
+                Q = true;
+            }
+        }
+
+        if (W)
             applyForceToCenter({0,-120000*deltaTime});
-        }
-        if (sf::Keyboard::isKeyPressed(sf::Keyboard::Key::A))
-        {
-            // move(-75*deltaTime, 0);
+        if (A)
             applyForceToCenter({-120000*deltaTime,0});
-        }
-        if (sf::Keyboard::isKeyPressed(sf::Keyboard::Key::S))
-        {
-            // move(0, 75*deltaTime);
+        if (S)
             applyForceToCenter({0,120000*deltaTime});
-        }
-        if (sf::Keyboard::isKeyPressed(sf::Keyboard::Key::D))
-        {
-            // move(75*deltaTime, 0);
+        if (D)
             applyForceToCenter({120000*deltaTime,0});
-        }
-        if (sf::Keyboard::isKeyPressed(sf::Keyboard::Key::E))
-        {
-            // rotate(PI * deltaTime);
+        if (E)
             applyTorque(500000*deltaTime);
-        }
-        if (sf::Keyboard::isKeyPressed(sf::Keyboard::Key::Q))
-        {
-            // rotate(-PI * deltaTime);
+        if (Q)
             applyTorque(-500000*deltaTime);
-        }
     }
 
     inline void LateUpdate(float delta) override
@@ -165,6 +171,37 @@ public:
             m_hitParticle->emit();
         }
     }
+
+    sf::Packet OnServerSendData() override
+    {
+        sf::Packet temp;
+        temp << getPosition().x << getPosition().y << getRotation().getAngle();
+        return temp;
+    }
+
+    void OnClientReceivedData(sf::Packet& packet) override
+    {
+        Vector2 pos;
+        float rot;
+        packet >> pos.x >> pos.y >> rot;
+        setPosition(pos);
+        setRotation(rot);
+    }
+
+    sf::Packet OnClientSendData() override
+    {
+        sf::Packet temp;
+        temp << W << A << S << D << Q << E;
+        return temp;
+    }
+
+    void OnServerReceivedData(sf::Packet& packet) override
+    {
+        packet >> W >> A >> S >> D >> Q >> E;
+    }
+
+    bool W = false, A = false, S = false, D = false, Q = false, E = false;
+    bool owner = false;
 
     createDestroy();
 };
@@ -272,10 +309,49 @@ private:
     std::set<const Collider*> m_freeFlow;
 };
 
+class NetObj : public virtual Object, public Renderer<sf::CircleShape>, public Collider, public NetworkObject
+{
+public:
+    inline NetObj() : NetworkObject(1)
+    {
+        setRadius(5);
+        setOrigin(5,5);
+    }
+
+protected:
+    sf::Packet OnServerSendData() override
+    {
+        sf::Packet temp;
+        temp << this->getPosition().x << this->getPosition().y << this->getRotation().getAngle();
+        return temp;
+    }
+
+    void OnClientReceivedData(sf::Packet& packet) override
+    {
+        float x, y, angle;
+        packet >> x >> y >> angle;
+        this->setPosition(x,y);
+        this->setRotation(angle);
+    }
+
+    sf::Packet OnClientSendData() override
+    {
+        return sf::Packet(); // empty packet
+    }
+
+    void OnServerReceivedData(sf::Packet& packet) override
+    {
+        // dont care about this data
+    }
+
+private:
+    createDestroy();
+};
+
 int main()
 {
     // setup for sfml and tgui
-    sf::RenderWindow window(sf::VideoMode::getDesktopMode(), "Game Framework", sf::Style::Fullscreen);
+    sf::RenderWindow window(sf::VideoMode::getDesktopMode(), "Game Framework"); // , sf::Style::Fullscreen
     // window.setFramerateLimit(60);
     WindowHandler::setRenderWindow(&window);
     CanvasManager::initGUI();
@@ -301,16 +377,31 @@ int main()
     //! ---------------------------------------------------
 
     //* init code
+
+    NetworkType::initType(1, {[](){ return static_cast<NetworkObject*>(new NetObj()); }});
+    NetworkType::initType(2, {[](){ return static_cast<NetworkObject*>(new Player()); }});
+
+    using namespace udp;
+    SocketUI socketUI(gui->getGroup(), 50001);
+    Command::Handler::addCommand(Command::command{"net", "Commands for the network UI", {Command::helpCommand, "net"}, {
+        {"SetConnectionWindowVisible", "sets visiblity of connection window", {[&socketUI](Command::Data* data){ socketUI.setConnectionVisible(StringHelper::toBool(data->getToken())); }}},
+        {"SetInfoWindowVisible", "sets visiblity of info window", {[&socketUI](Command::Data* data){ socketUI.setInfoVisible(StringHelper::toBool(data->getToken())); }}},
+    }});
+    socketUI.setConnectionVisible();
+    socketUI.setInfoVisible();
+    socketUI.getInfoWindow()->setPosition({socketUI.getConnectionWindow()->getSize().x, 0});
+    NetworkObjectManager::init(&socketUI.getServer(), &socketUI.getClient());
+
     new Wall({96,108}, {192,10});
     new Wall({96,0}, {192,10});
     new Wall({192, 54}, {10, 108});
     new Wall({0, 54}, {10, 108});
-    for (int i = 0; i < 100; i++)
-        (new Player())->setPosition({50,50});
-    auto p = new Player();
-    p->setPosition({15,10});
-    p->setRotation(45);
-    p->name = "Something";
+    // for (int i = 0; i < 100; i++)
+    //     (new Player())->setPosition({50,50});
+    // auto p = new Player();
+    // p->setPosition({15,10});
+    // p->setRotation(45);
+    // p->name = "Something";
 
     sf::RectangleShape particleShape;
     particleShape.setSize({10,10});
@@ -328,34 +419,11 @@ int main()
 
     new OneWay({40,25}, {40,10});
 
-    // auto gui2 = new Canvas();
-    // gui2->setGlobalSpace();
-    // gui2->setPosition(50,50);
-    // auto panel = tgui::Panel::create();
-    // panel->getRenderer()->setBackgroundColor(tgui::Color::applyOpacity(panel->getSharedRenderer()->getBackgroundColor(), 0.5));
-    // panel->add(tgui::ChildWindow::create("Test window"));
-    // gui2->add(panel);
-    // camera->blacklistCanvas(gui2);
-
-    auto line1 = new Renderer<sf::RectangleShape>();
-    line1->setSize({10,1});
-    line1->setOrigin({0,0.5});
-    line1->setParent(gui);
-    line1->setPosition(gui->getSize()/(2*PIXELS_PER_METER));
-    line1->setFillColor(sf::Color::Red);
-    auto line2 = new Renderer<sf::RectangleShape>();
-    line2->setSize({10,1});
-    line2->setOrigin({0,0.5});
-    line2->setRotation(PI/2);
-    line2->setParent(gui);
-    line2->setPosition(gui->getSize()/(2*PIXELS_PER_METER));
-    line2->setFillColor(sf::Color::Blue);
-    Vector2 a;
-    Vector2 b;
-    auto circle = new Renderer<sf::CircleShape>();
-    circle->setRadius(2.5);
-    circle->setOrigin({2.5,2.5});
-    circle->setFillColor(sf::Color::Magenta);
+    NetworkObject* temp = nullptr;
+    NetworkObjectManager::getServer()->onConnectionOpen([&temp](){
+        temp = new Player(true);
+        temp->createNetworkObject();
+    });
 
     float secondTimer = 0;
     int fps = 0;
@@ -411,29 +479,6 @@ int main()
 
         //* Write code here
 
-        if (sf::Mouse::isButtonPressed(sf::Mouse::Left))
-        {
-            Vector2 temp = WindowHandler::getMouseScreenPos() - WindowHandler::getScreenSize()/2;
-            a = temp;
-            line1->setSize({temp.normalize(),1});
-            line1->setRotation({temp.x, temp.y});
-        }
-        if (sf::Mouse::isButtonPressed(sf::Mouse::Right))
-        {
-            Vector2 temp = WindowHandler::getMouseScreenPos() - WindowHandler::getScreenSize()/2;
-            b = temp;
-            line2->setSize({temp.normalize(),1});
-            line2->setRotation({temp.x, temp.y});
-        }
-        if (sf::Keyboard::isKeyPressed(sf::Keyboard::Space))
-        {
-            a = Vector2::rotateTowards(a, b, PI/16*deltaTime.asSeconds(), 5*deltaTime.asSeconds());
-            line1->setSize({a.length(),1});
-            line1->setRotation(Vector2::rotation(a));
-        }
-
-        circle->setPosition(Vector2::moveTowards(circle->getPosition(), p->getPosition(), 5*deltaTime.asSeconds()));
-
         fps++;
         if (secondTimer >= 1)
         {
@@ -448,15 +493,12 @@ int main()
         WindowHandler::Display();
     }
 
-    //! Required so that VarDisplay and CommandPrompt release all data
-    VarDisplay::close();
-    Command::Prompt::close();
-    TFuncDisplay::close();
-    //! --------------------------------------------------------------
-
     ObjectManager::destroyAllObjects();
     CanvasManager::closeGUI();
     window.close();
+
+    NetworkObjectManager::getClient()->closeConnection(); // TODO do this in a function
+    NetworkObjectManager::getServer()->closeConnection();
 
     return 0;
 }

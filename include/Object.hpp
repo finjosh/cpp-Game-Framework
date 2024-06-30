@@ -207,6 +207,9 @@ public:
     void setParent(Object* parent);
     /// @returns an invalid ptr if no parent
     Object::Ptr<> getParent();
+    /// @note only use this if you do not need to know when the parent is no longer existant
+    /// @returns a raw ptr to the parent
+    Object* getParentRaw();
     /// @brief adds the given object as a child to this one
     void addChild(Object::Ptr<>& child);
     /// @brief adds the given object as a child to this one
@@ -299,13 +302,16 @@ public:
     void move(float x, float y);
     void rotate(Rotation rot);
 
-protected:
+    /// @brief sets the stored user type for easy comparison later on
+    void setUserType(size_t type);
+    /// @returns the stored user type
+    size_t getUserType() const;
+
+    /// @note this is just the transform if no other derived classes override this
     /// @returns the locally interpolated transform
     virtual Transform getInterpolatedTransform() const;
-    /// @returns the locally interpolated position
-    virtual Vector2 getInterpolatedPosition() const;
-    /// @returns the locally interpolated rotation
-    virtual Rotation getInterpolatedRotation() const;
+
+protected:
     inline virtual void OnEnable() {};
     inline virtual void OnDisable() {};
     /// @warning do NOT disconnect all EVER
@@ -340,6 +346,7 @@ private:
 
     std::atomic_bool m_enabled = true;
     size_t m_id = 0;
+    size_t m_userType = 0;
 
     Transform m_transform;
 

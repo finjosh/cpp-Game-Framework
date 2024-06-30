@@ -8,26 +8,27 @@
 #include "Object.hpp"
 
 class NetworkObjectManager;
+class NetworkType;
 
-/// @warning when and object is used on a network make sure to only use fixed size types
-/// @note fixed sized types are built in with SFML
+/// @warning when and object is used on a network make sure to only use fixed size types (also built in with sfml)
+/// @note the class of which this is a base class must have a constructor with zero inputs
 class NetworkObject : public virtual Object
 {
 public:
-    // /// @param objectType the type of object that is being made
-    // /// @note the objectType should be declared in the ObjectType.hpp file first
-    // NetworkObject(const size_t& objectType);
-    NetworkObject();
+    /// @param type the type of object that is being made
+    /// @note the objectType should be declared in the ObjectType.hpp file first
+    NetworkObject(size_t type); // TODO do this using typeid and a dict that converts typeid to the object type
+    // NetworkObject();
     ~NetworkObject();
 
     /// @brief the network ID is the id of either a client or the server to the network connection
     /// @returns the id that defined this program on the network
-    sf::Uint32 getNetworkID() const;
-    // size_t getTypeid() const;
-    // void createNetworkObject();
+    sf::Uint64 getNetworkID() const;
+    size_t getTypeid() const;
+    void createNetworkObject(); // TODO handle if this is a server or client properly
     /// @brief removes this object from the network
     /// @note does not destroy this object
-    // void removeNetworkObject();
+    void removeNetworkObject();
 
     /// @brief called when the network connection is opened
     /// @note this is called when either the server is opened or the client is connected
@@ -35,29 +36,22 @@ public:
     /// @brief called when the network connection is closed
     /// @note this is called when either the server is closed or the client is disconnected 
     inline virtual void OnConnectionClose(){};
-    /// @brief called when data is received for this Object
-    /// @param data the packet containing data for this obj
-    virtual void OnDataReceived(sf::Packet& data) = 0;
-    /// @brief Called when data is required from this object
-    /// @note make sure that the send function is thread safe
-    /// @returns a packet with the data that will be unpacked in "OnDataReceived"
-    virtual sf::Packet OnSendData() = 0;
+
+    virtual void OnClientReceivedData(sf::Packet& data) = 0;
+    virtual sf::Packet OnClientSendData() = 0;
+    virtual void OnServerReceivedData(sf::Packet& data) = 0;
+    virtual sf::Packet OnServerSendData() = 0;
 
 protected:
     friend NetworkObjectManager;
+    friend NetworkType;
 
 private:
     /// @brief null id = 0
-    sf::Uint32 m_id = 0;
-    // const size_t _typeid = 0;
+    sf::Uint64 m_id = 0;
+    const size_t m_typeid = 0;
 
-    static sf::Uint32 m_nextID;
-};
-
-class _networkObjectComp
-{
-public:
-    bool operator() (const NetworkObject* lhs, const NetworkObject* rhs) const;
+    static sf::Uint64 m_nextID;
 };
 
 namespace std {

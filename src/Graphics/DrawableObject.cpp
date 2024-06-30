@@ -11,11 +11,6 @@ bool _drawableComp::operator() (const DrawableObject* lhs, const DrawableObject*
         return true;
     else 
         return false;
-
-//     if (lhs->getDrawStage() < rhs->getDrawStage() || (lhs->getDrawStage() == rhs->getDrawStage() && lhs->getLayer() <= rhs->getLayer()) && lhs->getID() < rhs->getID())
-//         return true;
-//     else    
-//         return false;
 }
 
 DrawableObject::DrawableObject(int layer, DrawStage stage) : m_layer(layer), m_stage(stage)
@@ -33,9 +28,22 @@ DrawableObject::~DrawableObject()
 
 void DrawableObject::setLayer(int layer)
 {
-    DrawableManager::removeDrawable(this);
-    m_layer = layer;
-    DrawableManager::addDrawable(this);
+    if (m_drawableParent)
+    {
+        auto parent = m_drawableParent;
+        unsigned int nonDraw = m_nonDrawableParents;
+        m_removeParent();
+        m_layer = layer;
+        m_drawableParent = parent;
+        m_nonDrawableParents = nonDraw;
+        m_drawableParent->m_drawableChildren.emplace(this);
+    }
+    else
+    {
+        DrawableManager::removeDrawable(this);
+        m_layer = layer;
+        DrawableManager::addDrawable(this);
+    }
 }
 
 int DrawableObject::getLayer() const
@@ -45,20 +53,27 @@ int DrawableObject::getLayer() const
 
 void DrawableObject::setDrawStage(DrawStage stage)
 {
-    DrawableManager::removeDrawable(this);
-    m_stage = stage;
     if (m_drawableParent)
-        m_removeParent(); // also adds back to the drawable manager
+    {
+        auto parent = m_drawableParent;
+        unsigned int nonDraw = m_nonDrawableParents;
+        m_removeParent();
+        m_stage = stage;
+        m_drawableParent = parent;
+        m_nonDrawableParents = nonDraw;
+        m_drawableParent->m_drawableChildren.emplace(this);
+    }
     else
+    {
+        DrawableManager::removeDrawable(this);
+        m_stage = stage;
         DrawableManager::addDrawable(this);
+    }
 }
 
 DrawStage DrawableObject::getDrawStage() const
 {
-    if (m_drawableParent)
-        return m_drawableParent->getDrawStage();
-    else
-        return m_stage;
+    return m_stage;
 }
 
 void DrawableObject::m_setParent()
@@ -72,23 +87,26 @@ void DrawableObject::m_setParent()
     }
 
     DrawableObject* drawableParent = curParent->cast<DrawableObject>();
+    unsigned int nonDrawables = 0;
 
     while (drawableParent == nullptr && curParent != nullptr)
     {
-        curParent = curParent->getParent();
+        nonDrawables++;
+        curParent = curParent->getParentRaw();
         drawableParent = curParent->cast<DrawableObject>();
     }
 
     if (drawableParent != nullptr)
     {
         DrawableManager::removeDrawable(this);
-        drawableParent->m_drawableChildren.insert({this});
+        drawableParent->m_drawableChildren.emplace(this);
         m_drawableParent = drawableParent;
     }
     else
     {
         m_removeParent();
     }
+    m_nonDrawableParents = nonDrawables;
 }
 
 void DrawableObject::m_removeParent()
@@ -98,18 +116,28 @@ void DrawableObject::m_removeParent()
         m_drawableParent->m_drawableChildren.erase(this);
         m_drawableParent = nullptr;
     }
+    m_nonDrawableParents = 0;
     DrawableManager::addDrawable(this);
 }
 
-void DrawableObject::m_draw(sf::RenderTarget* target, const Transform& stateTransform) 
+// TODO fix this as it does not handle the following case
+// Drawable Parent -> non drawable child -> drawable child
+void DrawableObject::m_draw(sf::RenderTarget* target, Transform stateTransform) 
 {
+    if (m_nonDrawableParents > 0)
+        stateTransform += m_getNInterpolatedTransforms(getParentRaw(), m_nonDrawableParents);
+    stateTransform += getInterpolatedTransform();
     this->Draw(target, stateTransform);
     for (auto child: m_drawableChildren)
     {
-        Transform childTransform(stateTransform);
-        childTransform.position += Vector2::rotateAround(child->getInterpolatedPosition(), {0,0}, stateTransform.rotation);
-        childTransform.rotation += child->getInterpolatedRotation();
-        child->m_draw(target, childTransform);
+        child->m_draw(target, stateTransform);
     }
     this->LateDraw(target, stateTransform);
+}
+
+Transform DrawableObject::m_getNInterpolatedTransforms(Object* parent, unsigned int n)
+{
+    if (n == 0)
+        return Transform{};
+    return m_getNInterpolatedTransforms(parent->getParentRaw(), n-1) + parent->getInterpolatedTransform();
 }

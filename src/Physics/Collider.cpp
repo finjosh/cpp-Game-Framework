@@ -261,17 +261,7 @@ Fixture Collider::getFixtureList()
 
 Transform Collider::getInterpolatedTransform() const
 {
-    return Transform{getInterpolatedPosition(), getInterpolatedRotation()};
-}
-
-Vector2 Collider::getInterpolatedPosition() const
-{
-    return Object::getPosition() + WorldHandler::getLeftOverTime() * m_body->GetLinearVelocity();
-}
-
-Rotation Collider::getInterpolatedRotation() const
-{
-    return Object::getRotation() + m_body->GetAngularVelocity() * WorldHandler::getLeftOverTime();
+    return Transform{Object::getPosition() + WorldHandler::getLeftOverTime() * m_body->GetLinearVelocity(), Object::getRotation() + m_body->GetAngularVelocity() * WorldHandler::getLeftOverTime()};
 }
 
 //* Collision Data

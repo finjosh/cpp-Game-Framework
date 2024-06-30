@@ -61,8 +61,6 @@ public:
     #endif
     // ----------------
 
-    // TODO test floating point errors by using these functions
-    // TODO test performance on these with trig identities vs recalculating using trig functions
     Rotation operator + (Rotation rotation) const;
     void operator += (Rotation rotation);
     Rotation operator - (Rotation rotation) const;

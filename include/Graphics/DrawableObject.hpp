@@ -34,9 +34,9 @@ public:
     /// @note the layer is relative to the parent layer if it is a drawableObject
     virtual int getLayer() const;
     /// @brief sets the stage at which this object will be drawn
-    /// @note stage is the same as the drawable parent unless manually set (if there is any parent that is drawable)
+    /// @note the draw stage is relative to the parent
     virtual void setDrawStage(DrawStage stage);
-    /// @note stage is relative to the parent unless manually set
+    /// @note the draw stage is relative to the parent
     virtual DrawStage getDrawStage() const;
 
     /// @brief should be used to draw the obj
@@ -59,13 +59,18 @@ protected:
 
     /// @brief draws the objects recursively 
     /// @note only use this if you know what you are doing
-    void m_draw(sf::RenderTarget* target, const Transform& stateTransform);
+    /// @param stateTransform is the global transform of this objects drawable parent
+    void m_draw(sf::RenderTarget* target, Transform stateTransform);
+    /// @warning assumes that the given parent is not nullptr
+    /// @returns the n interpolated parent transforms
+    Transform m_getNInterpolatedTransforms(Object* parent, unsigned int n);
 
     friend DrawableManager;
     friend CanvasManager;
 
 private:
     int m_layer = 0;
+    unsigned int m_nonDrawableParents = 0;
     DrawStage m_stage = DrawStage::Default;
 
     DrawableObject* m_drawableParent = nullptr;
