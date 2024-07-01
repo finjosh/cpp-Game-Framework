@@ -133,6 +133,8 @@ typedef ContactData CollisionData;
 class Collider : public virtual Object
 {
 public:
+    using Ptr = Object::Ptr<Collider>;
+
     Collider();
     ~Collider();
 
@@ -173,7 +175,8 @@ public:
     inline virtual void PreSolve(PreSolveData data) {};
     /// @brief called every frame until the two objects are no longer colliding
     /// @note this will also be called on start of contact
-    /// @note these are called for each fixture
+    /// @exception if an object is destroyed in this callback it will also be called with EndContact (normally does not call when contact ends)
+    /// @note this is called for each fixture
     inline virtual void OnColliding(ContactData ContactData) {};
 
     void setAwake(bool awake = true);
@@ -296,8 +299,6 @@ private:
     b2Body* m_body = nullptr;
     /// @brief if true follows object else physics are disabled no matter object state
     bool m_enabled = true;
-    /// @note stores all the current contacts that are ongoing
-    std::set<ContactData> m_currentCollisions;
 };
 
 namespace std {

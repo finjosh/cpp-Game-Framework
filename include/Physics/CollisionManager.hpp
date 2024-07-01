@@ -4,6 +4,7 @@
 #pragma once
 
 #include <unordered_set>
+#include <set>
 #include <list>
 
 #include "box2d/b2_world_callbacks.h"
@@ -33,6 +34,9 @@ private:
     struct m_contactData
     {
         m_contactData(Collider* A, Collider* B, b2Contact* contactData);
+        
+        bool operator < (const m_contactData& data) const;
+        bool operator == (const m_contactData& data) const;
 
         Collider* A = nullptr;
         Collider* B = nullptr;
@@ -42,6 +46,9 @@ private:
     static std::unordered_set<Collider*> m_objects;
     static std::list<m_contactData> m_beginContact;
     static std::list<m_contactData> m_endContact;
+    static std::set<m_contactData> m_colliding;
+    static bool m_usingCollidingSet;
+    static std::list<m_contactData> m_collidingEraseQueue;
 };
 
 #endif

@@ -2,15 +2,23 @@
 #include "Graphics/WindowHandler.hpp"
 #include "Graphics/CameraManager.hpp"
 #include <cassert>
+#include <TGUI/ToolTip.hpp>
 
-tgui::Gui* CanvasManager::m_gui;
+Gui::Gui(sf::RenderWindow& window) : tgui::Gui(window) {}
+Gui::Gui(sf::RenderTarget& target) : tgui::Gui(target) {}
+tgui::Widget::Ptr Gui::getToolTip()
+{
+    return m_visibleToolTip;
+}
+
+Gui* CanvasManager::m_gui;
 std::set<Canvas*, _drawableComp> CanvasManager::m_canvases;
 
 void CanvasManager::initGUI()
 {
     assert(WindowHandler::getRenderWindow() != nullptr);
 
-    m_gui = new tgui::Gui(*WindowHandler::getRenderWindow());
+    m_gui = new Gui(*WindowHandler::getRenderWindow());
 }
 
 void CanvasManager::closeGUI()
@@ -78,6 +86,8 @@ void CanvasManager::removeCanvas(Canvas* canvas)
 
 void CanvasManager::drawOverlayGUI()
 {
+    m_gui->updateTime();
+
     if (!m_gui->getTarget() || (m_gui->getWindow()->getSize().x == 0) || (m_gui->getWindow()->getSize().y == 0) || (m_gui->getView().getWidth() <= 0) || (m_gui->getView().getHeight() <= 0))
         return;
 
@@ -91,7 +101,23 @@ void CanvasManager::drawOverlayGUI()
             canvas->m_draw(m_gui->getTarget(), {}); // should be the default transform as screen space canvases dont care about pos or rotation
     }
 
-    m_gui->updateTime();
+    if (m_gui->getToolTip() != nullptr)
+    {
+        auto toolTip = m_gui->getToolTip();
+        tgui::RenderStates widgetStates;
+        widgetStates.transform.translate((tgui::Vector2f)WindowHandler::getMouseScreenPos()*PIXELS_PER_METER - tgui::Vector2f{toolTip->getOrigin().x * toolTip->getSize().x, toolTip->getOrigin().y * toolTip->getSize().y});
+        if (toolTip->getRotation() != 0)
+        {
+            const tgui::Vector2f rotOrigin{toolTip->getRotationOrigin().x * toolTip->getSize().x, toolTip->getRotationOrigin().y * toolTip->getSize().y};
+            widgetStates.transform.rotate(toolTip->getRotation(), rotOrigin);
+        }
+        if ((toolTip->getScale().x != 1) || (toolTip->getScale().y != 1))
+        {
+            const tgui::Vector2f scaleOrigin{toolTip->getScaleOrigin().x * toolTip->getSize().x, toolTip->getScaleOrigin().y * toolTip->getSize().y};
+            widgetStates.transform.scale(toolTip->getScale(), scaleOrigin);
+        }
+        CanvasManager::getGui()->getBackendRenderTarget()->drawWidget(widgetStates, toolTip);
+    }
 }
 
 void CanvasManager::updateViewForCamera(Camera* camera)

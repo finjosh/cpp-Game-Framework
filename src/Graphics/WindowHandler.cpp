@@ -6,6 +6,7 @@
 #include "SFML/Window/Mouse.hpp"
 
 sf::RenderWindow* WindowHandler::m_renderWindow = nullptr;
+Vector2 WindowHandler::m_lastMousePos = {0,0};
 
 sf::RenderWindow* WindowHandler::getRenderWindow()
 {
@@ -23,11 +24,16 @@ void WindowHandler::Display()
         return;
 
     // Emitting an mouse move event to the gui so that it updates any canvas position changes
-    sf::Event event;
-    event.type = sf::Event::MouseMoved;
-    event.mouseMove.x = sf::Mouse::getPosition(*m_renderWindow).x;
-    event.mouseMove.y = sf::Mouse::getPosition(*m_renderWindow).y;
-    CanvasManager::handleEvent(event);
+    Vector2 newMousePos = WindowHandler::getMousePos();
+    if (m_lastMousePos != newMousePos)
+    {
+        m_lastMousePos = newMousePos;
+        sf::Event event;
+        event.type = sf::Event::MouseMoved;
+        event.mouseMove.x = sf::Mouse::getPosition(*m_renderWindow).x;
+        event.mouseMove.y = sf::Mouse::getPosition(*m_renderWindow).y;
+        CanvasManager::handleEvent(event);
+    }
 
     if (CameraManager::m_cameras.size() == 0)
     {   

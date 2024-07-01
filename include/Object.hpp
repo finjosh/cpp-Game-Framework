@@ -310,6 +310,8 @@ public:
     /// @note this is just the transform if no other derived classes override this
     /// @returns the locally interpolated transform
     virtual Transform getInterpolatedTransform() const;
+    /// @returns true if this object is in the destroy queue
+    bool isDestroyed() const;
 
 protected:
     inline virtual void OnEnable() {};
@@ -344,7 +346,8 @@ private:
     void m_addChild(Object* object);
     void m_removeChild(Object* object);
 
-    std::atomic_bool m_enabled = true;
+    bool m_enabled = true;
+    bool m_destroyed = false;
     size_t m_id = 0;
     size_t m_userType = 0;
 
@@ -353,7 +356,7 @@ private:
     Object* m_parent = nullptr;
     std::list<Object*> m_children;
 
-    static std::atomic_ullong m_lastID;
+    static size_t m_lastID;
 
     friend ObjectManager;
 };

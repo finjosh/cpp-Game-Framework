@@ -8,6 +8,24 @@
 
 class Camera;
 
+/// @note used to access protected variables
+class Gui : public tgui::Gui
+{
+public:
+    Gui(sf::RenderWindow& window);
+    Gui(sf::RenderTarget& target);
+
+    /// @returns the current visible tooltip
+    tgui::Widget::Ptr getToolTip();
+    /// @returns the global position of the
+    tgui::Vector2f getToolTipPosition();
+
+protected:
+
+private:
+
+};
+
 class CanvasManager
 {
 public:
@@ -36,7 +54,7 @@ protected:
 private:
     inline CanvasManager() = default;
 
-    static tgui::Gui* m_gui;
+    static Gui* m_gui;
     /// @brief list of canvases that are drawn to the main screen
     static std::set<Canvas*, _drawableComp> m_canvases;
 };

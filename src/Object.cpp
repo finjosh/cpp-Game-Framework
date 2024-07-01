@@ -6,7 +6,7 @@
 //     return lhs->getID() < rhs->getID();
 // }
 
-std::atomic_ullong Object::m_lastID = 1;
+size_t Object::m_lastID = 1;
 
 Object::Object()
 {
@@ -44,6 +44,9 @@ Object::~Object()
 
 void Object::destroy()
 {
+    if (m_destroyed)
+        return;
+    m_destroyed = true;
     m_invokeDestroyEvents();
     ObjectManager::addToDestroyQueue(this);
     // ObjectManager::removeObject(this);
@@ -390,4 +393,9 @@ void Object::setUserType(size_t type)
 size_t Object::getUserType() const
 {
     return m_userType;
+}
+
+bool Object::isDestroyed() const
+{
+    return m_destroyed;
 }

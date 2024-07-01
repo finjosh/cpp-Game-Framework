@@ -18,7 +18,7 @@ public:
     static void Display();
 
     /// @note based off of mainCamera
-    /// @returns mouse position in global position 
+    /// @returns mouse position in global position (meters)
     static Vector2 getMousePos();
     /// @returns the mouse position in screen position (meters)
     static Vector2 getMouseScreenPos();
@@ -29,6 +29,7 @@ private:
     inline WindowHandler() = default;
     
     static sf::RenderWindow* m_renderWindow;
+    static Vector2 m_lastMousePos;
 };
 
 #endif

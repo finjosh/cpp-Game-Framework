@@ -13,8 +13,8 @@ Canvas::Canvas() : DrawableObject(0, DrawStage::UI)
 
     // removing the UI component as soon as object is added to queue
     m_onDestroy([this](){ 
-        this->m_group = nullptr;
         CanvasManager::m_gui->remove(m_group);
+        this->m_group = nullptr;
         if (m_screenSpace)
             CanvasManager::removeCanvas(this);
     });
@@ -50,13 +50,13 @@ void Canvas::Draw(sf::RenderTarget* target, const Transform& parentTransform)
         widgetStates.transform.translate(m_group->getPosition() - tgui::Vector2f{m_group->getOrigin().x * m_group->getSize().x, m_group->getOrigin().y * m_group->getSize().y});
         if (m_group->getRotation() != 0)
         {
-            const Vector2 rotOrigin{m_group->getRotationOrigin().x * m_group->getSize().x, m_group->getRotationOrigin().y * m_group->getSize().y};
-            widgetStates.transform.rotate(m_group->getRotation(), (tgui::Vector2f)rotOrigin);
+            const tgui::Vector2f rotOrigin{m_group->getRotationOrigin().x * m_group->getSize().x, m_group->getRotationOrigin().y * m_group->getSize().y};
+            widgetStates.transform.rotate(m_group->getRotation(), rotOrigin);
         }
         if ((m_group->getScale().x != 1) || (m_group->getScale().y != 1))
         {
-            const Vector2 scaleOrigin{m_group->getScaleOrigin().x * m_group->getSize().x, m_group->getScaleOrigin().y * m_group->getSize().y};
-            widgetStates.transform.scale(m_group->getScale(), (tgui::Vector2f)scaleOrigin);
+            const tgui::Vector2f scaleOrigin{m_group->getScaleOrigin().x * m_group->getSize().x, m_group->getScaleOrigin().y * m_group->getSize().y};
+            widgetStates.transform.scale(m_group->getScale(), scaleOrigin);
         }
     }
     CanvasManager::getGui()->getBackendRenderTarget()->drawWidget(widgetStates, m_group);
