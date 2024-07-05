@@ -383,9 +383,9 @@ int main()
 
     using namespace udp;
     SocketUI socketUI(gui->getGroup(), 50001);
-    Command::Handler::addCommand(Command::command{"net", "Commands for the network UI", {Command::helpCommand, "net"}, {
-        {"SetConnectionWindowVisible", "sets visiblity of connection window", {[&socketUI](Command::Data* data){ socketUI.setConnectionVisible(StringHelper::toBool(data->getToken())); }}},
-        {"SetInfoWindowVisible", "sets visiblity of info window", {[&socketUI](Command::Data* data){ socketUI.setInfoVisible(StringHelper::toBool(data->getToken())); }}},
+    Command::Handler::addCommand(Command::command{"net", "Commands for the network UI", {Command::helpCommand, "net"}, {}, {
+        {"SetConnectionWindowVisible", "sets visiblity of connection window", {[&socketUI](Command::Data* data){ socketUI.setConnectionVisible(StringHelper::toBool(data->getToken())); }}, {"True", "False"}},
+        {"SetInfoWindowVisible", "sets visiblity of info window", {[&socketUI](Command::Data* data){ socketUI.setInfoVisible(StringHelper::toBool(data->getToken())); }}, {"True", "False"}},
     }});
     socketUI.setConnectionVisible();
     socketUI.setInfoVisible();
@@ -506,7 +506,7 @@ int main()
 void addThemeCommands()
 {
     Command::Handler::addCommand(Command::command{"setTheme", "Function used to set the theme of the UI (The previous outputs in the command prompt will not get updated color)", 
-        {Command::print, "Trying calling one of the sub commands"},
+        {Command::print, "Trying calling one of the sub commands"}, {},
         std::list<Command::command>{
             // Command::command{"default", "(Currently does not work, coming soon) Sets the theme back to default", {[](){ 
             //     tgui::Theme::setDefault(""); //! This does not work due to a tgui issue

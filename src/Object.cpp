@@ -271,16 +271,11 @@ void Object::move(const Vector2& move)
     m_transform.position += move;
     m_onTransformUpdated.invoke();
     onTransformUpdated.invoke();
-
-    for (auto child: m_children)
-    {
-        child->move(move);
-    }
 }
 
 void Object::move(float x, float y)
 {
-    move(Vector2(x,y));
+    move(Vector2{x,y});
 }
 
 void Object::rotate(Rotation rot)

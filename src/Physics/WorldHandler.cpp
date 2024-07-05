@@ -2,11 +2,14 @@
 #include "Physics/CollisionManager.hpp"
 
 b2World WorldHandler::m_world({0.f,0.f});
+bool WorldHandler::m_keepLostSimulationTime = true;
 double WorldHandler::m_accumulate = 0;
 int32 WorldHandler::m_tickRate = 60;
 int32 WorldHandler::m_velocityIterations = 8;
 int32 WorldHandler::m_positionIterations = 3;
 int32 WorldHandler::m_maxUpdates = 8;
+double WorldHandler::m_interpolateTime = 0;
+double WorldHandler::m_maxInterpolateTime = 1/30;
 
 void WorldHandler::init(const Vector2& gravity)
 {
@@ -24,6 +27,9 @@ void WorldHandler::updateWorld(double deltaTime)
     m_accumulate += deltaTime;
     int32 updates = std::min(int(m_accumulate*m_tickRate), m_maxUpdates);
     m_accumulate -= updates*(1.f/m_tickRate);
+    if (!m_keepLostSimulationTime)
+        m_accumulate = m_accumulate > 1.f/m_tickRate ? 0.f : m_accumulate;
+    m_interpolateTime = m_accumulate > m_maxInterpolateTime ? m_maxInterpolateTime : m_accumulate;
     while (updates > 0)
     {
         m_world.Step(1.f/m_tickRate, m_velocityIterations, m_positionIterations);
@@ -31,9 +37,24 @@ void WorldHandler::updateWorld(double deltaTime)
     }
 }
 
-float WorldHandler::getLeftOverTime()
+double WorldHandler::getLeftOverTime()
 {
     return m_accumulate;
+}
+
+void WorldHandler::setMaxInterpolationTime(double maxTime)
+{
+    m_maxInterpolateTime = maxTime;
+}
+
+double WorldHandler::getMaxInterpolationTime()
+{
+    return m_maxInterpolateTime;
+}
+
+double WorldHandler::getInterpolationTime()
+{
+    return m_interpolateTime;
 }
 
 void WorldHandler::setTickRate(int32 interval)
@@ -74,4 +95,14 @@ void WorldHandler::setGravity(const Vector2& gravity)
 Vector2 WorldHandler::getGravity()
 {
     return m_world.GetGravity();
+}
+
+void WorldHandler::setKeepLostSimulationTime(bool flag)
+{
+    m_keepLostSimulationTime = flag;
+}
+
+bool WorldHandler::isKeepLostSimulationTime()
+{
+    return m_keepLostSimulationTime;
 }

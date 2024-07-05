@@ -60,13 +60,17 @@ void WindowHandler::Display()
 
     CanvasManager::drawOverlayGUI();
     m_renderWindow->display();
+    if (auto mainCamera = CameraManager::getMainCamera())
+        m_renderWindow->setView(mainCamera->getCameraView());
     m_renderWindow->clear();
 }
 
 Vector2 WindowHandler::getMousePos()
 {
     Vector2 temp(sf::Mouse::getPosition(*m_renderWindow));
-    temp -= Vector2(m_renderWindow->getSize().x/2, m_renderWindow->getSize().y/2);
+    temp.x *= m_renderWindow->getView().getSize().x / m_renderWindow->getSize().x;
+    temp.y *= m_renderWindow->getView().getSize().y / m_renderWindow->getSize().y;
+    temp -= Vector2(m_renderWindow->getView().getSize().x/2, m_renderWindow->getView().getSize().y/2);
     temp *= 1/PIXELS_PER_METER;
     if (auto camera = CameraManager::getMainCamera())
     {

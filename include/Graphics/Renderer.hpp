@@ -11,6 +11,7 @@
 // #include "Physics/WorldHandler.hpp"
 
 // TODO make renderers for other sfml drawables
+// TODO make a base renderer class and completely encapsulate sfml drawable types
 
 /// @brief renderer for any sf::Shape
 /// @warning if derived from do NOT forget to use "createDestroy()"
@@ -48,9 +49,7 @@ public:
 
     inline Vector2 getScale() const
     {
-        Vector2 temp = T::getScale();
-        temp /= PIXELS_PER_METER;
-        return temp;
+        return {T::getScale().x/PIXELS_PER_METER, T::getScale().y/PIXELS_PER_METER};
     }
 
 protected:

@@ -147,7 +147,7 @@ public:
 
         inline bool isValid() const
         {
-            return (m_ptr != nullptr);
+            return (m_ptr != nullptr /*&& m_ptr->isDestroyed()*/);
         }
         
         /// @brief assigns which obj is stored in this ptr
@@ -216,15 +216,17 @@ public:
     void addChild(Object* child);
     /// @brief tries to convert every child to the given type until found
     /// @tparam T the type that you want the child to be
+    /// @note if no child of type is found returns nullptr
     /// @returns the first child of the wanted type
     template <typename T>
-    inline Object::Ptr<T> tryGetChildOf()
+    inline T* tryGetChildOf()
     {
         for (auto child: m_children)
         {
             if (auto rtn = child->cast<T>())
-                return Object::Ptr<T>(rtn);
+                return rtn;
         }
+        return nullptr;
     }
 
     /// @note if derived class, use the virtual function
@@ -323,7 +325,7 @@ protected:
     /// @brief called when the object is added to the destroy queue (should act as if it is already destroyed)
     /// @note this is where the object should show itself as being destroyed (deconstructor should be used to finalize destruction)
     /// @warning do NOT disconnect all EVER
-    EventHelper::Event m_onDestroy;
+    EventHelper::Event m_onDestroy; // TODO rework how this event works OR make another event just for Ptr so it is only removed once the object is actually destroyed (in which case you much add a check for is destroyed in "isValid")
     /// @warning do NOT disconnect all EVER
     EventHelper::Event m_onParentSet;
     /// @warning do NOT disconnect all EVER

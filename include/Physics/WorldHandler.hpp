@@ -28,13 +28,28 @@ public:
     static void setGravity(const Vector2& gravity);
     static Vector2 getGravity();
     /// @returns the time that was not able to be calculated this frame
-    static float getLeftOverTime();
+    static double getLeftOverTime();
+    /// @brief the max time that interpolation will be set to
+    /// @note leftOverTime > maxTime ? maxTime : leftOverTime
+    static void setMaxInterpolationTime(double maxTime);
+    static double getMaxInterpolationTime();
+    /// @returns the amount of time that should be interpolated for
+    static double getInterpolationTime();
+    /// @brief this affects what happens to physics at low frames
+    /// @note any time left over after updating physics that is larger than 1/tickRate will be cleared
+    /// @note default: True
+    static void setKeepLostSimulationTime(bool flag);
+    static bool isKeepLostSimulationTime();
 
 private:
     inline WorldHandler() = default;
     
     static b2World m_world;
+    /// @brief if at low frames do we keep the time lost and make up for it later?
+    static bool m_keepLostSimulationTime;
     static double m_accumulate;
+    static double m_interpolateTime;
+    static double m_maxInterpolateTime;
     static int32 m_tickRate;
     static int32 m_velocityIterations;
     static int32 m_positionIterations; 

@@ -1,4 +1,4 @@
-#include "Utils/Debug/CommandPrompt.hpp"
+#include "Utils/CommandPrompt.hpp"
 // #include "Debug/CommandHandler.hpp"
 // #include "funcHelper.hpp"
 // #include "StringHelper.hpp"

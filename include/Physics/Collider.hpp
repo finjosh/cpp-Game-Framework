@@ -79,6 +79,9 @@ public:
     PreSolveData(Collider* collider, b2Fixture* thisFixture, b2Fixture* otherFixture, b2Contact* contactData);
 
     const Collider* getCollider() const;
+    /// @warning NEVER edit the collider in the pre solve callback this should only be used for storage and editing/deleting later
+    /// @returns a non const ptr to the other collider
+    Collider* getNoneConstCollider();
     const Fixture getThisFixture() const;
     const Fixture getOtherFixture() const;
     ContactData::Info getInfo() const;

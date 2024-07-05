@@ -187,6 +187,14 @@ Rotation Vector2::rotation(Vector2 vector)
 Vector2 Vector2::lerp(const Vector2& current, const Vector2& target, float relativeDistance)
 {
     Vector2 rtn(target-current); // finding the vector from a to b
+    rtn *= std::clamp(relativeDistance, 0.f, 1.f); // only getting the part we want
+    rtn += current; // moving origin back to current
+    return rtn;
+}
+
+Vector2 Vector2::lerpUnclamped(const Vector2& current, const Vector2& target, float relativeDistance)
+{
+    Vector2 rtn(target-current); // finding the vector from a to b
     rtn *= relativeDistance; // only getting the part we want
     rtn += current; // moving origin back to current
     return rtn;

@@ -261,7 +261,7 @@ Fixture Collider::getFixtureList()
 
 Transform Collider::getInterpolatedTransform() const
 {
-    return Transform{Object::getPosition() + WorldHandler::getLeftOverTime() * m_body->GetLinearVelocity(), Object::getRotation() + m_body->GetAngularVelocity() * WorldHandler::getLeftOverTime()};
+    return Transform{Object::getPosition() + WorldHandler::getInterpolationTime() * m_body->GetLinearVelocity(), Object::getRotation() + m_body->GetAngularVelocity() * WorldHandler::getInterpolationTime()};
 }
 
 //* Collision Data
@@ -356,6 +356,11 @@ PreSolveData::PreSolveData(Collider* collider, b2Fixture* thisFixture, b2Fixture
     m_collider(collider), m_thisFixture(thisFixture), m_otherFixture(otherFixture), m_contactData(contactData) {}
 
 const Collider* PreSolveData::getCollider() const
+{
+    return m_collider;
+}
+
+Collider* PreSolveData::getNoneConstCollider()
 {
     return m_collider;
 }

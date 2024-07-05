@@ -21,7 +21,7 @@ public:
     /// @note this relies on this class be accessible when ever the command is called
     inline void initCommands()
     {
-        Command::Handler::addCommand(Command::command("Physics", "Namespace for physics commands", {&Command::helpCommand, "Physics"}, 
+        Command::Handler::addCommand(Command::command("Physics", "Namespace for physics commands", {&Command::helpCommand, "Physics"}, {},
             {Command::command("setDebug", "[flags] sets the given debug flags (com, aabb, pair, joint, shape, all)", {[this](Command::Data* data)
             {
                 this->SetFlags(0);
@@ -45,7 +45,7 @@ public:
                     
                     data->removeToken();
                 }
-            }})
+            }}, {"COM", "AABB", "Pair", "Joint", "Shape", "All"})
         }));
     }
     #endif

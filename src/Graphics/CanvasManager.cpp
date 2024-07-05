@@ -30,7 +30,7 @@ void CanvasManager::closeGUI()
     }
 }
 
-void CanvasManager::handleEvent(sf::Event event)
+bool CanvasManager::handleEvent(sf::Event event)
 {
     Vector2 screenPosition; // left, top in pixels
     if (auto camera = CameraManager::getMainCamera())
@@ -66,7 +66,7 @@ void CanvasManager::handleEvent(sf::Event event)
     // setting the viewport so mouse position events are updated properly
     m_gui->setAbsoluteView(tgui::FloatRect{screenPosition.x,screenPosition.y,(float)m_gui->getWindow()->getSize().x,(float)m_gui->getWindow()->getSize().y}); // setting the viewport so mouse position events are updated properly
     m_gui->setRelativeViewport(tgui::FloatRect{0,0,1,1});
-    m_gui->handleEvent(event);
+    return m_gui->handleEvent(event);
 }
 
 tgui::Gui* CanvasManager::getGui()

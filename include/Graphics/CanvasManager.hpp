@@ -35,7 +35,7 @@ public:
     static void closeGUI();
     /// @note call this for each event
     /// @note this changes the tgui AbsoluteView and RelativeViewport
-    static void handleEvent(sf::Event event);
+    static bool handleEvent(sf::Event event);
     /// @warning do NOT remove any widgets from this only use canvases for adding widgets 
     static tgui::Gui* getGui();
     /// @brief this also updates the gui time

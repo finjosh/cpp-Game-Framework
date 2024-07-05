@@ -165,10 +165,15 @@ public:
     /// @returns the rotation of this vector from the positive x axis
     static Rotation rotation(Vector2 vector);
     /// @note a relativeDistance of 0 will return current, 1 will return target, and 0.5 will return the point midway between current and target
-    /// @note relativeDistance can be outside of the range (0-1)
+    /// @note relativeDistance is clamped between 0 and 1 (use lerpUnclamped if you dont want this functionality)
     /// @param relativeDistance the relative distance the returned vector will be (0-1)
     /// @returns a point between the two points
     static Vector2 lerp(const Vector2& current, const Vector2& target, float relativeDistance);
+    /// @note a relativeDistance of 0 will return current, 1 will return target, and 0.5 will return the point midway between current and target
+    /// @note relativeDistance can be outside of the range [0,1]
+    /// @param relativeDistance the relative distance the returned vector will be
+    /// @returns a point based on the distance between the two points and relative distance
+    static Vector2 lerpUnclamped(const Vector2& current, const Vector2& target, float relativeDistance);
     /// @returns a vector with the max components from a and b
     static Vector2 max(const Vector2& a, const Vector2& b);
     /// @returns a vector with the min components from a and b
