@@ -25,7 +25,9 @@ public:
     static void Update();
 
 protected:
-    static void addCollider(Collider* Collider);
+    /// @brief adds the collider to the manager
+    static void addCollider(Collider* collider);
+    /// @brief removes the collider for the manager
     static void removeCollider(Collider* collider);
     
     friend Collider;
@@ -49,6 +51,10 @@ private:
     static std::set<m_contactData> m_colliding;
     static bool m_usingCollidingSet;
     static std::list<m_contactData> m_collidingEraseQueue;
+    /// @brief a delete queue for the pre solve callback so that you can destroy an object during the callback
+    /// @note this is only for the deletion of the body not the entire object
+    static std::list<Collider*> m_deleteQueue;
+    static bool m_inPhysicsUpdate;
 };
 
 #endif

@@ -448,11 +448,13 @@ int main()
             if (event.type == sf::Event::Closed || (event.type == sf::Event::KeyPressed && event.key.code == sf::Keyboard::Key::Escape))
                 window.close();
 
-            CanvasManager::handleEvent(event);
+            if (Command::Prompt::UpdateEvent(event))
+                continue;
+            if (CanvasManager::handleEvent(event))
+                continue;
 
             //! Required for LiveVar and CommandPrompt to work as intended
             LiveVar::UpdateLiveVars(event);
-            Command::Prompt::UpdateEvent(event);
             //! ----------------------------------------------------------
         }
 

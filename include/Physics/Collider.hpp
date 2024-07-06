@@ -79,12 +79,15 @@ public:
     PreSolveData(Collider* collider, b2Fixture* thisFixture, b2Fixture* otherFixture, b2Contact* contactData);
 
     const Collider* getCollider() const;
-    /// @warning NEVER edit the collider in the pre solve callback this should only be used for storage and editing/deleting later
+    /// @warning NEVER edit the collider in the pre solve callback this should only be used for storage and editing later
     /// @returns a non const ptr to the other collider
     Collider* getNoneConstCollider();
     const Fixture getThisFixture() const;
     const Fixture getOtherFixture() const;
     ContactData::Info getInfo() const;
+    /// @brief destroys the other collider
+    /// @note also disables the contact for this collision (can be re-enabled if wanted)
+    void destroyCollider();
 
     /// @returns if the two fixtures are touching
     bool isTouching() const;
@@ -173,7 +176,8 @@ public:
     inline virtual void EndContact(ContactData ContactData) {};
     /// @brief This can be called multiple times in one frame (called before any collision is handled)
     /// @note try to make this efficient as it can be called many times per frame
-    /// @warning do NOT DESTROY OR EDIT the ANY colliders during this callback
+    /// @note you can destroy the objects during this callback although the body will not be destroyed until the physics update is finished
+    /// @warning do NOT edit the colliders during this callback
     /// @param PreContactData the pre solve contact data
     inline virtual void PreSolve(PreSolveData data) {};
     /// @brief called every frame until the two objects are no longer colliding
@@ -290,7 +294,7 @@ protected:
 private:
     friend CollisionManager;
     friend Fixture;
-    /// @brief removes the current body from physics
+    /// @brief removes the current body from physics or adds to the deletion queue
     void m_destroyBody();
     /// @brief updates the object transform to this colliders body transform
     void m_update();

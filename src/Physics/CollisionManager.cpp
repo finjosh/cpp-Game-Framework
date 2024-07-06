@@ -1,5 +1,6 @@
 #include "Physics/CollisionManager.hpp"
 #include "Physics/Collider.hpp"
+#include "Physics/WorldHandler.hpp"
 #include "ObjectManager.hpp"
 
 CollisionManager::m_contactData::m_contactData(Collider* A, Collider* B, b2Contact* contactData) : A(A), B(B), contactData(contactData) {}
@@ -18,6 +19,8 @@ std::list<CollisionManager::m_contactData> CollisionManager::m_endContact;
 std::set<CollisionManager::m_contactData> CollisionManager::m_colliding;
 bool CollisionManager::m_usingCollidingSet = false;
 std::list<CollisionManager::m_contactData> CollisionManager::m_collidingEraseQueue;
+std::list<Collider*> CollisionManager::m_deleteQueue;
+bool CollisionManager::m_inPhysicsUpdate = false;
 
 void CollisionManager::BeginContact(b2Contact* contact)
 {
@@ -45,11 +48,13 @@ void CollisionManager::EndContact(b2Contact* contact)
 
 void CollisionManager::PreSolve(b2Contact* contact, const b2Manifold* oldManifold)
 {
+    m_inPhysicsUpdate = true;
     Collider* A = static_cast<Collider*>((void*)contact->GetFixtureA()->GetBody()->GetUserData().pointer);
     Collider* B = static_cast<Collider*>((void*)contact->GetFixtureB()->GetBody()->GetUserData().pointer);
 
     A->PreSolve({B, contact->GetFixtureA(), contact->GetFixtureB(), contact});
     B->PreSolve({A, contact->GetFixtureB(), contact->GetFixtureA(), contact});
+    m_inPhysicsUpdate = false;
 }
 
 void CollisionManager::PostSolve(b2Contact* contact, const b2ContactImpulse* impulse)
@@ -70,6 +75,12 @@ void CollisionManager::PostSolve(b2Contact* contact, const b2ContactImpulse* imp
 
 void CollisionManager::Update()
 {
+    for (auto obj: m_deleteQueue)
+    {
+        WorldHandler::getWorld().DestroyBody(obj->m_body);
+    }
+    m_deleteQueue.clear();
+
     for (auto obj: m_objects)
     {
         obj->m_update();

@@ -29,7 +29,15 @@ Collider::~Collider()
 
 void Collider::m_destroyBody()
 {
-    WorldHandler::getWorld().DestroyBody(m_body); // No need to delete user data as it just points to this collider
+    //* NOT the best way of doing this but it works for now
+    if (CollisionManager::m_inPhysicsUpdate)
+    {
+        CollisionManager::m_deleteQueue.emplace_back(this);
+    }
+    else
+    {
+        WorldHandler::getWorld().DestroyBody(m_body); // No need to delete user data as it just points to this collider
+    }
     // m_body = nullptr;
 }
 
@@ -373,6 +381,11 @@ const Fixture PreSolveData::getThisFixture() const
 const Fixture PreSolveData::getOtherFixture() const
 {
     return Fixture(m_contactData->GetFixtureA());
+}
+
+void PreSolveData::destroyCollider()
+{
+    m_collider->destroy();
 }
 
 ContactData::Info PreSolveData::getInfo() const

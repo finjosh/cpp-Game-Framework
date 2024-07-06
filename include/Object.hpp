@@ -22,6 +22,7 @@ class ObjectManager;
 class Object
 {
 public:
+    /// @note the ptr is stored till the object is actually deleted but will no longer be valid after it is added to the destroy queue
     /// @warning the type must have the base class Object
     template <typename T = Object>
     class Ptr
@@ -39,11 +40,7 @@ public:
 
         inline ~Ptr()
         {
-            if (this->isValid())
-            {
-                m_ptr->m_onDestroy.disconnect(m_eventID);
-            }
-            this->removePtr();
+            set(nullptr);
         }
         
         inline T* operator->()
@@ -127,12 +124,14 @@ public:
         }
         
         /// @brief if there is no ptr returns nullptr
+        /// @note this could be invalid even if a ptr is returned (object is in destroy queue)
         inline T* get()
         {
             return m_ptr;
         }
         
         /// @brief if there is no ptr returns nullptr
+        /// @note this could be invalid even if a ptr is returned (object is in destroy queue)
         inline const T* get() const
         {
             return m_ptr;
@@ -147,7 +146,7 @@ public:
 
         inline bool isValid() const
         {
-            return (m_ptr != nullptr /*&& m_ptr->isDestroyed()*/);
+            return (m_ptr != nullptr);
         }
         
         /// @brief assigns which obj is stored in this ptr
@@ -163,7 +162,7 @@ public:
             if (rawPtr != nullptr)
             {
                 m_ptr = rawPtr;    
-                m_eventID = m_ptr->m_onDestroy(Object::Ptr<T>::removePtr, this);
+                m_eventID = m_ptr->m_onDestroy.connect(Object::Ptr<T>::removePtr, this);
             }
         }
 
@@ -325,7 +324,7 @@ protected:
     /// @brief called when the object is added to the destroy queue (should act as if it is already destroyed)
     /// @note this is where the object should show itself as being destroyed (deconstructor should be used to finalize destruction)
     /// @warning do NOT disconnect all EVER
-    EventHelper::Event m_onDestroy; // TODO rework how this event works OR make another event just for Ptr so it is only removed once the object is actually destroyed (in which case you much add a check for is destroyed in "isValid")
+    EventHelper::Event m_onDestroy;
     /// @warning do NOT disconnect all EVER
     EventHelper::Event m_onParentSet;
     /// @warning do NOT disconnect all EVER
@@ -333,7 +332,6 @@ protected:
     /// @brief called when ever the transform of this object is updated
     /// @warning do NOT disconnect all EVER
     EventHelper::Event m_onTransformUpdated;
-    // virtual Vector2 getInterpolatedPosition();
 
 private:
     /// @brief this should actually delete the object
