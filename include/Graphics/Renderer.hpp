@@ -52,6 +52,16 @@ public:
         return {T::getScale().x/PIXELS_PER_METER, T::getScale().y/PIXELS_PER_METER};
     }
 
+    inline sf::FloatRect getGlobalBounds() const
+    {
+        sf::FloatRect globalBounds = T::getGlobalBounds();
+        globalBounds.height /= PIXELS_PER_METER;
+        globalBounds.width /= PIXELS_PER_METER;
+        globalBounds.left /= PIXELS_PER_METER;
+        globalBounds.top /= PIXELS_PER_METER;
+        return globalBounds;
+    }
+
 protected:
     inline void Draw(sf::RenderTarget* target, const Transform& thisTransform) override
     {
@@ -66,6 +76,7 @@ private:
     using T::setScale;
     using T::getScale;
     using T::scale;
+    using T::getGlobalBounds;
 
     createDestroy();
 };

@@ -7,7 +7,11 @@ bool _drawableComp::operator() (const DrawableObject* lhs, const DrawableObject*
         return true;
     else if (lhs->getDrawStage() > rhs->getDrawStage())
         return false;
-    else if (lhs->getLayer() <= rhs->getLayer() && lhs->getID() < rhs->getID())
+    else if (lhs->getLayer() < rhs->getLayer())
+        return true;
+    else if (lhs->getLayer() > rhs->getLayer())
+        return false;
+    else if (lhs->getID() < rhs->getID())
         return true;
     else 
         return false;
@@ -28,14 +32,13 @@ DrawableObject::~DrawableObject()
 
 void DrawableObject::setLayer(int layer)
 {
+    if (layer == m_layer)
+        return;
+
     if (m_drawableParent)
     {
-        auto parent = m_drawableParent;
-        unsigned int nonDraw = m_nonDrawableParents;
-        m_removeParent();
+        m_drawableParent->m_drawableChildren.erase(this);
         m_layer = layer;
-        m_drawableParent = parent;
-        m_nonDrawableParents = nonDraw;
         m_drawableParent->m_drawableChildren.emplace(this);
     }
     else
@@ -53,14 +56,13 @@ int DrawableObject::getLayer() const
 
 void DrawableObject::setDrawStage(DrawStage stage)
 {
+    if (stage == m_stage)
+        return;
+
     if (m_drawableParent)
     {
-        auto parent = m_drawableParent;
-        unsigned int nonDraw = m_nonDrawableParents;
-        m_removeParent();
+        m_drawableParent->m_drawableChildren.erase(this);
         m_stage = stage;
-        m_drawableParent = parent;
-        m_nonDrawableParents = nonDraw;
         m_drawableParent->m_drawableChildren.emplace(this);
     }
     else

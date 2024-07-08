@@ -45,6 +45,7 @@ private:
 
     /// @brief if the comp class is deleted the object will be removed with the id
     static _objectCompClass m_compClass;
+    /// @brief all objects
     static std::unordered_set<Object*> m_objects;
 
     static std::list<Object*> m_destroyQueue0;

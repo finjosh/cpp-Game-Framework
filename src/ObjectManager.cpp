@@ -62,7 +62,7 @@ void ObjectManager::destroyAllObjects()
 {
     for (auto object: m_objects)
     {
-        if (object->getParent() == nullptr) // only delete if a parent otherwise it will be handled
+        if (object->getParent() == nullptr) // only delete if a parent otherwise results in error
             object->destroy();
     }
     ClearDestroyQueue(); 

@@ -136,6 +136,7 @@ typedef ContactData CollisionData;
 // TODO implement contact filtering
 // TODO make parent and child colliders have defined behaviour
 /// @warning If there is a parent and child that have a Collider there is undefined behaviour (try using fixtures instead)
+/// @note positions assume that the origin is in the middle of the shape
 class Collider : public virtual Object
 {
 public:
@@ -281,6 +282,7 @@ public:
     /// @returns Does this body have fixed rotation?
 	bool isFixedRotation() const;
     /// @note use Fixture.GetNext() to iterate through the list
+    /// @note make sure to check if the fixture is valid before use
     /// @returns the first fixture on this body
 	Fixture getFixtureList();
     // TODO implement joints

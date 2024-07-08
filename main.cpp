@@ -59,7 +59,7 @@ public:
     createDestroy();
 };
 
-class Player : public virtual Object, public Collider, public Renderer<sf::RectangleShape>, public UpdateInterface, public NetworkObject
+class Player : public virtual Object, public Collider, public Renderer<sf::RectangleShape>, public UpdateInterface
 {
 public:
     std::string name = "Random Name";
@@ -69,7 +69,7 @@ public:
     static Camera::Ptr m_camera; // default is nullptr
     static std::set<Object*> m_players;
 
-    inline Player(bool owner = false) : NetworkObject(2), owner(owner)
+    inline Player()
     {
         m_players.emplace(this);
 
@@ -94,7 +94,7 @@ public:
             m_camera = new Camera();
             // m_camera->setParent(this);
             m_camera->setMainCamera();
-            m_camera->setRotationLocked(true);
+            // m_camera->setRotationLocked(true);
         }
     }
 
@@ -105,48 +105,36 @@ public:
 
     inline virtual void Update(float deltaTime) override
     {
-        if (owner)
+        if (sf::Keyboard::isKeyPressed(sf::Keyboard::Key::W))
         {
-            W = false, A = false, S = false, D = false, Q = false, E = false;
-
-            if (sf::Keyboard::isKeyPressed(sf::Keyboard::Key::W))
-            {
-                W = true;
-            }
-            if (sf::Keyboard::isKeyPressed(sf::Keyboard::Key::A))
-            {
-                A = true;
-            }
-            if (sf::Keyboard::isKeyPressed(sf::Keyboard::Key::S))
-            {
-                S = true;
-            }
-            if (sf::Keyboard::isKeyPressed(sf::Keyboard::Key::D))
-            {
-                D = true;
-            }
-            if (sf::Keyboard::isKeyPressed(sf::Keyboard::Key::E))
-            {
-                E = true;
-            }
-            if (sf::Keyboard::isKeyPressed(sf::Keyboard::Key::Q))
-            {
-                Q = true;
-            }
+            // applyForceToCenter({0,-120000*deltaTime});
+            move({0,-12*deltaTime});
         }
-
-        if (W)
-            applyForceToCenter({0,-120000*deltaTime});
-        if (A)
-            applyForceToCenter({-120000*deltaTime,0});
-        if (S)
-            applyForceToCenter({0,120000*deltaTime});
-        if (D)
-            applyForceToCenter({120000*deltaTime,0});
-        if (E)
-            applyTorque(500000*deltaTime);
-        if (Q)
-            applyTorque(-500000*deltaTime);
+        if (sf::Keyboard::isKeyPressed(sf::Keyboard::Key::A))
+        {
+            // applyForceToCenter({-120000*deltaTime,0});
+            move({-12*deltaTime,0});
+        }
+        if (sf::Keyboard::isKeyPressed(sf::Keyboard::Key::S))
+        {
+            // applyForceToCenter({0,120000*deltaTime});
+            move({0,12*deltaTime});
+        }
+        if (sf::Keyboard::isKeyPressed(sf::Keyboard::Key::D))
+        {
+            // applyForceToCenter({120000*deltaTime,0});
+            move({12*deltaTime,0});
+        }
+        if (sf::Keyboard::isKeyPressed(sf::Keyboard::Key::E))
+        {
+            // applyTorque(500000*deltaTime);
+            rotate(PI * deltaTime);
+        }
+        if (sf::Keyboard::isKeyPressed(sf::Keyboard::Key::Q))
+        {
+            // applyTorque(-500000*deltaTime);
+            rotate(-PI * deltaTime);
+        }
     }
 
     inline void LateUpdate(float delta) override
@@ -160,6 +148,7 @@ public:
         pos /= m_players.size();
 
         m_camera->setPosition(Vector2::lerp(m_camera->getPosition(), pos, 0.97*delta)); // since late update is called after physics update
+        m_camera->setRotation(getRotation());
     }
 
     void BeginContact(ContactData data) override
@@ -171,37 +160,6 @@ public:
             m_hitParticle->emit();
         }
     }
-
-    sf::Packet OnServerSendData() override
-    {
-        sf::Packet temp;
-        temp << getPosition().x << getPosition().y << getRotation().getAngle();
-        return temp;
-    }
-
-    void OnClientReceivedData(sf::Packet& packet) override
-    {
-        Vector2 pos;
-        float rot;
-        packet >> pos.x >> pos.y >> rot;
-        setPosition(pos);
-        setRotation(rot);
-    }
-
-    sf::Packet OnClientSendData() override
-    {
-        sf::Packet temp;
-        temp << W << A << S << D << Q << E;
-        return temp;
-    }
-
-    void OnServerReceivedData(sf::Packet& packet) override
-    {
-        packet >> W >> A >> S >> D >> Q >> E;
-    }
-
-    bool W = false, A = false, S = false, D = false, Q = false, E = false;
-    bool owner = false;
 
     createDestroy();
 };
@@ -378,19 +336,19 @@ int main()
 
     //* init code
 
-    NetworkType::initType(1, {[](){ return static_cast<NetworkObject*>(new NetObj()); }});
-    NetworkType::initType(2, {[](){ return static_cast<NetworkObject*>(new Player()); }});
+    // NetworkType::initType(1, {[](){ return static_cast<NetworkObject*>(new NetObj()); }});
+    // NetworkType::initType(2, {[](){ return static_cast<NetworkObject*>(new Player()); }});
 
-    using namespace udp;
-    SocketUI socketUI(gui->getGroup(), 50001);
-    Command::Handler::addCommand(Command::command{"net", "Commands for the network UI", {Command::helpCommand, "net"}, {}, {
-        {"SetConnectionWindowVisible", "sets visiblity of connection window", {[&socketUI](Command::Data* data){ socketUI.setConnectionVisible(StringHelper::toBool(data->getToken())); }}, {"True", "False"}},
-        {"SetInfoWindowVisible", "sets visiblity of info window", {[&socketUI](Command::Data* data){ socketUI.setInfoVisible(StringHelper::toBool(data->getToken())); }}, {"True", "False"}},
-    }});
-    socketUI.setConnectionVisible();
-    socketUI.setInfoVisible();
-    socketUI.getInfoWindow()->setPosition({socketUI.getConnectionWindow()->getSize().x, 0});
-    NetworkObjectManager::init(&socketUI.getServer(), &socketUI.getClient());
+    // using namespace udp;
+    // SocketUI socketUI(gui->getGroup(), 50001);
+    // Command::Handler::addCommand(Command::command{"net", "Commands for the network UI", {Command::helpCommand, "net"}, {}, {
+    //     {"SetConnectionWindowVisible", "sets visiblity of connection window", {[&socketUI](Command::Data* data){ socketUI.setConnectionVisible(StringHelper::toBool(data->getToken())); }}, {"True", "False"}},
+    //     {"SetInfoWindowVisible", "sets visiblity of info window", {[&socketUI](Command::Data* data){ socketUI.setInfoVisible(StringHelper::toBool(data->getToken())); }}, {"True", "False"}},
+    // }});
+    // socketUI.setConnectionVisible();
+    // socketUI.setInfoVisible();
+    // socketUI.getInfoWindow()->setPosition({socketUI.getConnectionWindow()->getSize().x, 0});
+    // NetworkObjectManager::init(&socketUI.getServer(), &socketUI.getClient());
 
     new Wall({96,108}, {192,10});
     new Wall({96,0}, {192,10});
@@ -398,8 +356,8 @@ int main()
     new Wall({0, 54}, {10, 108});
     // for (int i = 0; i < 100; i++)
     //     (new Player())->setPosition({50,50});
-    // auto p = new Player();
-    // p->setPosition({15,10});
+    auto p = new Player();
+    p->setPosition({15,10});
     // p->setRotation(45);
     // p->name = "Something";
 
@@ -419,11 +377,17 @@ int main()
 
     new OneWay({40,25}, {40,10});
 
-    NetworkObject* temp = nullptr;
-    NetworkObjectManager::getServer()->onConnectionOpen([&temp](){
-        temp = new Player(true);
-        temp->createNetworkObject();
-    });
+    // NetworkObject* temp = nullptr;
+    // NetworkObjectManager::getServer()->onConnectionOpen([&temp](){
+    //     temp = new Player(true);
+    //     temp->createNetworkObject();
+    // });
+
+    auto canvas = new Canvas();
+    canvas->setGlobalSpace();
+    canvas->setPosition({50,50});
+    canvas->add(tgui::Panel::create());
+    canvas->add(tgui::ChildWindow::create());
 
     float secondTimer = 0;
     int fps = 0;
@@ -499,8 +463,8 @@ int main()
     CanvasManager::closeGUI();
     window.close();
 
-    NetworkObjectManager::getClient()->closeConnection(); // TODO do this in a function
-    NetworkObjectManager::getServer()->closeConnection();
+    // NetworkObjectManager::getClient()->closeConnection(); // TODO do this in a function
+    // NetworkObjectManager::getServer()->closeConnection();
 
     return 0;
 }

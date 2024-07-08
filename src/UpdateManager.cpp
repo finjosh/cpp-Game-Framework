@@ -13,14 +13,14 @@ void UpdateManager::removeUpdateObject(UpdateInterface* obj)
     m_objects.erase(obj);
 }
 
-std::unordered_set<UpdateInterface*>::iterator getIterator(std::unordered_set<UpdateInterface*>::iterator start, size_t n)
-{
-    for (size_t i = 0; i < n; i++)
-    {
-        start++;
-    }
-    return start;
-}
+// std::unordered_set<UpdateInterface*>::iterator getIterator(std::unordered_set<UpdateInterface*>::iterator start, size_t n)
+// {
+//     for (size_t i = 0; i < n; i++)
+//     {
+//         start++;
+//     }
+//     return start;
+// }
 
 // void UpdateManager::Update(float deltaTime, BS::thread_pool& pool)
 // {

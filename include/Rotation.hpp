@@ -22,9 +22,9 @@ public:
     /// @brief sets the stored sin and cos values with and angle in radians
     void set(float radians);
     /// @returns the rotation/angle in radians
-    float getRadians() const;
-    /// @returns the rotation/angle in radians
     float getAngle() const;
+    /// @returns the rotation/angle in degrees
+    float getAngleInDegrees() const;
     /// @brief sets the stored rotation to 0
     void setZero();
 	/// @returns the rotated x axis (1,0) in terms of this rotation
@@ -64,6 +64,7 @@ public:
     Rotation operator + (Rotation rotation) const;
     void operator += (Rotation rotation);
     Rotation operator - (Rotation rotation) const;
+    Rotation operator - () const;
     void operator -= (Rotation rotation);
     void operator = (Rotation rotation);
 

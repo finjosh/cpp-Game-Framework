@@ -14,6 +14,9 @@ class PreSolveData;
 class Fixture
 {
 public:
+	/// @note if not valid calling any function on this fixture will result in undefined behaviour
+	/// @returns true if this fixture is valid
+	bool isValid() const;
 	/// Set if this fixture is a sensor.
 	void setSensor(bool sensor);
 	/// Is this fixture a sensor (non-solid)?

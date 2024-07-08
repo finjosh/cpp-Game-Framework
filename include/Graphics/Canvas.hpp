@@ -8,7 +8,7 @@
 #include "Object.hpp"
 
 // TODO make this work when the camera is rotated
-/// @bug when the camera is rotated UI is not drawn properly
+/// @bug when the camera is rotated UI is not drawn properly (UI will be rotated around the origin to align with the window) and event dont work properly
 /// @note layer and drawStage work with drawableObjects if drawing in global space
 /// @note if in screen space layer and drawStage are between canvases only
 /// @note defaults to drawing in screen space (screen overlay)
@@ -28,13 +28,13 @@ public:
     void setGlobalSpace();
     bool isScreenSpace() const;
 
-    void setRotationLocked(bool locked = true);
-    bool isRotationLocked() const;
+    // void setRotationLocked(bool locked = true);
+    // bool isRotationLocked() const;
 
-    /// @note position, rotation, transform, and is enabled are controlled by this object DONT edit them
+    /// @note position, rotation, transform, origin, and is enabled are controlled by this object DONT edit them
     /// @returns the group widget that stores all widgets in this canvas 
     tgui::Group::Ptr getGroup();
-    /// @note position, rotation, transform, and is enabled are controlled by this object DONT edit them
+    /// @note position, rotation, transform, origin, and is enabled are controlled by this object DONT edit them
     /// @returns the group widget that stores all widgets in this canvas
     tgui::Group::ConstPtr getGroup() const;
 

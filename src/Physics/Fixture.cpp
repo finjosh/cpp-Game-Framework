@@ -14,6 +14,11 @@ Fixture::Fixture(Collider& collider, const b2FixtureDef& fixtureDef)
     collider.m_body->CreateFixture(&fixtureDef);
 }
 
+bool Fixture::isValid() const
+{
+    return m_fixture;
+}
+
 void Fixture::setSensor(bool sensor)
 {
     m_fixture->SetSensor(sensor);

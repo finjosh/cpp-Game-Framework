@@ -1,7 +1,7 @@
 #include "Graphics/Canvas.hpp"
 #include "Graphics/CanvasManager.hpp"
-#include "Graphics/Camera.hpp"
 #include "Graphics/DrawableManager.hpp"
+#include "Graphics/CameraManager.hpp"
 
 Canvas::Canvas() : DrawableObject(0, DrawStage::UI)
 {
@@ -22,10 +22,15 @@ Canvas::Canvas() : DrawableObject(0, DrawStage::UI)
         if (isScreenSpace())
             return;
 
-        if (!isRotationLocked())
-            this->m_group->setRotation(getGlobalRotation().getAngle()*180/PI);
+        // if (!isRotationLocked())
+        this->m_group->setRotation(getGlobalRotation().getAngle()*180/PI);
 
-        Vector2 globalPos = Object::getGlobalPosition()*PIXELS_PER_METER;
+        Vector2 globalPos = Object::getGlobalPosition();
+        if (auto mainCamera = CameraManager::getMainCamera())
+        {
+            globalPos = Vector2::rotateAround(globalPos, mainCamera->getPosition(), -mainCamera->getRotation());
+        }
+        globalPos *= PIXELS_PER_METER;
         this->m_group->setPosition(globalPos.x, globalPos.y);
     });
     m_onEnabled([this](){
@@ -45,8 +50,17 @@ Canvas::~Canvas()
 void Canvas::Draw(sf::RenderTarget* target, const Transform& parentTransform)
 {
     tgui::RenderStates widgetStates;
-    if (!isScreenSpace()) // only draw in the set position and rotation IF not in screen space
+    if (!isScreenSpace()) // only draw in the set position and rotation IF NOT in screen space
     {
+        // Updating the position of the group to be corrected based on camera rotation
+        Vector2 globalPos = Object::getGlobalPosition();
+        if (auto mainCamera = CameraManager::getMainCamera())
+        {
+            globalPos = Vector2::rotateAround(globalPos, mainCamera->getPosition(), -mainCamera->getRotation());
+        }
+        globalPos *= PIXELS_PER_METER;
+        this->m_group->setPosition(globalPos.x, globalPos.y);
+
         widgetStates.transform.translate(m_group->getPosition() - tgui::Vector2f{m_group->getOrigin().x * m_group->getSize().x, m_group->getOrigin().y * m_group->getSize().y});
         if (m_group->getRotation() != 0)
         {
@@ -81,15 +95,15 @@ bool Canvas::isScreenSpace() const
     return m_screenSpace;
 }
 
-void Canvas::setRotationLocked(bool locked)
-{
-    m_rotationLock = locked;
-}
+// void Canvas::setRotationLocked(bool locked)
+// {
+//     m_rotationLock = locked;
+// }
 
-bool Canvas::isRotationLocked() const
-{
-    return m_rotationLock;
-}
+// bool Canvas::isRotationLocked() const
+// {
+//     return m_rotationLock;
+// }
 
 tgui::Group::Ptr Canvas::getGroup()
 {

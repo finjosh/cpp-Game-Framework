@@ -24,7 +24,7 @@ protected:
 
 private:
     inline DrawableManager() = default;
-    
+
     static std::set<DrawableObject*, _drawableComp> m_drawables;
 };
 

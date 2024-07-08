@@ -14,14 +14,14 @@ void Rotation::set(float radians)
     sin = std::sin(radians);
 }
 
-float Rotation::getRadians() const
+float Rotation::getAngle() const
 {
     return std::atan2(sin, cos);
 }
 
-float Rotation::getAngle() const
+float Rotation::getAngleInDegrees() const
 {
-    return std::atan2(sin, cos);
+    return std::atan2(sin, cos) * 180 / PI;
 }
 
 void Rotation::setZero()
@@ -55,6 +55,11 @@ void Rotation::operator += (Rotation rotation)
 Rotation Rotation::operator - (Rotation rotation) const
 {
     return {cos*rotation.cos + sin*rotation.sin, sin*rotation.cos - cos*rotation.sin};
+}
+
+Rotation Rotation::operator - () const
+{
+    return {cos, -sin};
 }
 
 void Rotation::operator -= (Rotation rotation)
