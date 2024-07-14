@@ -6,7 +6,7 @@
 #include "SFML/Graphics/RenderWindow.hpp"
 
 #include "Object.hpp"
-#include "Settings.hpp"
+#include "EngineSettings.hpp"
 
 #include <set>
 

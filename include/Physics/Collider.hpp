@@ -9,7 +9,7 @@
 
 #include "Physics/Fixture.hpp"
 #include "Object.hpp"
-#include "Settings.hpp"
+#include "EngineSettings.hpp"
 
 class CollisionManager; // defined early to friend in Collider
 

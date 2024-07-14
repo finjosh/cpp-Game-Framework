@@ -6,6 +6,7 @@
 #include <SFML/Graphics/RenderWindow.hpp>
 // #include "TGUI/Backend/SFML-Graphics.hpp"
 // #include "Box2D/b2_math.h"
+#include "TGUI/Vector2.hpp"
 #include "Vector2.hpp"
 
 class WindowHandler

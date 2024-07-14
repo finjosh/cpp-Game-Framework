@@ -3,6 +3,7 @@
 #include "Graphics/CameraManager.hpp"
 #include <cassert>
 #include <TGUI/ToolTip.hpp>
+#include <TGUI/Widgets/ListBox.hpp>
 
 Gui::Gui(sf::RenderWindow& window) : tgui::Gui(window) {}
 Gui::Gui(sf::RenderTarget& target) : tgui::Gui(target) {}
@@ -49,7 +50,7 @@ bool CanvasManager::handleEvent(sf::Event event)
     {
         const tgui::Vector2f origin = {canvas->getOrigin().x * canvas->getSize().x, canvas->getOrigin().y * canvas->getSize().y};
         canvas->getGroup()->setPosition(screenPosition.x + origin.x, screenPosition.y + origin.y);
-        canvas->getGroup()->moveToFront();
+        // canvas->getGroup()->moveToFront();
     }
 
     // setting the viewport so mouse position events are updated properly
@@ -58,7 +59,7 @@ bool CanvasManager::handleEvent(sf::Event event)
     return m_gui->handleEvent(event);
 }
 
-tgui::Gui* CanvasManager::getGui()
+Gui* CanvasManager::getGui()
 {
     return m_gui;
 }
@@ -88,6 +89,36 @@ void CanvasManager::drawOverlayGUI()
     {
         if (canvas->isEnabled() /* && canvas->isScreenSpace() */)
             canvas->m_draw(m_gui->getTarget(), {}); // should be the default transform as screen space canvases dont care about pos or rotation
+    }
+
+    // TODO fix when camera moves after combo box list is showing
+    for (auto widget: CanvasManager::getGui()->getWidgets()) // TODO do this more optimally?
+    {
+        if (widget->getWidgetName().starts_with("#TGUI_INTERNAL$ComboBoxListBox#"))
+        {
+            tgui::RenderStates widgetStates;
+            Vector2 offset;
+            if (auto camera = CameraManager::getMainCamera())
+            {
+                offset = camera->getPosition() - camera->getSize()/2;
+                offset *= PIXELS_PER_METER;
+            }
+
+            widgetStates.transform.translate(widget->getPosition() - (tgui::Vector2f)offset - tgui::Vector2f{widget->getOrigin().x * widget->getSize().x, widget->getOrigin().y * widget->getSize().y});
+            if (widget->getRotation() != 0)
+            {
+                const tgui::Vector2f rotOrigin{widget->getRotationOrigin().x * widget->getSize().x, widget->getRotationOrigin().y * widget->getSize().y};
+                widgetStates.transform.rotate(widget->getRotation(), rotOrigin);
+            }
+            if ((widget->getScale().x != 1) || (widget->getScale().y != 1))
+            {
+                const tgui::Vector2f scaleOrigin{widget->getScaleOrigin().x * widget->getSize().x, widget->getScaleOrigin().y * widget->getSize().y};
+                widgetStates.transform.scale(widget->getScale(), scaleOrigin);
+            }
+            CanvasManager::getGui()->getBackendRenderTarget()->drawWidget(widgetStates, widget);
+            
+            break;
+        }
     }
 
     if (m_gui->getToolTip() != nullptr)

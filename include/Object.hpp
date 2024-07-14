@@ -7,7 +7,7 @@
 #include <list>
 
 #include "Utils/EventHelper.hpp"
-#include "Settings.hpp"
+#include "EngineSettings.hpp"
 #include "Rotation.hpp"
 #include "Vector2.hpp"
 #include "Transform.hpp"

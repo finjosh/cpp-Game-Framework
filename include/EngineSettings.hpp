@@ -1,5 +1,5 @@
-#ifndef SETTINGS_HPP
-#define SETTINGS_HPP
+#ifndef ENGINE_SETTINGS_HPP
+#define ENGINE_SETTINGS_HPP
 
 #pragma once
 

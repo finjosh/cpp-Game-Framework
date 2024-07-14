@@ -9,6 +9,7 @@
 
 // TODO make this work when the camera is rotated
 /// @bug when the camera is rotated UI is not drawn properly (UI will be rotated around the origin to align with the window) and event dont work properly
+/// @bug tooltips dont work when the camera is moving
 /// @note layer and drawStage work with drawableObjects if drawing in global space
 /// @note if in screen space layer and drawStage are between canvases only
 /// @note defaults to drawing in screen space (screen overlay)

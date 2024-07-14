@@ -17,8 +17,6 @@ public:
 
     /// @returns the current visible tooltip
     tgui::Widget::Ptr getToolTip();
-    /// @returns the global position of the
-    tgui::Vector2f getToolTipPosition();
 
 protected:
 
@@ -37,7 +35,7 @@ public:
     /// @note this changes the tgui AbsoluteView and RelativeViewport
     static bool handleEvent(sf::Event event);
     /// @warning do NOT remove any widgets from this only use canvases for adding widgets 
-    static tgui::Gui* getGui();
+    static Gui* getGui();
     /// @brief this also updates the gui time
     static void drawOverlayGUI();
     /// @brief updates the gui view for the given camera

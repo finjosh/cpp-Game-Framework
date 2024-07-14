@@ -7,7 +7,7 @@
 
 #include "Object.hpp"
 #include "Graphics/DrawableObject.hpp"
-#include "Settings.hpp"
+#include "EngineSettings.hpp"
 // #include "Physics/WorldHandler.hpp"
 
 // TODO make renderers for other sfml drawables

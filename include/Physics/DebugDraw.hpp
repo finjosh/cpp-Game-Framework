@@ -8,7 +8,7 @@
 #include <SFML/System.hpp>
 #include <SFML/Graphics.hpp>
 
-#include "Settings.hpp"
+#include "EngineSettings.hpp"
 
 class DebugDraw : public b2Draw
 {

@@ -20,8 +20,7 @@ void WindowHandler::setRenderWindow(sf::RenderWindow* renderWindow)
 
 void WindowHandler::Display()
 {
-    if (!m_renderWindow)
-        return;
+    TGUI_ASSERT(m_renderWindow, "Must set render window before trying to draw");
 
     // Emitting an mouse move event to the gui so that it updates any canvas position changes
     Vector2 newMousePos = WindowHandler::getMousePos();
@@ -30,8 +29,9 @@ void WindowHandler::Display()
         m_lastMousePos = newMousePos;
         sf::Event event;
         event.type = sf::Event::MouseMoved;
-        event.mouseMove.x = sf::Mouse::getPosition(*m_renderWindow).x;
-        event.mouseMove.y = sf::Mouse::getPosition(*m_renderWindow).y;
+        Vector2 mousePos = sf::Mouse::getPosition(*m_renderWindow); // pos in pixel cords
+        event.mouseMove.x = mousePos.x;
+        event.mouseMove.y = mousePos.y;
         CanvasManager::handleEvent(event);
     }
 
