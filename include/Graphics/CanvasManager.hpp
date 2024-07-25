@@ -18,6 +18,11 @@ public:
     /// @returns the current visible tooltip
     tgui::Widget::Ptr getToolTip();
 
+    /// @brief sets the viewport without changing the container size
+    void setRelativeViewport_notContainer(const tgui::FloatRect& viewport);
+    /// @brief sets the view without changing the container size
+    void setAbsoluteView_notContainer(const tgui::FloatRect& view);
+
 protected:
 
 private:

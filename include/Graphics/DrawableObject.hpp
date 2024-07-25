@@ -19,6 +19,7 @@ struct _drawableComp
     bool operator() (const DrawableObject* lhs, const DrawableObject* rhs) const;
 };
 
+// TODO add drawing layers where the object is only drawn if it is in said layer (cameras should also have a selection on which layers they want to be drawn)
 class DrawableObject : public virtual Object
 {
 public:

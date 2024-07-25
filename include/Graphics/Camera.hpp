@@ -21,7 +21,7 @@ public:
     using Ptr = Object::Ptr<Camera>;
 
     Camera(int layer = 0);
-    ~Camera();
+    virtual ~Camera();
 
     /// @brief sets the layer which this camera will be drawn on (relative to other cameras NOT drawable objects)
     /// @note lower is sooner
@@ -98,7 +98,6 @@ private:
     bool m_displaying = true;
     /// @brief canvases to ignore when drawing to this camera
     std::list<Object::Ptr<Canvas>> m_canvases;
-    createDestroy();
 };
 
 #endif

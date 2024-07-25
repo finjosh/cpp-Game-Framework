@@ -313,18 +313,18 @@ private:
 namespace std {
     template <>
     struct hash<Collider> {
-        inline size_t operator()(const Collider& obj) const noexcept
+        inline uint64_t operator()(const Collider& obj) const noexcept
         {
-            return hash<size_t>{}(obj.getID());
+            return hash<uint64_t>{}(obj.getID());
         }
     };
     template <>
     struct hash<Collider*> {
-        inline size_t operator()(const Collider* obj) const noexcept
+        inline uint64_t operator()(const Collider* obj) const noexcept
         {
             if (obj == nullptr)
                 return 0;
-            return hash<size_t>{}(obj->getID());
+            return hash<uint64_t>{}(obj->getID());
         }
     };
     template <>

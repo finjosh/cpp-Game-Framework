@@ -6,7 +6,7 @@ Collider::Collider()
 {
     Object::m_onDisabled(&Collider::m_updatePhysicsState, this);
     Object::m_onEnabled(&Collider::m_updatePhysicsState, this);
-    Object::onDestroy(&Collider::m_destroyBody, this);
+    Object::m_onDestroy(&Collider::m_destroyBody, this);
     Object::m_onTransformUpdated(&Collider::m_updateTransform, this);
     // Object::_onParentRemoved(&CollisionManager::addCollider, this);
     // Object::_onParentSet(&CollisionManager::removeCollider, this);

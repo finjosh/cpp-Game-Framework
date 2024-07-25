@@ -75,12 +75,6 @@ void CollisionManager::PostSolve(b2Contact* contact, const b2ContactImpulse* imp
 
 void CollisionManager::Update()
 {
-    for (auto obj: m_deleteQueue)
-    {
-        WorldHandler::getWorld().DestroyBody(obj->m_body);
-    }
-    m_deleteQueue.clear();
-
     for (auto obj: m_objects)
     {
         obj->m_update();
@@ -101,17 +95,26 @@ void CollisionManager::Update()
 
     for (auto data: m_beginContact)
     {
+        if (data.A->isDestroyed() || data.B->isDestroyed()) // dont want to call on begin contact because it no longer exists
+            continue;
+
         data.A->BeginContact({data.B, data.contactData->GetFixtureA(), data.contactData->GetFixtureB(), data.contactData});
         data.B->BeginContact({data.A, data.contactData->GetFixtureB(), data.contactData->GetFixtureA(), data.contactData});
     }
     m_beginContact.clear();
 
     for (auto data: m_endContact)
-    {
+    { // might want to know end contact even if it is destroyed
         data.A->EndContact({data.B, data.contactData->GetFixtureA(), data.contactData->GetFixtureB(), data.contactData});
         data.B->EndContact({data.A, data.contactData->GetFixtureB(), data.contactData->GetFixtureA(), data.contactData});
     }
     m_endContact.clear();
+
+    for (auto obj: m_deleteQueue)
+    {
+        WorldHandler::getWorld().DestroyBody(obj->m_body);
+    }
+    m_deleteQueue.clear();
 }
 
 void CollisionManager::addCollider(Collider* Collider)

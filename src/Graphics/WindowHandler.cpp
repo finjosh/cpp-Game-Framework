@@ -40,13 +40,14 @@ void WindowHandler::Display()
         DrawableManager::draw(m_renderWindow);
         WorldHandler::getWorld().DebugDraw();
     }
-    for (auto camera: CameraManager::m_cameras) //* Note this can not be multithreaded simply (camera uses regular events that could lead to memory races)
+    for (auto camera: CameraManager::m_cameras)
     {
         if (!camera->isDisplaying())
             return;
 
         m_renderWindow->setView(camera->getCameraView()); // updates drawable objects view
-        CanvasManager::updateViewForCamera(camera); // updates the UI view
+        /// TODO make a global and screen space GUI so that global UI does not need to change its view port all the time (try to find a way around this for global as its not efficient)
+        // CanvasManager::updateViewForCamera(camera); // updates the UI view // TODO uncomment this is a quick fix for frame drops when camera view is different from normal view (global gui does not work with this commented)
         
         camera->m_drawBackground((sf::RenderTarget*)m_renderWindow);
         
@@ -60,9 +61,9 @@ void WindowHandler::Display()
 
     CanvasManager::drawOverlayGUI();
     m_renderWindow->display();
+    m_renderWindow->clear();
     if (auto mainCamera = CameraManager::getMainCamera())
         m_renderWindow->setView(mainCamera->getCameraView());
-    m_renderWindow->clear();
 }
 
 Vector2 WindowHandler::getMousePos()

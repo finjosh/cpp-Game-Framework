@@ -10,12 +10,12 @@ bool ObjectManager::m_nextQueue = false;
 
 //* Comparison classes
 
-ObjectManager::_objectCompClass::_objectCompClass(size_t id) : Object(id) {}
-void ObjectManager::_objectCompClass::setID(size_t id) { Object::m_setID(id); }
+ObjectManager::_objectCompClass::_objectCompClass(uint64_t id) : Object(id) {}
+void ObjectManager::_objectCompClass::setID(uint64_t id) { Object::m_setID(id); }
 
 // -------------------
 
-Object::Ptr<> ObjectManager::getObject(size_t id)
+Object::Ptr<> ObjectManager::getObject(uint64_t id)
 {
     m_compClass.setID(id);
     std::unordered_set<Object*>::iterator obj = m_objects.find((Object*)&m_compClass);
@@ -34,7 +34,7 @@ void ObjectManager::ClearDestroyQueue()
     std::list<Object*>& list = m_nextQueue ? m_destroyQueue1 : m_destroyQueue0;
     for (std::list<Object*>::iterator obj = list.begin(); obj != list.end(); obj++)
     {
-        (*obj)->m_destroy();
+        delete(*obj);
     }
     list.clear();
 

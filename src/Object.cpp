@@ -6,7 +6,7 @@
 //     return lhs->getID() < rhs->getID();
 // }
 
-size_t Object::m_lastID = 1;
+uint64_t Object::m_lastID = 1;
 
 Object::Object()
 {
@@ -38,7 +38,7 @@ Object::~Object()
     while (child != m_children.end())
     {
         auto temp = child++;
-        (*temp)->m_destroy();
+        delete(*temp);
     }
 }
 
@@ -59,8 +59,8 @@ void Object::m_invokeDestroyEvents()
         child->m_invokeDestroyEvents();
     }
     m_enabled = false; // dont want the event to be called
-    m_onDestroy.invoke();
     onDestroy.invoke();
+    m_onDestroy.invoke();
 }
 
 void Object::setEnabled(bool enabled)
@@ -380,12 +380,12 @@ Transform Object::getInterpolatedTransform() const
     return m_transform;
 }
 
-void Object::setUserType(size_t type)
+void Object::setUserType(uint64_t type)
 {   
     m_userType = type;
 }
 
-size_t Object::getUserType() const
+uint64_t Object::getUserType() const
 {
     return m_userType;
 }

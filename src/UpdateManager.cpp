@@ -13,9 +13,9 @@ void UpdateManager::removeUpdateObject(UpdateInterface* obj)
     m_objects.erase(obj);
 }
 
-// std::unordered_set<UpdateInterface*>::iterator getIterator(std::unordered_set<UpdateInterface*>::iterator start, size_t n)
+// std::unordered_set<UpdateInterface*>::iterator getIterator(std::unordered_set<UpdateInterface*>::iterator start, uint64_t n)
 // {
-//     for (size_t i = 0; i < n; i++)
+//     for (uint64_t i = 0; i < n; i++)
 //     {
 //         start++;
 //     }
@@ -26,9 +26,9 @@ void UpdateManager::removeUpdateObject(UpdateInterface* obj)
 // {
 //     std::list<std::future<void>> threads;
 
-//     size_t partitionSize = m_objects.size()/pool.get_thread_count();
-//     size_t extra = m_objects.size()%pool.get_thread_count();
-//     size_t temp = 0;
+//     uint64_t partitionSize = m_objects.size()/pool.get_thread_count();
+//     uint64_t extra = m_objects.size()%pool.get_thread_count();
+//     uint64_t temp = 0;
 //     std::unordered_set<UpdateInterface*>::iterator current = m_objects.begin();
 //     std::unordered_set<UpdateInterface*>::iterator next;
 //     for (int i = 0; i < pool.get_thread_count(); i++)
@@ -52,9 +52,9 @@ void UpdateManager::removeUpdateObject(UpdateInterface* obj)
 // {
 //     std::list<std::future<void>> threads;
 
-//     size_t partitionSize = m_objects.size()/pool.get_thread_count();
-//     size_t extra = m_objects.size()%pool.get_thread_count();
-//     size_t temp = 0;
+//     uint64_t partitionSize = m_objects.size()/pool.get_thread_count();
+//     uint64_t extra = m_objects.size()%pool.get_thread_count();
+//     uint64_t temp = 0;
 //     std::unordered_set<UpdateInterface*>::iterator current = m_objects.begin();
 //     std::unordered_set<UpdateInterface*>::iterator next;
 //     for (int i = 0; i < pool.get_thread_count(); i++)
@@ -78,9 +78,9 @@ void UpdateManager::removeUpdateObject(UpdateInterface* obj)
 // {
 //     std::list<std::future<void>> threads;
 
-//     size_t partitionSize = m_objects.size()/pool.get_thread_count();
-//     size_t extra = m_objects.size()%pool.get_thread_count();
-//     size_t temp = 0;
+//     uint64_t partitionSize = m_objects.size()/pool.get_thread_count();
+//     uint64_t extra = m_objects.size()%pool.get_thread_count();
+//     uint64_t temp = 0;
 //     std::unordered_set<UpdateInterface*>::iterator current = m_objects.begin();
 //     std::unordered_set<UpdateInterface*>::iterator next;
 //     for (int i = 0; i < pool.get_thread_count(); i++)
@@ -104,9 +104,9 @@ void UpdateManager::removeUpdateObject(UpdateInterface* obj)
 // {
 //     std::list<std::future<void>> threads;
 
-//     size_t partitionSize = m_objects.size()/pool.get_thread_count();
-//     size_t extra = m_objects.size()%pool.get_thread_count();
-//     size_t temp = 0;
+//     uint64_t partitionSize = m_objects.size()/pool.get_thread_count();
+//     uint64_t extra = m_objects.size()%pool.get_thread_count();
+//     uint64_t temp = 0;
 //     std::unordered_set<UpdateInterface*>::iterator current = m_objects.begin();
 //     std::unordered_set<UpdateInterface*>::iterator next;
 //     for (int i = 0; i < pool.get_thread_count(); i++)
@@ -165,7 +165,7 @@ void UpdateManager::_start(std::unordered_set<UpdateInterface*>::iterator begin,
     }
 }
 
-size_t UpdateManager::getNumberOfObjects()
+uint64_t UpdateManager::getNumberOfObjects()
 {
     return m_objects.size();
 }

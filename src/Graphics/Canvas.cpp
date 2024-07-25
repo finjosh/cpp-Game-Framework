@@ -60,18 +60,17 @@ void Canvas::Draw(sf::RenderTarget* target, const Transform& parentTransform)
         }
         globalPos *= PIXELS_PER_METER;
         this->m_group->setPosition(globalPos.x, globalPos.y);
-
-        widgetStates.transform.translate(m_group->getPosition() - tgui::Vector2f{m_group->getOrigin().x * m_group->getSize().x, m_group->getOrigin().y * m_group->getSize().y});
-        if (m_group->getRotation() != 0)
-        {
-            const tgui::Vector2f rotOrigin{m_group->getRotationOrigin().x * m_group->getSize().x, m_group->getRotationOrigin().y * m_group->getSize().y};
-            widgetStates.transform.rotate(m_group->getRotation(), rotOrigin);
-        }
-        if ((m_group->getScale().x != 1) || (m_group->getScale().y != 1))
-        {
-            const tgui::Vector2f scaleOrigin{m_group->getScaleOrigin().x * m_group->getSize().x, m_group->getScaleOrigin().y * m_group->getSize().y};
-            widgetStates.transform.scale(m_group->getScale(), scaleOrigin);
-        }
+    }
+    widgetStates.transform.translate(m_group->getPosition() - tgui::Vector2f{m_group->getOrigin().x * m_group->getSize().x, m_group->getOrigin().y * m_group->getSize().y});
+    if (m_group->getRotation() != 0)
+    {
+        const tgui::Vector2f rotOrigin{m_group->getRotationOrigin().x * m_group->getSize().x, m_group->getRotationOrigin().y * m_group->getSize().y};
+        widgetStates.transform.rotate(m_group->getRotation(), rotOrigin);
+    }
+    if ((m_group->getScale().x != 1) || (m_group->getScale().y != 1))
+    {
+        const tgui::Vector2f scaleOrigin{m_group->getScaleOrigin().x * m_group->getSize().x, m_group->getScaleOrigin().y * m_group->getSize().y};
+        widgetStates.transform.scale(m_group->getScale(), scaleOrigin);
     }
     CanvasManager::getGui()->getBackendRenderTarget()->drawWidget(widgetStates, m_group);
 }

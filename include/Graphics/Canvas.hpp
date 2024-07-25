@@ -21,7 +21,7 @@ public:
     using Ptr = Object::Ptr<Canvas>;
 
     Canvas();
-    ~Canvas();
+    virtual ~Canvas();
 
     /// @brief draws in the screen space as an overlay
     void setScreenSpace();
@@ -121,8 +121,6 @@ private:
     tgui::Group::Ptr m_group = nullptr;
     bool m_screenSpace = true;
     bool m_rotationLock = false;
-
-    createDestroy();
 };
 
 #endif

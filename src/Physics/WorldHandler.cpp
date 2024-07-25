@@ -9,7 +9,7 @@ int32 WorldHandler::m_velocityIterations = 8;
 int32 WorldHandler::m_positionIterations = 3;
 int32 WorldHandler::m_maxUpdates = 8;
 double WorldHandler::m_interpolateTime = 0;
-double WorldHandler::m_maxInterpolateTime = 1/30;
+double WorldHandler::m_maxInterpolateTime = 1/30.0;
 
 void WorldHandler::init(const Vector2& gravity)
 {

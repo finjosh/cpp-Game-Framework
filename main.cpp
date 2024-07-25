@@ -11,7 +11,7 @@
 
 #include "ObjectManager.hpp"
 #include "UpdateManager.hpp"
-#include "ParticleEmitter.hpp"
+// #include "ParticleEmitter.hpp"
 
 #include "Graphics/Renderer.hpp"
 #include "Graphics/WindowHandler.hpp"
@@ -32,6 +32,7 @@ using namespace std;
 
 // TODO make animation class
 // TODO implement fixture and joint isValid functions that connect the the collider with the body that relates to them
+// TODO update managers to be singletons and make the getter function thread safe
 
 void addThemeCommands();
 /// @param themes in order of most wanted
@@ -55,8 +56,6 @@ public:
         setOrigin(size.x/2,size.y/2);
         setFillColor(sf::Color::Red);
     }
-
-    createDestroy();
 };
 
 class Player : public virtual Object, public Collider, public Renderer<sf::RectangleShape>, public UpdateInterface
@@ -64,7 +63,7 @@ class Player : public virtual Object, public Collider, public Renderer<sf::Recta
 public:
     std::string name = "Random Name";
     // sf::Texture temp;
-    Object::Ptr<ParticleEmitter> m_hitParticle;
+    // Object::Ptr<ParticleEmitter> m_hitParticle;
     static sf::RectangleShape m_particle;
     static Camera::Ptr m_camera; // default is nullptr
     static std::set<Object*> m_players;
@@ -87,14 +86,14 @@ public:
         m_particle.setFillColor(sf::Color::Green);
         m_particle.setSize({5,5});
         m_particle.setOrigin({2.5,2.5});
-        m_hitParticle.set(new ParticleEmitter(&m_particle, {0,0}, 10, 0, 0, 1, 10, 0.5, 360));
+        // m_hitParticle.set(new ParticleEmitter(&m_particle, {0,0}, 10, 0, 0, 1, 10, 0.5, 360));
 
         if (!m_camera)
         {
             m_camera = new Camera();
             // m_camera->setParent(this);
             m_camera->setMainCamera();
-            // m_camera->setRotationLocked(true);
+            m_camera->setRotationLocked(true);
         }
     }
 
@@ -107,33 +106,33 @@ public:
     {
         if (sf::Keyboard::isKeyPressed(sf::Keyboard::Key::W))
         {
-            // applyForceToCenter({0,-120000*deltaTime});
-            move({0,-12*deltaTime});
+            applyForceToCenter({0,-120000*deltaTime});
+            // move({0,-12*deltaTime});
         }
         if (sf::Keyboard::isKeyPressed(sf::Keyboard::Key::A))
         {
-            // applyForceToCenter({-120000*deltaTime,0});
-            move({-12*deltaTime,0});
+            applyForceToCenter({-120000*deltaTime,0});
+            // move({-12*deltaTime,0});
         }
         if (sf::Keyboard::isKeyPressed(sf::Keyboard::Key::S))
         {
-            // applyForceToCenter({0,120000*deltaTime});
-            move({0,12*deltaTime});
+            applyForceToCenter({0,120000*deltaTime});
+            // move({0,12*deltaTime});
         }
         if (sf::Keyboard::isKeyPressed(sf::Keyboard::Key::D))
         {
-            // applyForceToCenter({120000*deltaTime,0});
-            move({12*deltaTime,0});
+            applyForceToCenter({120000*deltaTime,0});
+            // move({12*deltaTime,0});
         }
         if (sf::Keyboard::isKeyPressed(sf::Keyboard::Key::E))
         {
-            // applyTorque(500000*deltaTime);
-            rotate(PI * deltaTime);
+            applyTorque(500000*deltaTime);
+            // rotate(PI * deltaTime);
         }
         if (sf::Keyboard::isKeyPressed(sf::Keyboard::Key::Q))
         {
-            // applyTorque(-500000*deltaTime);
-            rotate(-PI * deltaTime);
+            applyTorque(-500000*deltaTime);
+            // rotate(-PI * deltaTime);
         }
     }
 
@@ -156,12 +155,10 @@ public:
         auto info = data.getInfo();
         if (info.getPointCount() > 0 && getLinearVelocity().lengthSquared() > 250 && data.getCollider()->cast<Wall>())
         {
-            m_hitParticle->setPosition(info.getContactPoint(0));
-            m_hitParticle->emit();
+            // m_hitParticle->setPosition(info.getContactPoint(0));
+            // m_hitParticle->emit();
         }
     }
-
-    createDestroy();
 };
 
 Camera::Ptr Player::m_camera = nullptr;
@@ -198,7 +195,6 @@ public:
 
 
 private:
-    createDestroy();
     funcHelper::func<> m_onEnter;
     Object::Ptr<> m_object;
 };
@@ -263,7 +259,6 @@ public:
     }
 
 private:
-    createDestroy();
     std::set<const Collider*> m_freeFlow;
 };
 
@@ -303,7 +298,6 @@ protected:
     }
 
 private:
-    createDestroy();
 };
 
 int main()
@@ -366,14 +360,14 @@ int main()
     particleShape.setOrigin({5,5});
     particleShape.setFillColor(sf::Color::Magenta);
 
-    Object::Ptr<ParticleEmitter> emitter(new ParticleEmitter(&particleShape, {50,50}, 10, 0, 0.1, 3, 25, 1, 360));
+    // Object::Ptr<ParticleEmitter> emitter(new ParticleEmitter(&particleShape, {50,50}, 10, 0, 0.1, 3, 25, 1, 360));
     // emitter->setPosition({50, window.getSize().y/PIXELS_PER_METER - 10});
-    emitter->setLayer(100); // since player default layer is 0
+    // emitter->setLayer(100); // since player default layer is 0
     // emitter->setDrawStage(DrawStage::Particles);
-    emitter->setSpawning();
-    emitter->setDrawStage(DrawStage::Particles);
+    // emitter->setSpawning();
+    // emitter->setDrawStage(DrawStage::Particles);
     
-    (new Sensor({[&emitter](){ emitter->setSpawning(!emitter->isSpawning()); }}, nullptr))->setPosition(50,50);
+    // (new Sensor({[&emitter](){ emitter->setSpawning(!emitter->isSpawning()); }}, nullptr))->setPosition(50,50);
 
     new OneWay({40,25}, {40,10});
 
@@ -383,11 +377,12 @@ int main()
     //     temp->createNetworkObject();
     // });
 
-    auto canvas = new Canvas();
-    canvas->setGlobalSpace();
-    canvas->setPosition({50,50});
-    canvas->add(tgui::Panel::create());
-    canvas->add(tgui::ChildWindow::create());
+    // TODO fix the global space canvases
+    // auto canvas = new Canvas();
+    // canvas->setGlobalSpace();
+    // canvas->setPosition({50,50});
+    // canvas->add(tgui::Panel::create());
+    // canvas->add(tgui::ChildWindow::create());
 
     float secondTimer = 0;
     int fps = 0;

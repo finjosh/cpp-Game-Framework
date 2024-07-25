@@ -28,6 +28,8 @@ public:
         T::setScale(PIXELS_PER_METER, PIXELS_PER_METER);
     }
 
+    inline virtual ~Renderer() = default;
+
     using Object::setPosition;
     using Object::getPosition;
     using Object::setRotation;
@@ -77,8 +79,6 @@ private:
     using T::getScale;
     using T::scale;
     using T::getGlobalBounds;
-
-    createDestroy();
 };
 
 // TODO finish this 
@@ -107,7 +107,7 @@ private:
 //     Vector2 m_origin;
 //     Vector2 m_bounds;
 //     Transform m_lastTransform;
-//     size_t m_lastVertexCount = 0;
+//     uint64_t m_lastVertexCount = 0;
 //     bool m_updated = false;
 
 //     createDestroy();

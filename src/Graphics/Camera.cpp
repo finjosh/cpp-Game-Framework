@@ -41,15 +41,11 @@ bool Camera::isMainCamera() const
 
 void Camera::setViewSize(Vector2 size)
 {
-    if (isMainCamera())
-        return;
     m_size = size;
 }
 
 void Camera::setViewSize(float x, float y)
 {
-    if (isMainCamera())
-        return;
     m_size = {x,y};
 }
 

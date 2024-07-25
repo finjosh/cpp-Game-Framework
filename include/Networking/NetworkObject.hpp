@@ -17,14 +17,14 @@ class NetworkObject : public virtual Object
 public:
     /// @param type the type of object that is being made
     /// @note the objectType should be declared in the ObjectType.hpp file first
-    NetworkObject(size_t type); // TODO do this using typeid and a dict that converts typeid to the object type
+    NetworkObject(uint64_t type); // TODO do this using typeid and a dict that converts typeid to the object type
     // NetworkObject();
-    ~NetworkObject();
+    virtual ~NetworkObject();
 
     /// @brief the network ID is the id of either a client or the server to the network connection
     /// @returns the id that defined this program on the network
     sf::Uint64 getNetworkID() const;
-    size_t getTypeid() const;
+    uint64_t getTypeid() const;
     void createNetworkObject(); // TODO handle if this is a server or client properly
     /// @brief removes this object from the network
     /// @note does not destroy this object
@@ -49,7 +49,7 @@ protected:
 private:
     /// @brief null id = 0
     sf::Uint64 m_id = 0;
-    const size_t m_typeid = 0;
+    const uint64_t m_typeid = 0;
 
     static sf::Uint64 m_nextID;
 };
@@ -57,18 +57,18 @@ private:
 namespace std {
     template <>
     struct hash<NetworkObject> {
-        inline size_t operator()(const NetworkObject& obj) const noexcept
+        inline uint64_t operator()(const NetworkObject& obj) const noexcept
         {
-            return hash<size_t>{}(obj.getNetworkID());
+            return hash<uint64_t>{}(obj.getNetworkID());
         }
     };
     template <>
     struct hash<NetworkObject*> {
-        inline size_t operator()(const NetworkObject* obj) const noexcept
+        inline uint64_t operator()(const NetworkObject* obj) const noexcept
         {
             if (obj == nullptr)
                 return 0;
-            return hash<size_t>{}(obj->getNetworkID());
+            return hash<uint64_t>{}(obj->getNetworkID());
         }
     };
     template <>

@@ -3,7 +3,7 @@
 
 sf::Uint64 NetworkObject::m_nextID = 1;
 
-NetworkObject::NetworkObject(size_t type) : m_typeid(type) {}
+NetworkObject::NetworkObject(uint64_t type) : m_typeid(type) {}
 
 NetworkObject::~NetworkObject()
 {
@@ -15,7 +15,7 @@ sf::Uint64 NetworkObject::getNetworkID() const
     return m_id;
 }
 
-size_t NetworkObject::getTypeid() const
+uint64_t NetworkObject::getTypeid() const
 {
     return m_typeid;
 }

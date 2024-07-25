@@ -122,8 +122,6 @@ void DrawableObject::m_removeParent()
     DrawableManager::addDrawable(this);
 }
 
-// TODO fix this as it does not handle the following case
-// Drawable Parent -> non drawable child -> drawable child
 void DrawableObject::m_draw(sf::RenderTarget* target, Transform stateTransform) 
 {
     if (m_nonDrawableParents > 0)

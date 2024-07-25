@@ -14,9 +14,6 @@
 
 class ObjectManager;
 
-/// @note anything after this will be private unless specifying scope
-#define createDestroy() private: inline virtual void m_destroy() override { delete(this); }
-
 /// @note the pure virtual "destroy" function must only handle the destruction of the derived object
 /// @warning no thread safe if not acceded through a pointer or Object::Ptr
 class Object
@@ -168,7 +165,7 @@ public:
 
         /// @brief if this is invalid then returns 0
         /// @returns the id of the base Object class
-        inline size_t getID() const
+        inline uint64_t getID() const
         {
             return (this->m_ptr == nullptr ? 0 : this->m_ptr->getID());
         }
@@ -184,11 +181,11 @@ public:
         inline Ptr(const Ptr& ptr) = default;
 
         T* m_ptr = nullptr;
-        size_t m_eventID = 0;
+        uint64_t m_eventID = 0;
     };
 
     Object();
-    ~Object();
+    virtual ~Object();
 
     void setEnabled(bool enabled = true); 
     bool isEnabled() const;
@@ -304,9 +301,9 @@ public:
     void rotate(Rotation rot);
 
     /// @brief sets the stored user type for easy comparison later on
-    void setUserType(size_t type);
+    void setUserType(uint64_t type);
     /// @returns the stored user type
-    size_t getUserType() const;
+    uint64_t getUserType() const;
 
     /// @note this is just the transform if no other derived classes override this
     /// @returns the locally interpolated transform
@@ -334,29 +331,27 @@ protected:
     EventHelper::Event m_onTransformUpdated;
 
 private:
-    /// @brief this should actually delete the object
-    virtual void m_destroy() = 0;
     /// @brief invokes the destroy events, sets enabled false, and calls on all children
     void m_invokeDestroyEvents();
     /// @warning only use this if you know what you are doing
-    Object(size_t id);
+    Object(uint64_t id);
     /// @warning only use this if you know what you are doing
-    void m_setID(size_t id);
+    void m_setID(uint64_t id);
 
     void m_addChild(Object* object);
     void m_removeChild(Object* object);
 
     bool m_enabled = true;
     bool m_destroyed = false;
-    size_t m_id = 0;
-    size_t m_userType = 0;
+    uint64_t m_id = 0;
+    uint64_t m_userType = 0;
 
     Transform m_transform;
 
     Object* m_parent = nullptr;
     std::list<Object*> m_children;
 
-    static size_t m_lastID;
+    static uint64_t m_lastID;
 
     friend ObjectManager;
 };
@@ -370,18 +365,18 @@ private:
 namespace std {
     template <>
     struct hash<Object> {
-        inline size_t operator()(const Object& obj) const noexcept
+        inline uint64_t operator()(const Object& obj) const noexcept
         {
-            return hash<size_t>{}(obj.getID());
+            return hash<uint64_t>{}(obj.getID());
         }
     };
     template <>
     struct hash<Object*> {
-        inline size_t operator()(const Object* obj) const noexcept
+        inline uint64_t operator()(const Object* obj) const noexcept
         {
             if (obj == nullptr)
                 return 0;
-            return hash<size_t>{}(obj->getID());
+            return hash<uint64_t>{}(obj->getID());
         }
     };
     template <>

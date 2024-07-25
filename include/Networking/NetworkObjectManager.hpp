@@ -80,7 +80,6 @@ private:
     public:
         _networkObject(sf::Uint32 id);
         void setID(sf::Uint32 id);
-        inline virtual void m_destroy() override {} // this is only used as a static object so we dont want the destroy function to actually delete the object
         inline void OnClientReceivedData(sf::Packet& data) override {}
         inline sf::Packet OnClientSendData() override { return sf::Packet(); }
         inline void OnServerReceivedData(sf::Packet& data) {}

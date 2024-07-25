@@ -5,7 +5,9 @@
 
 // #include "Box2D/b2_math.h" (B2_MATH_H)
 
-#define PI 3.14159265359f
+#ifndef PI
+#define PI 3.14159265358979323846f
+#endif
 
 class Vector2;
 

@@ -11,9 +11,9 @@ class ObjectManager
 {
 public:
     /// @returns nullptr if the object does not exist 
-    static Object::Ptr<> getObject(size_t id);
+    static Object::Ptr<> getObject(uint64_t id);
 
-    static size_t getNumberOfObjects();
+    static uint64_t getNumberOfObjects();
 
     /// @brief destroys all the objects in the queue
     /// @note only use this if you know what you are doing
@@ -38,8 +38,8 @@ private:
     class _objectCompClass : public Object
     {
     public:
-        _objectCompClass(size_t id);
-        void setID(size_t id);
+        _objectCompClass(uint64_t id);
+        void setID(uint64_t id);
         createDestroy();
     };
 

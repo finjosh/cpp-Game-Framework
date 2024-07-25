@@ -3,13 +3,32 @@
 #include "Graphics/CameraManager.hpp"
 #include <cassert>
 #include <TGUI/ToolTip.hpp>
-#include <TGUI/Widgets/ListBox.hpp>
+
+// TODO update for the following
+// - need to stop changing the size of the root tgui container
+//   - only change root container size when the main camera size changes
+//   - when rendering need to handle window size manually with scaling
+// possibly dont use the root container at all and build own backend
+//   - might be difficult when dealing with stuff like tooltips and combo box list boxes
+// Use two gui objects one for global and one for local gui
+//   - this could still slow down if there are lots of global gui as the container size will still change a lot
+//      - change with handling events, drawing (also per camera), ect.
 
 Gui::Gui(sf::RenderWindow& window) : tgui::Gui(window) {}
 Gui::Gui(sf::RenderTarget& target) : tgui::Gui(target) {}
 tgui::Widget::Ptr Gui::getToolTip()
 {
     return m_visibleToolTip;
+}
+
+void Gui::setRelativeViewport_notContainer(const tgui::FloatRect& viewport)
+{
+    m_viewport = {tgui::RelativeValue(viewport.left), tgui::RelativeValue(viewport.top), tgui::RelativeValue(viewport.width), tgui::RelativeValue(viewport.height)};
+}
+
+void Gui::setAbsoluteView_notContainer(const tgui::FloatRect& view)
+{
+    m_view = {view.left, view.top, view.width, view.height};
 }
 
 Gui* CanvasManager::m_gui;
@@ -35,15 +54,17 @@ void CanvasManager::closeGUI()
 bool CanvasManager::handleEvent(sf::Event event)
 {
     Vector2 screenPosition; // left, top in pixels
+    Vector2 screenSize = m_gui->getTarget()->getSize();
     if (auto camera = CameraManager::getMainCamera())
     {
         screenPosition = camera->getPosition();
         screenPosition *= PIXELS_PER_METER;
-        screenPosition.x -= (float)m_gui->getWindow()->getSize().x/2;
-        screenPosition.y -= (float)m_gui->getWindow()->getSize().y/2;
+        screenPosition -= screenSize/2;
     }
     else
+    {
         screenPosition = Vector2{0,0};
+    }
 
     // first update all screen space canvases to have the proper position for events to be handled
     for (auto canvas: m_canvases)
@@ -54,7 +75,7 @@ bool CanvasManager::handleEvent(sf::Event event)
     }
 
     // setting the viewport so mouse position events are updated properly
-    m_gui->setAbsoluteView(tgui::FloatRect{screenPosition.x,screenPosition.y,(float)m_gui->getWindow()->getSize().x,(float)m_gui->getWindow()->getSize().y}); // setting the viewport so mouse position events are updated properly
+    m_gui->setAbsoluteView(tgui::FloatRect{screenPosition.x,screenPosition.y,screenSize.x,screenSize.y}); // setting the viewport so mouse position events are updated properly
     m_gui->setRelativeViewport(tgui::FloatRect{0,0,1,1});
     return m_gui->handleEvent(event);
 }
@@ -81,8 +102,8 @@ void CanvasManager::drawOverlayGUI()
     if (!m_gui->getTarget() || (m_gui->getWindow()->getSize().x == 0) || (m_gui->getWindow()->getSize().y == 0) || (m_gui->getView().getWidth() <= 0) || (m_gui->getView().getHeight() <= 0))
         return;
 
-    m_gui->setAbsoluteView(tgui::FloatRect{0,0,(float)m_gui->getWindow()->getSize().x,(float)m_gui->getWindow()->getSize().y});
-    m_gui->setRelativeViewport(tgui::FloatRect{0,0,1,1});
+    // m_gui->setAbsoluteView(tgui::FloatRect{0,0,(float)m_gui->getWindow()->getSize().x,(float)m_gui->getWindow()->getSize().y});
+    // m_gui->setRelativeViewport(tgui::FloatRect{0,0,1,1});
     
     // Draw the canvases
     for (auto canvas: m_canvases)
@@ -104,7 +125,12 @@ void CanvasManager::drawOverlayGUI()
                 offset *= PIXELS_PER_METER;
             }
 
-            widgetStates.transform.translate(widget->getPosition() - (tgui::Vector2f)offset - tgui::Vector2f{widget->getOrigin().x * widget->getSize().x, widget->getOrigin().y * widget->getSize().y});
+            if (widget->getPosition().y - offset.y + widget->getFullSize().y > m_gui->getWindow()->getSize().y)
+            {
+                widget->setHeight(m_gui->getWindow()->getSize().y - widget->getPosition().y + offset.y);
+            }
+
+            widgetStates.transform.translate(widget->getPosition() - tgui::Vector2f{widget->getOrigin().x * widget->getSize().x, widget->getOrigin().y * widget->getSize().y});
             if (widget->getRotation() != 0)
             {
                 const tgui::Vector2f rotOrigin{widget->getRotationOrigin().x * widget->getSize().x, widget->getRotationOrigin().y * widget->getSize().y};
@@ -125,7 +151,7 @@ void CanvasManager::drawOverlayGUI()
     {
         auto toolTip = m_gui->getToolTip();
         tgui::RenderStates widgetStates;
-        widgetStates.transform.translate((tgui::Vector2f)WindowHandler::getMouseScreenPos()*PIXELS_PER_METER - tgui::Vector2f{toolTip->getOrigin().x * toolTip->getSize().x, toolTip->getOrigin().y * toolTip->getSize().y});
+        widgetStates.transform.translate((tgui::Vector2f)WindowHandler::getMousePos()*PIXELS_PER_METER - tgui::Vector2f{toolTip->getOrigin().x * toolTip->getSize().x, toolTip->getOrigin().y * toolTip->getSize().y});
         if (toolTip->getRotation() != 0)
         {
             const tgui::Vector2f rotOrigin{toolTip->getRotationOrigin().x * toolTip->getSize().x, toolTip->getRotationOrigin().y * toolTip->getSize().y};
@@ -143,6 +169,8 @@ void CanvasManager::drawOverlayGUI()
 void CanvasManager::updateViewForCamera(Camera* camera)
 {
     m_gui->setAbsoluteView(tgui::FloatRect{(camera->getPosition().x-camera->getSize().x/2)*PIXELS_PER_METER, (camera->getPosition().y-camera->getSize().y/2)*PIXELS_PER_METER, camera->getSize().x*PIXELS_PER_METER, camera->getSize().y*PIXELS_PER_METER});
+    // m_gui->setAbsoluteView_notContainer(tgui::FloatRect{(camera->getPosition().x-camera->getSize().x/2)*PIXELS_PER_METER, (camera->getPosition().y-camera->getSize().y/2)*PIXELS_PER_METER, camera->getSize().x*PIXELS_PER_METER, camera->getSize().y*PIXELS_PER_METER});
     auto temp = camera->getScreenRect();
     m_gui->setRelativeViewport(tgui::FloatRect{temp.left, temp.top, temp.width, temp.height});
+    // m_gui->setRelativeViewport_notContainer({temp.left, temp.top, temp.width, temp.height});
 }

@@ -4,6 +4,8 @@ std::set<DrawableObject*, _drawableComp> DrawableManager::m_drawables;
 
 void DrawableManager::draw(sf::RenderTarget* target)
 {
+    // TODO test multithreading
+    // NOTE - you have to draw to different render targets in different threads as a texture and then draw the textures to the window
     for (auto drawable: m_drawables)    
     {
         if (drawable->isEnabled())
