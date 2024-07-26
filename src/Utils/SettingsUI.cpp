@@ -11,20 +11,18 @@
 
 SettingsUI::SettingsUI(Canvas* canvas, const tgui::Layout2d& size, const tgui::Layout2d& position)
 {
-    m_onDestroy([this](){ 
-        if (m_parent) 
-        {
-            auto parent = m_parent->getParent();
-            if (parent)
-                parent->remove(m_parent);
-            m_parent = nullptr;
-        }
-    });
-
     m_parent = tgui::Panel::create(size);
     m_parent->setPosition(position);
     canvas->add(m_parent);
     this->setVisible(false);
+
+    m_onDestroyQueued([this](){
+        if (m_parent)
+        {
+            m_parent->setVisible(false);
+            m_parent->setEnabled(false);
+        }
+    });
 
     SPACE_BETWEEN_WIDGETS = m_parent->getSize().y * 0.01;
     HEIGHT = m_parent->getSize().y * 0.1;
@@ -101,6 +99,17 @@ SettingsUI::SettingsUI(Canvas* canvas, const tgui::Layout2d& size, const tgui::L
         wrap->add(widget);
         wrap->setHeight(widget->getPosition().y + widget->getFullSize().y + wrap->getParent()->cast<tgui::ScrollablePanel>()->getSharedRenderer()->getPadding().getBottom());
     });
+}
+
+SettingsUI::~SettingsUI()
+{
+    if (m_parent) 
+    {
+        auto parent = m_parent->getParent();
+        if (parent)
+            parent->remove(m_parent);
+        m_parent = nullptr;
+    }
 }
 
 void SettingsUI::updateForTheme()

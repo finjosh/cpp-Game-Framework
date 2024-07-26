@@ -97,8 +97,6 @@ public:
     /// @brief removes all particles
     void clear();
 
-    createDestroy();
-
 protected:
     virtual void Update(float deltaTime) override;
     virtual void Draw(sf::RenderTarget* target, const Transform& parentTransform) override;

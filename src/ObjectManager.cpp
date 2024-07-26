@@ -1,19 +1,11 @@
 #include "ObjectManager.hpp"
 
-ObjectManager::_objectCompClass ObjectManager::m_compClass(0);
+_objectCompare ObjectManager::m_compClass;
 std::unordered_set<Object*> ObjectManager::m_objects;
 
 std::list<Object*> ObjectManager::m_destroyQueue0;
 std::list<Object*> ObjectManager::m_destroyQueue1;
 bool ObjectManager::m_nextQueue = false;
-
-
-//* Comparison classes
-
-ObjectManager::_objectCompClass::_objectCompClass(uint64_t id) : Object(id) {}
-void ObjectManager::_objectCompClass::setID(uint64_t id) { Object::m_setID(id); }
-
-// -------------------
 
 Object::Ptr<> ObjectManager::getObject(uint64_t id)
 {
@@ -62,8 +54,10 @@ void ObjectManager::destroyAllObjects()
 {
     for (auto object: m_objects)
     {
-        if (object->getParent() == nullptr) // only delete if a parent otherwise results in error
+        if (object->getParentRaw() == nullptr) // only delete if a parent otherwise results in error
+        {
             object->destroy();
+        }
     }
     ClearDestroyQueue(); 
     ClearDestroyQueue(); // clearing twice for both queues

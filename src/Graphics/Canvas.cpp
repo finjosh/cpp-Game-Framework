@@ -11,12 +11,13 @@ Canvas::Canvas() : DrawableObject(0, DrawStage::UI)
     CanvasManager::m_gui->add(m_group);
     CanvasManager::addCanvas(this);
 
-    // removing the UI component as soon as object is added to queue
-    m_onDestroy([this](){ 
-        CanvasManager::m_gui->remove(m_group);
-        this->m_group = nullptr;
-        if (m_screenSpace)
-            CanvasManager::removeCanvas(this);
+    // setting UI enabled and visibility to false when added to destroy queue
+    m_onDestroyQueued([this](){ 
+        if (m_group) // if group exits
+        {
+            this->m_group->setEnabled(false);
+            this->m_group->setVisible(false);
+        }
     });
     m_onTransformUpdated([this](){
         if (isScreenSpace())
@@ -45,6 +46,12 @@ Canvas::Canvas() : DrawableObject(0, DrawStage::UI)
 
 Canvas::~Canvas()
 {
+    if (!m_group) // group does not exist
+        return;
+    CanvasManager::m_gui->remove(m_group);
+    this->m_group = nullptr;
+    if (m_screenSpace)
+        CanvasManager::removeCanvas(this);
 }
 
 void Canvas::Draw(sf::RenderTarget* target, const Transform& parentTransform)

@@ -13,12 +13,10 @@ EventHelper::EventDynamic<sf::Packet> NetworkObjectManager::onDataReceived;
 
 std::unordered_set<NetworkObject*> NetworkObjectManager::m_objects;
 
-NetworkObjectManager::_networkObject NetworkObjectManager::m_networkComp(0);
+NetworkObjectManager::_networkObject NetworkObjectManager::m_networkComp;
 
-NetworkObjectManager::_networkObject::_networkObject(sf::Uint32 id) : NetworkObject(0) // the value does not matter as we never use the create function
-{
-    NetworkObject::m_id = id;
-}
+NetworkObjectManager::_networkObject::_networkObject() : Object(0), NetworkObject(0) // the value does not matter as we never use the create function
+{}
 
 void NetworkObjectManager::_networkObject::setID(sf::Uint32 id)
 {

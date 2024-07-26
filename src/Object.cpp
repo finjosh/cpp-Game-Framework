@@ -1,11 +1,6 @@
 #include "Object.hpp"
 #include "ObjectManager.hpp"
 
-// bool _objectComp::operator()(const Object* lhs, const Object* rhs) const
-// {
-//     return lhs->getID() < rhs->getID();
-// }
-
 uint64_t Object::m_lastID = 1;
 
 Object::Object()
@@ -28,7 +23,7 @@ Object::~Object()
         return;
 
     ObjectManager::removeObject(this);
-    
+
     if (m_parent != nullptr)
     {
         m_parent->m_removeChild(this);
@@ -40,16 +35,16 @@ Object::~Object()
         auto temp = child++;
         delete(*temp);
     }
+    m_children.clear();
 }
 
 void Object::destroy()
 {
-    if (m_destroyed)
+    if (m_destroyQueued)
         return;
-    m_destroyed = true;
+    m_destroyQueued = true;
     m_invokeDestroyEvents();
     ObjectManager::addToDestroyQueue(this);
-    // ObjectManager::removeObject(this);
 }
 
 void Object::m_invokeDestroyEvents()
@@ -59,8 +54,8 @@ void Object::m_invokeDestroyEvents()
         child->m_invokeDestroyEvents();
     }
     m_enabled = false; // dont want the event to be called
-    onDestroy.invoke();
-    m_onDestroy.invoke();
+    m_onDestroyQueued.invoke();
+    onDestroyQueued.invoke();
 }
 
 void Object::setEnabled(bool enabled)
@@ -108,6 +103,8 @@ void Object::setParent(Object* parent)
     if (parent == this)
         return;
 
+    Object* lastParent = m_parent;
+
     if (m_parent != nullptr)
     {
         m_parent->m_removeChild(this);
@@ -118,13 +115,12 @@ void Object::setParent(Object* parent)
     if (parent != nullptr)
     {
         parent->m_addChild(this);
+    }
+
+    if (lastParent != m_parent)
+    {
         m_onParentSet.invoke();
         onParentSet.invoke();
-    }
-    else
-    {
-        m_onParentRemoved.invoke();
-        onParentRemoved.invoke();
     }
 }
 
@@ -199,12 +195,6 @@ void Object::rotateAround(const Vector2& center, Rotation rot)
     m_transform.position += posChange;
     m_onTransformUpdated.invoke();
     onTransformUpdated.invoke();
-
-    // for (auto child: m_children)
-    // {
-    //     child->move(posChange);
-    //     child->rotateAround({0,0}, rot);
-    // }
 }
 
 void Object::setPosition(const Vector2& position)
@@ -213,11 +203,6 @@ void Object::setPosition(const Vector2& position)
     m_transform.position = position;
     m_onTransformUpdated.invoke();
     onTransformUpdated.invoke();
-
-    // for (auto child: m_children)
-    // {
-    //     child->move(posChange);
-    // }
 }
 
 void Object::setPosition(float x, float y)
@@ -236,12 +221,6 @@ void Object::setRotation(Rotation rotation)
     m_transform.rotation = rotation;
     m_onTransformUpdated.invoke();
     onTransformUpdated.invoke();
-
-    // for (auto child: m_children)
-    // {
-    //     child->rotateAround(m_transform.position, rotChange);
-    //     child->rotate(rotChange);
-    // }
 }
 
 Rotation Object::getRotation() const
@@ -283,11 +262,6 @@ void Object::rotate(Rotation rot)
     m_transform.rotation = m_transform.rotation + rot;
     m_onTransformUpdated.invoke();
     onTransformUpdated.invoke();
-
-    // for (auto child: m_children)
-    // {
-    //     child->rotate(rot);
-    // }
 }
 
 void Object::setGlobalPosition(const Vector2& position)
@@ -365,14 +339,12 @@ const Transform Object::getGlobalTransform() const
 
 void Object::m_addChild(Object* object)
 {
-    if (object == nullptr) return;
     m_children.push_back(object);
 }
 
 void Object::m_removeChild(Object* object)
 {
-    if (object == nullptr) return;
-    m_children.remove_if([object](const Object* obj){ return obj == object; });
+    m_children.remove(object);
 }
 
 Transform Object::getInterpolatedTransform() const
@@ -390,7 +362,7 @@ uint64_t Object::getUserType() const
     return m_userType;
 }
 
-bool Object::isDestroyed() const
+bool Object::isDestroyQueued() const
 {
-    return m_destroyed;
+    return m_destroyQueued;
 }

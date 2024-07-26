@@ -19,7 +19,7 @@ std::list<CollisionManager::m_contactData> CollisionManager::m_endContact;
 std::set<CollisionManager::m_contactData> CollisionManager::m_colliding;
 bool CollisionManager::m_usingCollidingSet = false;
 std::list<CollisionManager::m_contactData> CollisionManager::m_collidingEraseQueue;
-std::list<Collider*> CollisionManager::m_deleteQueue;
+EventHelper::Event CollisionManager::m_updateBodyEvent;
 bool CollisionManager::m_inPhysicsUpdate = false;
 
 void CollisionManager::BeginContact(b2Contact* contact)
@@ -75,6 +75,9 @@ void CollisionManager::PostSolve(b2Contact* contact, const b2ContactImpulse* imp
 
 void CollisionManager::Update()
 {
+    m_updateBodyEvent.invoke();
+    m_updateBodyEvent.disconnectAll();
+
     for (auto obj: m_objects)
     {
         obj->m_update();
@@ -95,7 +98,7 @@ void CollisionManager::Update()
 
     for (auto data: m_beginContact)
     {
-        if (data.A->isDestroyed() || data.B->isDestroyed()) // dont want to call on begin contact because it no longer exists
+        if (data.A->isDestroyQueued() || data.B->isDestroyQueued()) // dont want to call on begin contact because it no longer exists
             continue;
 
         data.A->BeginContact({data.B, data.contactData->GetFixtureA(), data.contactData->GetFixtureB(), data.contactData});
@@ -109,12 +112,6 @@ void CollisionManager::Update()
         data.B->EndContact({data.A, data.contactData->GetFixtureB(), data.contactData->GetFixtureA(), data.contactData});
     }
     m_endContact.clear();
-
-    for (auto obj: m_deleteQueue)
-    {
-        WorldHandler::getWorld().DestroyBody(obj->m_body);
-    }
-    m_deleteQueue.clear();
 }
 
 void CollisionManager::addCollider(Collider* Collider)

@@ -14,8 +14,6 @@
 // TODO make a base renderer class and completely encapsulate sfml drawable types
 
 /// @brief renderer for any sf::Shape
-/// @warning if derived from do NOT forget to use "createDestroy()"
-/// @note this can be used as a stand alone object
 /// @tparam T the wanted sf::Shape to render
 template <typename T, typename std::enable_if_t<std::is_base_of<sf::Shape, T>::value>* = nullptr>
 class Renderer : public virtual Object, public DrawableObject, public T
@@ -110,7 +108,6 @@ private:
 //     uint64_t m_lastVertexCount = 0;
 //     bool m_updated = false;
 
-//     createDestroy();
 // };
 
 #endif

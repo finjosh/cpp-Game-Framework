@@ -348,6 +348,10 @@ int main()
     new Wall({96,0}, {192,10});
     new Wall({192, 54}, {10, 108});
     new Wall({0, 54}, {10, 108});
+    Object::Ptr<OneWay> oneWay = new OneWay({0, 54}, {10, 108});
+    // oneWay->onDestroy(Command::Prompt::print, "One Way Destroyed", Command::color(), true);
+    oneWay->onDestroyQueued(Command::Prompt::print, "One Way added to destroy queue", Command::color(), true);
+    oneWay->destroy();
     // for (int i = 0; i < 100; i++)
     //     (new Player())->setPosition({50,50});
     auto p = new Player();

@@ -12,8 +12,6 @@
 
 class WindowHandler;
 
-/// @warning if derived from do NOT forget to use "createDestroy()"
-/// @note this can be used as a stand alone object
 /// @note position is always the center of the camera view
 class Camera : virtual public Object
 {

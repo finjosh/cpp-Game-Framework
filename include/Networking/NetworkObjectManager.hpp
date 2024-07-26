@@ -74,11 +74,10 @@ private:
 
     static std::mutex m_threadLock;
 
-    /// @note used as network object can not be made on its own due to its pure virtual destroy function
     class _networkObject : public NetworkObject
     {
     public:
-        _networkObject(sf::Uint32 id);
+        _networkObject();
         void setID(sf::Uint32 id);
         inline void OnClientReceivedData(sf::Packet& data) override {}
         inline sf::Packet OnClientSendData() override { return sf::Packet(); }

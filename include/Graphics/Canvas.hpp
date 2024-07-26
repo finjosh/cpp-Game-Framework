@@ -14,6 +14,7 @@
 /// @note if in screen space layer and drawStage are between canvases only
 /// @note defaults to drawing in screen space (screen overlay)
 /// @note when a canvas is in screen space the position, rotation, and origin does not affect the canvas
+/// @note when canvas is added to destroy queue the tgui object is set enabled(false) and visible(false) and full removed when fully destroyed
 /// @warning all functions defined in the Canvas class return values in pixels NOT meters
 class Canvas : public virtual Object, public DrawableObject
 {

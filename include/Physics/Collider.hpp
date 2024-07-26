@@ -137,13 +137,14 @@ typedef ContactData CollisionData;
 // TODO make parent and child colliders have defined behaviour
 /// @warning If there is a parent and child that have a Collider there is undefined behaviour (try using fixtures instead)
 /// @note positions assume that the origin is in the middle of the shape
+/// @note when added to destroy queue physics is set disabled and removed when fully destroyed
 class Collider : public virtual Object
 {
 public:
     using Ptr = Object::Ptr<Collider>;
 
     Collider();
-    ~Collider();
+    virtual ~Collider();
 
     /// @brief sets only physics enabled or disabled, ignores the object state
     /// @note if disabled object state does not matter if enabled physics will follow object state
@@ -177,16 +178,18 @@ public:
     inline virtual void EndContact(ContactData ContactData) {};
     /// @brief This can be called multiple times in one frame (called before any collision is handled)
     /// @note try to make this efficient as it can be called many times per frame
-    /// @note you can destroy the objects during this callback although the body will not be destroyed until the physics update is finished
+    /// @note you can destroy the objects during this callback although the body will not be destroyed until the object is out of the destroy queue
     /// @warning do NOT edit the colliders during this callback
     /// @param PreContactData the pre solve contact data
     inline virtual void PreSolve(PreSolveData data) {};
     /// @brief called every frame until the two objects are no longer colliding
     /// @note this will also be called on start of contact
-    /// @exception if an object is destroyed in this callback it will also be called with EndContact (normally does not call when contact ends)
     /// @note this is called for each fixture
     inline virtual void OnColliding(ContactData ContactData) {};
 
+    /// @brief Set the sleep state of the body
+    /// @note A sleeping body has very low CPU cost.
+	/// @param flag set to true to wake the body, false to put it to sleep
     void setAwake(bool awake = true);
     /// @returns world position of the center of mass.
 	Vector2 getWorldCenter() const;
@@ -296,8 +299,6 @@ protected:
 private:
     friend CollisionManager;
     friend Fixture;
-    /// @brief removes the current body from physics or adds to the deletion queue
-    void m_destroyBody();
     /// @brief updates the object transform to this colliders body transform
     void m_update();
     /// @brief updates the body state (enabled or not)

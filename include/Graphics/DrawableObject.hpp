@@ -26,7 +26,7 @@ public:
     using Ptr = Object::Ptr<DrawableObject>;
 
     DrawableObject(int layer = 0, DrawStage stage = DrawStage::Default);
-    ~DrawableObject();
+    virtual ~DrawableObject();
 
     /// @brief changes the order in which this obj will be drawn
     /// @note layer is relative to the parents layer if it is a drawableObject

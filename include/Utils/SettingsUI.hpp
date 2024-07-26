@@ -19,6 +19,7 @@ public:
     /// @param canvas the canvas to add the settings menu to
     /// @param size the size layout of the menu
     SettingsUI(Canvas* canvas, const tgui::Layout2d& size = {"100%", "100%"}, const tgui::Layout2d& position = {0,0});
+    virtual ~SettingsUI();
     /// @brief updates the UI for the current default theme
     /// @note this should be called when ever the theme changes after creation
     void updateForTheme();

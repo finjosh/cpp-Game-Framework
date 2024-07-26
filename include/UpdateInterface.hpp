@@ -11,7 +11,7 @@ public:
     using Ptr = Object::Ptr<UpdateInterface>;
 
     UpdateInterface();
-    ~UpdateInterface();
+    virtual ~UpdateInterface();
 
     /// @brief called every frame
     virtual void Update(float deltaTime);

@@ -6,10 +6,10 @@ Collider::Collider()
 {
     Object::m_onDisabled(&Collider::m_updatePhysicsState, this);
     Object::m_onEnabled(&Collider::m_updatePhysicsState, this);
-    Object::m_onDestroy(&Collider::m_destroyBody, this);
+    Object::m_onDestroyQueued([this](){
+        this->setPhysicsEnabled(false);
+    });
     Object::m_onTransformUpdated(&Collider::m_updateTransform, this);
-    // Object::_onParentRemoved(&CollisionManager::addCollider, this);
-    // Object::_onParentSet(&CollisionManager::removeCollider, this);
 
     CollisionManager::addCollider(this);
 
@@ -24,21 +24,8 @@ Collider::Collider()
 
 Collider::~Collider()
 {
+    WorldHandler::getWorld().DestroyBody(m_body); // No need to delete user data as it just points to this collider
     CollisionManager::removeCollider(this);
-}
-
-void Collider::m_destroyBody()
-{
-    //* NOT the best way of doing this but it works for now
-    if (CollisionManager::m_inPhysicsUpdate)
-    {
-        CollisionManager::m_deleteQueue.emplace_back(this);
-    }
-    else
-    {
-        WorldHandler::getWorld().DestroyBody(m_body); // No need to delete user data as it just points to this collider
-    }
-    // m_body = nullptr;
 }
 
 Fixture Collider::createFixture(const b2Shape& shape, float friction, float restitution, float restitutionThreshold, 
@@ -72,7 +59,7 @@ void Collider::destroyFixture(const Fixture& fixture)
 void Collider::setPhysicsEnabled(bool enabled)
 {
     m_enabled = enabled;
-    m_body->SetEnabled(m_enabled && Object::isEnabled());
+    m_updatePhysicsState();
 }
 
 bool Collider::isPhysicsEnabled() const
@@ -82,7 +69,10 @@ bool Collider::isPhysicsEnabled() const
 
 void Collider::m_updatePhysicsState()
 {
-    m_body->SetEnabled(m_enabled && Object::isEnabled());
+    if (CollisionManager::m_inPhysicsUpdate)
+        CollisionManager::m_updateBodyEvent(b2Body::SetEnabled, this->m_body, m_enabled && Object::isEnabled());
+    else
+        m_body->SetEnabled(m_enabled && Object::isEnabled());
 }
 
 void Collider::m_updateTransform()
@@ -99,7 +89,10 @@ void Collider::m_update()
 
 void Collider::setAwake(bool awake)
 {
-    m_body->SetAwake(awake);
+    if (CollisionManager::m_inPhysicsUpdate)
+        CollisionManager::m_updateBodyEvent(b2Body::SetAwake, this->m_body, awake);
+    else
+        m_body->SetAwake(awake);
 }
 
 Vector2 Collider::getWorldCenter() const

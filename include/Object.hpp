@@ -13,13 +13,11 @@
 #include "Transform.hpp"
 
 class ObjectManager;
+class _objectCompare;
 
-/// @note the pure virtual "destroy" function must only handle the destruction of the derived object
-/// @warning no thread safe if not acceded through a pointer or Object::Ptr
 class Object
 {
 public:
-    /// @note the ptr is stored till the object is actually deleted but will no longer be valid after it is added to the destroy queue
     /// @warning the type must have the base class Object
     template <typename T = Object>
     class Ptr
@@ -121,14 +119,12 @@ public:
         }
         
         /// @brief if there is no ptr returns nullptr
-        /// @note this could be invalid even if a ptr is returned (object is in destroy queue)
         inline T* get()
         {
             return m_ptr;
         }
         
         /// @brief if there is no ptr returns nullptr
-        /// @note this could be invalid even if a ptr is returned (object is in destroy queue)
         inline const T* get() const
         {
             return m_ptr;
@@ -141,6 +137,7 @@ public:
             return static_cast<Object*>(m_ptr);
         }
 
+        /// @returns false if the object originally stored object was added to destroy queue
         inline bool isValid() const
         {
             return (m_ptr != nullptr);
@@ -150,16 +147,16 @@ public:
         /// @param rawPtr the new ptr
         inline void set(T* rawPtr)
         {
-            if (this->isValid())
+            if (this->m_ptr != nullptr)
             {
-                m_ptr->m_onDestroy.disconnect(m_eventID);
+                m_ptr->m_onDestroyQueued.disconnect(m_eventID);
             }
             this->removePtr();
 
             if (rawPtr != nullptr)
             {
                 m_ptr = rawPtr;    
-                m_eventID = m_ptr->m_onDestroy.connect(Object::Ptr<T>::removePtr, this);
+                m_eventID = m_ptr->m_onDestroyQueued.connect(Object::Ptr<T>::removePtr, this);
             }
         }
 
@@ -212,14 +209,15 @@ public:
     void addChild(Object* child);
     /// @brief tries to convert every child to the given type until found
     /// @tparam T the type that you want the child to be
-    /// @note if no child of type is found returns nullptr
+    /// @note if no child of type is found or in destroy queue returns nullptr
     /// @returns the first child of the wanted type
     template <typename T>
     inline T* tryGetChildOf()
     {
         for (auto child: m_children)
         {
-            if (auto rtn = child->cast<T>())
+            auto rtn = child->cast<T>();
+            if (rtn != nullptr && !rtn->isDestroyQueued())
                 return rtn;
         }
         return nullptr;
@@ -229,14 +227,10 @@ public:
     EventHelper::Event onEnabled;
     /// @note if derived class, use the virtual function
     EventHelper::Event onDisabled;
-    /// @note this is called one frame before the object is actually destroyed
-    /// @note you should NOT access any thing about the object through this event
-    EventHelper::Event onDestroy;
-    /// @note this is called when the parent is set to anything but nullptr
+    /// @brief this is called when the destruction of this object is queued
+    EventHelper::Event onDestroyQueued;
+    /// @note this is called when the parent is set to something other than the current parent
     EventHelper::Event onParentSet;
-    /// @note this is called when the parent is set to nullptr
-    /// @note not called when this object is destroyed
-    EventHelper::Event onParentRemoved;
     /// @brief called when ever the transform of this object is updated
     /// @note only called if the local position is updated
     EventHelper::Event onTransformUpdated;
@@ -309,7 +303,7 @@ public:
     /// @returns the locally interpolated transform
     virtual Transform getInterpolatedTransform() const;
     /// @returns true if this object is in the destroy queue
-    bool isDestroyed() const;
+    bool isDestroyQueued() const;
 
 protected:
     inline virtual void OnEnable() {};
@@ -318,31 +312,28 @@ protected:
     EventHelper::Event m_onEnabled;
     /// @warning do NOT disconnect all EVER
     EventHelper::Event m_onDisabled;
-    /// @brief called when the object is added to the destroy queue (should act as if it is already destroyed)
-    /// @note this is where the object should show itself as being destroyed (deconstructor should be used to finalize destruction)
-    /// @warning do NOT disconnect all EVER
-    EventHelper::Event m_onDestroy;
+    /// @brief this is called when the destruction of this object is queued
+    /// @note the object should appear as if it is destroyed
+    EventHelper::Event m_onDestroyQueued;
     /// @warning do NOT disconnect all EVER
     EventHelper::Event m_onParentSet;
-    /// @warning do NOT disconnect all EVER
-    EventHelper::Event m_onParentRemoved;
     /// @brief called when ever the transform of this object is updated
     /// @warning do NOT disconnect all EVER
     EventHelper::Event m_onTransformUpdated;
 
-private:
-    /// @brief invokes the destroy events, sets enabled false, and calls on all children
-    void m_invokeDestroyEvents();
     /// @warning only use this if you know what you are doing
     Object(uint64_t id);
     /// @warning only use this if you know what you are doing
     void m_setID(uint64_t id);
+private:
+    /// @brief invokes the destroy events, sets enabled false, and calls on all children
+    void m_invokeDestroyEvents();
 
     void m_addChild(Object* object);
     void m_removeChild(Object* object);
 
     bool m_enabled = true;
-    bool m_destroyed = false;
+    bool m_destroyQueued = false;
     uint64_t m_id = 0;
     uint64_t m_userType = 0;
 
@@ -354,13 +345,23 @@ private:
     static uint64_t m_lastID;
 
     friend ObjectManager;
+    friend _objectCompare;
 };
 
-// class _objectComp
-// {
-// public:
-//     bool operator()(const Object* lhs, const Object* rhs) const;
-// };
+/// @brief this should only be used to compare objects based on ID when stored with raw ptrs
+/// @note this object is not handled by object manager
+/// @note you must set the ID to the wanted ID before trying to compare
+class _objectCompare : public Object
+{
+public:
+    inline _objectCompare() : Object(0) {}
+    /// @brief sets the object ID to the wanted ID
+    /// @note remember to set this back to 0 once done
+    inline void setID(uint64_t id)
+    {
+        Object::m_id = id;
+    }
+};
 
 namespace std {
     template <>

@@ -19,7 +19,6 @@ bool _drawableComp::operator() (const DrawableObject* lhs, const DrawableObject*
 
 DrawableObject::DrawableObject(int layer, DrawStage stage) : m_layer(layer), m_stage(stage)
 {
-    m_onParentRemoved(&DrawableObject::m_removeParent, this);
     m_onParentSet(&DrawableObject::m_setParent, this);
 
     DrawableManager::addDrawable(this);
