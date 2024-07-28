@@ -87,6 +87,16 @@ int32 WorldHandler::getPositionIterations()
     return m_positionIterations;
 }
 
+void WorldHandler::setMaxUpdates(int32 maxUpdates)
+{
+    m_maxUpdates = maxUpdates;
+}
+
+int32 WorldHandler::getMaxUpdates()
+{
+    return m_maxUpdates;
+}
+
 void WorldHandler::setGravity(const Vector2& gravity)
 {
     m_world.SetGravity((b2Vec2)gravity);

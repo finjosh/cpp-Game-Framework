@@ -7,15 +7,28 @@
 
 sf::RenderWindow* WindowHandler::m_renderWindow = nullptr;
 Vector2 WindowHandler::m_lastMousePos = {0,0};
+EventHelper::EventDynamic<sf::RenderWindow*> WindowHandler::onRenderWindowChanged;
+sf::VideoMode WindowHandler::m_videoMode;
+sf::ContextSettings WindowHandler::m_contextSettings;
+sf::Uint32 WindowHandler::m_style;
+std::string WindowHandler::m_title;
 
 sf::RenderWindow* WindowHandler::getRenderWindow()
 {
     return m_renderWindow;
 }
 
-void WindowHandler::setRenderWindow(sf::RenderWindow* renderWindow)
+void WindowHandler::initRenderWindow(sf::VideoMode mode, const sf::String &title, sf::Uint32 style, const sf::ContextSettings &settings)
 {
-    m_renderWindow = renderWindow;
+    m_videoMode = mode;
+    m_contextSettings = settings;
+    m_style = style;
+
+    if (m_renderWindow)
+        delete(m_renderWindow);
+
+    m_renderWindow = new sf::RenderWindow(mode, title, style, settings);
+    onRenderWindowChanged.invoke(m_renderWindow);
 }
 
 void WindowHandler::Display()
@@ -37,7 +50,7 @@ void WindowHandler::Display()
 
     if (CameraManager::m_cameras.size() == 0)
     {   
-        DrawableManager::draw(m_renderWindow);
+        DrawableManager::draw(m_renderWindow, m_contextSettings);
         WorldHandler::getWorld().DebugDraw();
     }
     for (auto camera: CameraManager::m_cameras)
@@ -52,7 +65,7 @@ void WindowHandler::Display()
         camera->m_drawBackground((sf::RenderTarget*)m_renderWindow);
         
         camera->disableBlacklistedCanvases();
-        DrawableManager::draw(m_renderWindow);
+        DrawableManager::draw(m_renderWindow, m_contextSettings);
         camera->enableBlacklistedCanvases();
         WorldHandler::getWorld().DebugDraw();
 
@@ -91,4 +104,44 @@ Vector2 WindowHandler::getMouseScreenPos()
 Vector2 WindowHandler::getScreenSize()
 {
     return Vector2{m_renderWindow->getSize()} / PIXELS_PER_METER;
+}
+
+void WindowHandler::setContextSettings(sf::ContextSettings contextSettings)
+{
+    initRenderWindow(m_videoMode, m_title, m_style, contextSettings);
+}
+
+sf::ContextSettings WindowHandler::getContextSettings()
+{
+    return m_contextSettings;
+}
+
+void WindowHandler::setVideMode(sf::VideoMode mode)
+{
+    initRenderWindow(mode, m_title, m_style, m_contextSettings);
+}
+
+sf::VideoMode WindowHandler::getVideMode()
+{
+    return m_videoMode;
+}
+
+void WindowHandler::setStyle(sf::Uint32 style)
+{
+    initRenderWindow(m_videoMode, m_title, style, m_contextSettings);
+}
+
+sf::Uint32 WindowHandler::getStyle()
+{
+    return m_style;
+}
+
+void WindowHandler::setTitle(const std::string& title)
+{
+    m_renderWindow->setTitle(title);
+}
+
+std::string WindowHandler::getTitle()
+{
+    return m_title;
 }

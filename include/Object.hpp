@@ -18,6 +18,7 @@ class _objectCompare;
 class Object
 {
 public:
+    /// @note this will compare to other objects/Ptrs until the stored object is completely destroyed
     /// @warning the type must have the base class Object
     template <typename T = Object>
     class Ptr
@@ -119,28 +120,32 @@ public:
         }
         
         /// @brief if there is no ptr returns nullptr
+        /// @note the ptr returned could not be nullptr but still be invalid as it was added to the destroy queue
         inline T* get()
         {
             return m_ptr;
         }
         
         /// @brief if there is no ptr returns nullptr
+        /// @note the ptr returned could not be nullptr but still be invalid as it was added to the destroy queue
         inline const T* get() const
         {
             return m_ptr;
         }
 
-        /// @note if there is no ptr returns nullptr
+        /// @note if the ptr is invalid returns nullptr even if the object is not destroyed yet
         /// @returns the ptr to the base object
         inline Object* getObj() const
         {
+            if (isValid())
+                return nullptr;
             return static_cast<Object*>(m_ptr);
         }
 
         /// @returns false if the object originally stored object was added to destroy queue
         inline bool isValid() const
         {
-            return (m_ptr != nullptr);
+            return (m_ptr != nullptr) && !m_ptr->m_destroyQueued;
         }
         
         /// @brief assigns which obj is stored in this ptr
@@ -149,18 +154,18 @@ public:
         {
             if (this->m_ptr != nullptr)
             {
-                m_ptr->m_onDestroyQueued.disconnect(m_eventID);
+                m_ptr->m_onDestroy.disconnect(m_eventID);
             }
             this->removePtr();
 
             if (rawPtr != nullptr)
             {
                 m_ptr = rawPtr;    
-                m_eventID = m_ptr->m_onDestroyQueued.connect(Object::Ptr<T>::removePtr, this);
+                m_eventID = m_ptr->m_onDestroy.connect(Object::Ptr<T>::removePtr, this);
             }
         }
 
-        /// @brief if this is invalid then returns 0
+        /// @note this will return 0 when the stored object is destroyed
         /// @returns the id of the base Object class
         inline uint64_t getID() const
         {
@@ -229,6 +234,9 @@ public:
     EventHelper::Event onDisabled;
     /// @brief this is called when the destruction of this object is queued
     EventHelper::Event onDestroyQueued;
+    /// @brief this is called right before the destruction of this object
+    /// @note the object will be destroyed after this is called
+    EventHelper::Event onDestroy;
     /// @note this is called when the parent is set to something other than the current parent
     EventHelper::Event onParentSet;
     /// @brief called when ever the transform of this object is updated
@@ -315,6 +323,9 @@ protected:
     /// @brief this is called when the destruction of this object is queued
     /// @note the object should appear as if it is destroyed
     EventHelper::Event m_onDestroyQueued;
+    /// @brief this is called right before the destruction of this object
+    /// @note the object will be destroyed after this is called
+    EventHelper::Event m_onDestroy;
     /// @warning do NOT disconnect all EVER
     EventHelper::Event m_onParentSet;
     /// @brief called when ever the transform of this object is updated

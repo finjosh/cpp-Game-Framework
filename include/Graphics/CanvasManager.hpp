@@ -29,10 +29,10 @@ private:
 
 };
 
+// TODO make this singleton
 class CanvasManager
 {
 public:
-    /// @note call this AFTER the window handler has it's render window set
     static void initGUI();
     /// @brief frees up memory used by the gui
     static void closeGUI();

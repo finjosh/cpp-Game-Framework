@@ -33,6 +33,8 @@ Object::~Object()
     while (child != m_children.end())
     {
         auto temp = child++;
+        (*temp)->onDestroy.invoke();
+        (*temp)->m_onDestroy.invoke();
         delete(*temp);
     }
     m_children.clear();

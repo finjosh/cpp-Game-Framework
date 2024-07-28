@@ -23,7 +23,7 @@ public:
     /// @param fileName the name of the settings files
     /// @param directories the directories to search for the file (must end in a "/")
     /// @returns false if no file was found true if file was found and attempted to load from
-    bool loadFromFile(const std::string& fileName = "Settings.ini", const std::list<std::string>& directories = {});
+    bool tryLoadFromFile(const std::string& fileName = "Settings.ini", const std::list<std::string>& directories = {});
     /// @brief saves the settings to file 
     /// @param file the path and name of the file
     /// @note if the path does not exists it will first be created
@@ -99,5 +99,25 @@ private:
     /// @brief second is the set of all settings in the section
     std::map<std::string, std::set<SettingBase*, _SettingBaseComp>> m_settings;
 };
+
+// //* test settings
+// m_settings->createSubSectionLabel("Test Section", "Boolean Settings");
+// m_settings->createSetting<bool>("Test Section", {"Bool", true, "A test for boolean settings"});
+// m_settings->createSubSectionLabel("Test Section", "Integer Settings");
+// m_settings->createSetting<int>("Test Section", {"Int1", 1, "A test for int settings with any input"});
+// m_settings->createSetting<int>("Test Section", {"Int2", 2, "A test for int settings with a conditional input (-7 <= int <= 77)", [](int value){ return -7 <= value && value <= 77; }});
+// m_settings->createSetting<int>("Test Section", {"Int3", 3, "A test for int settings with a range slider", -7, 77, 1});
+// m_settings->createSubSectionLabel("Test Section", "Unsigned Integer Settings");
+// m_settings->createSetting<unsigned int>("Test Section", {"UInt1", 1, "A test for unsigned ints settings with any input"});
+// m_settings->createSetting<unsigned int>("Test Section", {"UInt2", 2, "A test for unsigned ints settings with a conditional input (7 <= int)", [](unsigned int value){ return 7 <= value; }});
+// m_settings->createSetting<unsigned int>("Test Section", {"UInt3", 3, "A test for unsigned ints settings with a range slider", 7, 77, 1});
+// m_settings->createSubSectionLabel("Test Section", "Floating Point Settings");
+// m_settings->createSetting<float>("Test Section", {"Float1", 1.f, "A test for float settings with any input"});
+// m_settings->createSetting<float>("Test Section", {"Float2", 2.f, "A test for float settings with a conditional input (0.7 <= float <= 7)", [](float value){ return 0.699999 <= value && value <= 7; }});
+// m_settings->createSetting<float>("Test Section", {"Float3", 3.f, "A test for float settings with a range slider", 0.7, 77, 0.1});
+// m_settings->createSubSectionLabel("Test Section", "String Settings");
+// m_settings->createSetting<std::string>("Test Section", {"String1", "one", "A test for string settings with any input"});
+// m_settings->createSetting<std::string>("Test Section", {"String2", "two", "A test for string settings with a list of input options", {"Cat", "Dog", "Coding", "Math", "Physics"}});
+// m_settings->createSetting<std::string>("Test Section", {"String3", "three", "A test for string settings with a conditional input (string must start with \"I\")", [](std::string value){ return value.starts_with("I"); }});
 
 #endif

@@ -24,7 +24,10 @@ public:
     /// @note this should be called when ever the theme changes after creation
     void updateForTheme();
     void setVisible(bool visible = true);
+    void showWithEffect(tgui::ShowEffectType showEffect, tgui::Duration duration);
+    void hideWithEffect(tgui::ShowEffectType hideEffect, tgui::Duration duration);
     bool isVisible() const;
+    tgui::Container::Ptr getParentGUI();
     /// @brief creates a label that separates the last setting from the new ones in the given section
     /// @param subSectionText the text that will be applied the the label
     /// @note if the section does not exists it will be created
@@ -40,7 +43,7 @@ public:
     tgui::Duration getShowEffectDuration() const;
 
     /// @note Optional parameter: if it is visible
-    EventHelper::EventDynamic<bool> onVisibilityChanged;
+    EventHelper::EventDynamic<bool> onVisibilitySet;
 
 protected:
     /// @note if nullptr is given returns a panel that has only a child label

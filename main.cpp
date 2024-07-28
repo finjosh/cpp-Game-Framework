@@ -6,7 +6,10 @@
 #include "box2d/Box2D.h"
 // #include "BS_thread_pool.hpp"
 
-#include "Utils.hpp"
+#include "Utils/CommandPrompt.hpp"
+#include "Utils/Debug/LiveVar.hpp"
+#include "Utils/Debug/VarDisplay.hpp"
+#include "Utils/Debug/TFuncDisplay.hpp"
 #include "Utils/iniParser.hpp"
 
 #include "ObjectManager.hpp"
@@ -303,16 +306,16 @@ private:
 int main()
 {
     // setup for sfml and tgui
-    sf::RenderWindow window(sf::VideoMode::getDesktopMode(), "Game Framework"); // , sf::Style::Fullscreen
+    // sf::RenderWindow window(sf::VideoMode::getDesktopMode(), "Game Framework"); // , sf::Style::Fullscreen
     // window.setFramerateLimit(60);
-    WindowHandler::setRenderWindow(&window);
+    WindowHandler::initRenderWindow(sf::VideoMode::getDesktopMode(), "Game Framework");
     CanvasManager::initGUI();
 
     tryLoadTheme({"Dark.txt", "Black.txt"}, {"", "Assets/", "themes/", "Themes/", "assets/", "Assets/Themes/", "Assets/themes/", "assets/themes/", "assets/Themes/"});
     // -----------------------
 
     WorldHandler::init({0.f,0.f});
-    DebugDraw debugDraw(&window);
+    DebugDraw debugDraw(WindowHandler::getRenderWindow());
     debugDraw.initCommands();
     WorldHandler::getWorld().SetDebugDraw(&debugDraw); // TODO implement ray cast system
 
@@ -348,10 +351,10 @@ int main()
     new Wall({96,0}, {192,10});
     new Wall({192, 54}, {10, 108});
     new Wall({0, 54}, {10, 108});
-    Object::Ptr<OneWay> oneWay = new OneWay({0, 54}, {10, 108});
-    // oneWay->onDestroy(Command::Prompt::print, "One Way Destroyed", Command::color(), true);
-    oneWay->onDestroyQueued(Command::Prompt::print, "One Way added to destroy queue", Command::color(), true);
-    oneWay->destroy();
+
+    for (int i = 0; i < 50000; i++)
+        new Renderer<sf::CircleShape>();
+
     // for (int i = 0; i < 100; i++)
     //     (new Player())->setPosition({50,50});
     auto p = new Player();
@@ -397,7 +400,7 @@ int main()
     sf::Clock deltaClock;
     float fixedUpdate = 0;
     UpdateManager::Start();
-    while (window.isOpen())
+    while (WindowHandler::getRenderWindow()->isOpen())
     {
         EventHelper::Event::ThreadSafe::update();
         // updating the delta time var
@@ -406,10 +409,10 @@ int main()
         secondTimer += deltaTime.asSeconds();
 
         sf::Event event;
-        while (window.pollEvent(event))
+        while (WindowHandler::getRenderWindow()->pollEvent(event))
         {
             if (event.type == sf::Event::Closed || (event.type == sf::Event::KeyPressed && event.key.code == sf::Keyboard::Key::Escape))
-                window.close();
+                WindowHandler::getRenderWindow()->close();
 
             if (Command::Prompt::UpdateEvent(event))
                 continue;
@@ -460,7 +463,7 @@ int main()
 
     ObjectManager::destroyAllObjects();
     CanvasManager::closeGUI();
-    window.close();
+    WindowHandler::getRenderWindow()->close();
 
     // NetworkObjectManager::getClient()->closeConnection(); // TODO do this in a function
     // NetworkObjectManager::getServer()->closeConnection();

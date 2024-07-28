@@ -33,10 +33,8 @@ public:
     void setMainCamera();
     bool isMainCamera() const;
     /// @brief sets the size of the view
-    /// @note nothing happens if this is the main camera
     void setViewSize(Vector2 size);
     /// @brief sets the size of the view
-    /// @note nothing happens if this is the main camera
     void setViewSize(float x, float y);
     /// @returns the size in terms of meters
     Vector2 getSize() const;

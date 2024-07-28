@@ -20,9 +20,11 @@ SettingsUI::SettingsUI(Canvas* canvas, const tgui::Layout2d& size, const tgui::L
         if (m_parent)
         {
             m_parent->setVisible(false);
-            m_parent->setEnabled(false);
         }
     });
+
+    m_onEnabled(SettingsUI::setVisible, this, true);
+    m_onDisabled(SettingsUI::setVisible, this, false);
 
     SPACE_BETWEEN_WIDGETS = m_parent->getSize().y * 0.01;
     HEIGHT = m_parent->getSize().y * 0.1;
@@ -46,7 +48,6 @@ SettingsUI::SettingsUI(Canvas* canvas, const tgui::Layout2d& size, const tgui::L
         auto panel = tgui::ScrollablePanel::create({"79%", "100%"});
         panel->setHorizontalScrollbarPolicy(tgui::Scrollbar::Policy::Never);
         panel->setPosition("21%", 0);
-        panel->setEnabled(button->isDown());
         panel->setVisible(button->isDown());
         auto wrap = tgui::HorizontalWrap::create();
         panel->add(wrap);
@@ -81,13 +82,11 @@ SettingsUI::SettingsUI(Canvas* canvas, const tgui::Layout2d& size, const tgui::L
                 if (iter.first == section)
                 {
                     iter.second->getParent()->setVisible(true);
-                    iter.second->getParent()->setEnabled(true);
                     iter.second->getParent()->showWithEffect(m_showEffect, m_showDuration);
                     continue;
                 }
 
                 iter.second->getParent()->setVisible(false);
-                iter.second->getParent()->setEnabled(false);
             }
         });
     });
@@ -142,12 +141,33 @@ void SettingsUI::setVisible(bool visible)
         m_parent->moveToFront();
         m_parent->setFocused(true);
     }
-    onVisibilityChanged.invoke(visible);
+    onVisibilitySet.invoke(visible);
+}
+
+void SettingsUI::showWithEffect(tgui::ShowEffectType showEffect, tgui::Duration duration)
+{
+    m_parent->setEnabled(true);
+    m_parent->moveToFront();
+    m_parent->setFocused(true);
+    m_parent->showWithEffect(showEffect, duration);
+    onVisibilitySet.invoke(true);
+}
+
+void SettingsUI::hideWithEffect(tgui::ShowEffectType hideEffect, tgui::Duration duration)
+{
+    m_parent->setEnabled(false);
+    m_parent->hideWithEffect(hideEffect, duration);
+    onVisibilitySet.invoke(false);
 }
 
 bool SettingsUI::isVisible() const
 {
     return m_parent != nullptr && m_parent->isVisible();
+}
+
+tgui::Container::Ptr SettingsUI::getParentGUI()
+{
+    return m_parent;
 }
 
 void SettingsUI::createSubSectionLabel(const std::string& section, const std::string& subSectionText)

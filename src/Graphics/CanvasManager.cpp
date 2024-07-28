@@ -36,9 +36,19 @@ std::set<Canvas*, _drawableComp> CanvasManager::m_canvases;
 
 void CanvasManager::initGUI()
 {
-    assert(WindowHandler::getRenderWindow() != nullptr);
+    if (WindowHandler::getRenderWindow() != nullptr)
+        m_gui = new Gui(*WindowHandler::getRenderWindow());
+    
+    WindowHandler::onRenderWindowChanged([](sf::RenderWindow* window){
+        assert("Render window must not be nullptr" && window != nullptr);
 
-    m_gui = new Gui(*WindowHandler::getRenderWindow());
+        if (m_gui)
+        {
+            m_gui->setWindow(*window);
+        }
+        else
+            m_gui = new Gui(*window);
+    });
 }
 
 void CanvasManager::closeGUI()
@@ -97,6 +107,8 @@ void CanvasManager::removeCanvas(Canvas* canvas)
 
 void CanvasManager::drawOverlayGUI()
 {
+    assert(WindowHandler::getRenderWindow() != nullptr);
+
     m_gui->updateTime();
 
     if (!m_gui->getTarget() || (m_gui->getWindow()->getSize().x == 0) || (m_gui->getWindow()->getSize().y == 0) || (m_gui->getView().getWidth() <= 0) || (m_gui->getView().getHeight() <= 0))
@@ -121,7 +133,7 @@ void CanvasManager::drawOverlayGUI()
             Vector2 offset;
             if (auto camera = CameraManager::getMainCamera())
             {
-                offset = camera->getPosition() - camera->getSize()/2;
+                offset = camera->getPosition() - WindowHandler::getScreenSize()/2;
                 offset *= PIXELS_PER_METER;
             }
 

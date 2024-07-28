@@ -26,6 +26,8 @@ void ObjectManager::ClearDestroyQueue()
     std::list<Object*>& list = m_nextQueue ? m_destroyQueue1 : m_destroyQueue0;
     for (std::list<Object*>::iterator obj = list.begin(); obj != list.end(); obj++)
     {
+        (*obj)->onDestroy.invoke();
+        (*obj)->m_onDestroy.invoke();
         delete(*obj);
     }
     list.clear();

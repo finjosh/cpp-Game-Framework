@@ -13,7 +13,7 @@ Settings::~Settings()
     }
 }
 
-bool Settings::loadFromFile(const std::string& fileName, const std::list<std::string>& directories)
+bool Settings::tryLoadFromFile(const std::string& fileName, const std::list<std::string>& directories)
 {
     std::string path = "";
     for (const std::string& dir: directories)
