@@ -8,7 +8,7 @@
 #include "Vector2.hpp"
 #include "Rotation.hpp"
 
-/// @note if you want helper functions to work with tgui, sfml, and box2d vectors make sure to include them before include "Vector2"
+/// @note if you want helper functions to work with box2d transforms make sure to include them before including "Transform"
 class Transform
 {
 public:

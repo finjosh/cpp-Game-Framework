@@ -11,7 +11,7 @@
 
 class Vector2;
 
-/// @note if you want helper functions to work with tgui, sfml, and box2d vectors make sure to include them before include "Vector2"
+/// @note if you want helper functions to work with box2d rotations make sure to include them before including "Rotation"
 /// @note if you want the to string function to be defined include this the string include
 class Rotation
 {

@@ -3,7 +3,7 @@
 #include "SFML/Graphics.hpp"
 #include "TGUI/TGUI.hpp"
 #include "TGUI/Backend/SFML-Graphics.hpp"
-#include "box2d/Box2D.h"
+#include "box2d/box2d.h"
 // #include "BS_thread_pool.hpp"
 
 #include "Utils/CommandPrompt.hpp"
@@ -49,8 +49,7 @@ public:
     {
         setPosition(pos);
 
-        b2PolygonShape b2shape;
-        b2shape.SetAsBox(size.x/2, size.y/2);
+        b2Polygon b2shape = b2MakeBox(size.x/2, size.y/2);
 
         Collider::createFixture(b2shape, 1);
         Collider::setType(b2BodyType::b2_staticBody);
@@ -75,8 +74,7 @@ public:
     {
         m_players.emplace(this);
 
-        b2PolygonShape b2shape;
-        b2shape.SetAsBox(2.5,2.5);
+        b2Polygon b2shape = b2MakeBox(2.5,2.5);
 
         Collider::createFixture(b2shape, 1, 0.1);
 
@@ -147,21 +145,21 @@ public:
         {
             pos += player->getPosition();
         }
-        pos /= m_players.size();
+        pos /= (float)m_players.size();
 
         m_camera->setPosition(Vector2::lerp(m_camera->getPosition(), pos, 0.97*delta)); // since late update is called after physics update
         m_camera->setRotation(getRotation());
     }
 
-    void BeginContact(ContactData data) override
-    {
-        auto info = data.getInfo();
-        if (info.getPointCount() > 0 && getLinearVelocity().lengthSquared() > 250 && data.getCollider()->cast<Wall>())
-        {
-            // m_hitParticle->setPosition(info.getContactPoint(0));
-            // m_hitParticle->emit();
-        }
-    }
+    // void BeginContact(ContactData data) override
+    // {
+    //     auto info = data.getInfo();
+    //     if (info.getPointCount() > 0 && getLinearVelocity().lengthSquared() > 250 && data.getCollider()->cast<Wall>())
+    //     {
+    //         // m_hitParticle->setPosition(info.getContactPoint(0));
+    //         // m_hitParticle->emit();
+    //     }
+    // }
 };
 
 Camera::Ptr Player::m_camera = nullptr;
@@ -173,8 +171,7 @@ class Sensor : public virtual Object, public Renderer<sf::RectangleShape>, publi
 public:
     Sensor(funcHelper::func<void> onEnter, const Object::Ptr<>& object = Object::Ptr<>(nullptr))
     {
-        b2PolygonShape shape;
-        shape.SetAsBox(10,10);
+        b2Polygon shape = b2MakeBox(10,10);
         Collider::createFixtureSensor(shape);
         Collider::setType(b2BodyType::b2_staticBody);
 
@@ -207,8 +204,7 @@ class OneWay : public virtual Object, public Renderer<sf::RectangleShape>, publi
 public:
     inline OneWay(const Vector2& pos, const Vector2& size)
     {
-        b2PolygonShape b2shape;
-        b2shape.SetAsBox(size.x/2, size.y/2);
+        b2Polygon b2shape = b2MakeBox(size.x/2, size.y/2);
 
         Collider::createFixture(b2shape, 1);
         // Collider::setType(b2BodyType::b2_staticBody);
@@ -241,19 +237,20 @@ public:
         // }
     }
 
-    void PreSolve(PreSolveData data) override
+    bool PreSolve(PreSolveData data) override
     {
         if (data.getCollider()->cast<Wall>() != nullptr)
-            return;
-        if (getLocalVector(data.getInfo().getNormal()).y < -0.5f) // if the object is colliding from the bottom
+            return true;
+        if (getLocalVector(data.getNormal()).y < -0.5f) // if the object is colliding from the bottom
         {
-            data.setEnabled(false);
             m_freeFlow.emplace(data.getCollider());
+            return false;
         }
         else if (m_freeFlow.find(data.getCollider()) != m_freeFlow.end())
         {
-            data.setEnabled(false);
+            return false;
         }
+        return true;
     }
 
     void EndContact(ContactData data) override
@@ -314,10 +311,8 @@ int main()
     tryLoadTheme({"Dark.txt", "Black.txt"}, {"", "Assets/", "themes/", "Themes/", "assets/", "Assets/Themes/", "Assets/themes/", "assets/themes/", "assets/Themes/"});
     // -----------------------
 
-    WorldHandler::init({0.f,0.f});
-    DebugDraw debugDraw(WindowHandler::getRenderWindow());
-    debugDraw.initCommands();
-    WorldHandler::getWorld().SetDebugDraw(&debugDraw); // TODO implement ray cast system
+    WorldHandler::get().init({0.f,0.f});
+    DebugDraw::get().initCommands();
 
     Canvas* gui = new Canvas();
 
@@ -351,9 +346,6 @@ int main()
     new Wall({96,0}, {192,10});
     new Wall({192, 54}, {10, 108});
     new Wall({0, 54}, {10, 108});
-
-    for (int i = 0; i < 50000; i++)
-        new Renderer<sf::CircleShape>();
 
     // for (int i = 0; i < 100; i++)
     //     (new Player())->setPosition({50,50});
@@ -440,8 +432,7 @@ int main()
         //! ------------------------------
 
         //! Do physics before this for consistent physics (in object update)
-        WorldHandler::updateWorld(deltaTime.asSeconds()); // updates the world physics
-        CollisionManager::Update(); // updates the collision callbacks
+        WorldHandler::get().updateWorld(deltaTime.asSeconds()); // updates the world physics
         //! Draw after this
         UpdateManager::LateUpdate(deltaTime.asSeconds());
 

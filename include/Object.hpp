@@ -259,6 +259,7 @@ public:
         return dynamic_cast<const type*>(this);
     }
 
+    /// @brief add this object to the destroy queue
     void destroy();
 
     /// @param vec global point

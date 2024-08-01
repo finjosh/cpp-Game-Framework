@@ -1,31 +1,46 @@
 #include "Physics/DebugDraw.hpp"
+#include "box2d/box2d.h"
+#include "Physics/WorldHandler.hpp"
+#include "Graphics/WindowHandler.hpp"
 
-DebugDraw::DebugDraw(sf::RenderWindow* window)
+DebugDraw::DebugDraw()
 {
-    m_renderWindow = window;
+    this->drawAll(false);
+    m_drawStruct.useDrawingBounds = false;
+    m_drawStruct.context = this;
+    m_drawStruct.DrawPolygon = DebugDraw::DrawPolygon;
+    m_drawStruct.DrawSolidPolygon = DebugDraw::DrawSolidPolygon;
+    m_drawStruct.DrawCircle = DebugDraw::DrawCircle;
+    m_drawStruct.DrawSolidCircle = DebugDraw::DrawSolidCircle;
+    m_drawStruct.DrawCapsule = DebugDraw::DrawCapsule;
+    m_drawStruct.DrawSolidCapsule = DebugDraw::DrawSolidCapsule;
+    m_drawStruct.DrawSegment = DebugDraw::DrawSegment;
+    m_drawStruct.DrawTransform = DebugDraw::DrawTransform;
+    m_drawStruct.DrawPoint = DebugDraw::DrawPoint;
+    m_drawStruct.DrawString = DebugDraw::DrawString;
 }
 
-void DebugDraw::setRenderWindow(sf::RenderWindow* window)
+DebugDraw& DebugDraw::get()
 {
-    m_renderWindow = window;
+    static DebugDraw singleton;
+    return singleton;
 }
 
-sf::RenderWindow* DebugDraw::getRenderWindow() const
+void DebugDraw::draw()
 {
-    return m_renderWindow;
+    b2World_Draw(WorldHandler::get().getWorld(), &m_drawStruct);
 }
 
-//convert a Box2D (float 0.0f - 1.0f range) color to a SFML color (uint8 0 - 255 range)
-sf::Color B2SFColor(const b2Color &color, int alpha = 255)
+sf::Color B2SFColor(const b2HexColor &color, int alpha = 255)
 {
-	sf::Color result((sf::Uint8)(color.r*255), (sf::Uint8)(color.g*255), (sf::Uint8)(color.b*255), (sf::Uint8) alpha);
+	sf::Color result((sf::Uint8)(((color >> 16) & 0xFF) / 255.0), (sf::Uint8)(((color >> 8) & 0xFF) / 255.0), (sf::Uint8)(((color) & 0xFF) / 255.0), (sf::Uint8) alpha);
 	return result;
 }
 
-void DebugDraw::DrawPolygon(const b2Vec2* vertices, int32 vertexCount, const b2Color& color)
+void DebugDraw::DrawPolygon(const b2Vec2* vertices, int vertexCount, b2HexColor color, void *context)
 {
-	sf::ConvexShape polygon(vertexCount);
-	for (int32 i=0; i<vertexCount; i++)
+    sf::ConvexShape polygon(vertexCount);
+	for (int32_t i=0; i<vertexCount; i++)
 	{
 		b2Vec2 vertex = vertices[i];
 		polygon.setPoint(i, sf::Vector2f(vertex.x*PIXELS_PER_METER, vertex.y*PIXELS_PER_METER));
@@ -33,100 +48,134 @@ void DebugDraw::DrawPolygon(const b2Vec2* vertices, int32 vertexCount, const b2C
     polygon.setFillColor(sf::Color::Transparent);
     polygon.setOutlineColor(B2SFColor(color));
 	polygon.setOutlineThickness(1.0f);
-	m_renderWindow->draw(polygon);
+	WindowHandler::getRenderWindow()->draw(polygon);
 }
 
-void DebugDraw::DrawSolidPolygon(const b2Vec2* vertices, int32 vertexCount, const b2Color& color)
+void DebugDraw::DrawSolidPolygon(b2Transform transform, const b2Vec2* vertices, int vertexCount, float radius, b2HexColor color, void *context)
 {
-	b2Color fillColor(0.5f * color.r, 0.5f * color.g, 0.5f * color.b, 0.5f);
+    sf::Color fillColor(B2SFColor(color));
+    fillColor.r *= 0.5f;
+    fillColor.g *= 0.5f;
+    fillColor.b *= 0.5f;
+    fillColor.a = 0.5f;
 
 	sf::ConvexShape polygon(vertexCount);
-	for (int32 i=0; i<vertexCount; i++)
+	for (int32_t i=0; i<vertexCount; i++)
 	{
 		b2Vec2 vertex = vertices[i];
 		polygon.setPoint(i, sf::Vector2f(vertex.x*PIXELS_PER_METER, vertex.y*PIXELS_PER_METER));
 	}
-    polygon.setFillColor(B2SFColor(fillColor));
+    polygon.setFillColor(fillColor);
     polygon.setOutlineColor(B2SFColor(color));
 	polygon.setOutlineThickness(1.0f);
-	m_renderWindow->draw(polygon);
+	WindowHandler::getRenderWindow()->draw(polygon);
 }
 
-void DebugDraw::DrawCircle(const b2Vec2& center, float radius, const b2Color& color)
+void DebugDraw::DrawCircle(b2Vec2 center, float radius, b2HexColor color, void *context)
 {
-	sf::CircleShape circle((radius*PIXELS_PER_METER));
+    sf::CircleShape circle((radius*PIXELS_PER_METER));
     circle.setPosition(center.x*PIXELS_PER_METER-radius*PIXELS_PER_METER, center.y*PIXELS_PER_METER-radius*PIXELS_PER_METER);
     circle.setFillColor(sf::Color::Transparent);
     circle.setOutlineColor(B2SFColor(color));
     circle.setOutlineThickness(1.f);
-    m_renderWindow->draw(circle);
+    WindowHandler::getRenderWindow()->draw(circle);
 }
 
-void DebugDraw::DrawSolidCircle(const b2Vec2& center, float radius, const b2Vec2& axis, const b2Color& color)
+void DebugDraw::DrawSolidCircle(b2Transform transform, float radius, b2HexColor color, void *context)
 {
-	b2Color fillColor(0.5f * color.r, 0.5f * color.g, 0.5f * color.b, 0.5f);
+    sf::Color fillColor(B2SFColor(color));
+    fillColor.r *= 0.5f;
+    fillColor.g *= 0.5f;
+    fillColor.b *= 0.5f;
+    fillColor.a = 0.5f;
+
 	sf::CircleShape circle((radius*PIXELS_PER_METER));
-    circle.setPosition(center.x*PIXELS_PER_METER-radius*PIXELS_PER_METER, center.y*PIXELS_PER_METER-radius*PIXELS_PER_METER);
-    circle.setFillColor(B2SFColor(fillColor));
+    circle.setPosition(transform.p.x*PIXELS_PER_METER-radius*PIXELS_PER_METER, transform.p.y*PIXELS_PER_METER-radius*PIXELS_PER_METER);
+    circle.setFillColor(fillColor);
     circle.setOutlineColor(B2SFColor(color));
     circle.setOutlineThickness(1.f);
-    m_renderWindow->draw(circle);
+    WindowHandler::getRenderWindow()->draw(circle);
+    DrawTransform(transform, context); // so that it has the direction lines
 }
 
-void DebugDraw::DrawSegment(const b2Vec2& p1, const b2Vec2& p2, const b2Color& color)
+void DebugDraw::DrawCapsule(b2Vec2 p1, b2Vec2 p2, float radius, b2HexColor color, void *context) // TODO test if this works
 {
-	sf::VertexArray line;
+    const int POINT_COUNT = 15; // point count per curved part
+
+    sf::VertexArray capsule;
+    capsule.setPrimitiveType(sf::PrimitiveType::LineStrip);
+    
+    for (int i = 0; i < POINT_COUNT; i++)
+        capsule.append(sf::Vertex{(sf::Vector2f)(Vector2::rotate(Vector2{-1,0}, i*180.0/POINT_COUNT) * radius + p1), B2SFColor(color)});
+
+    for (int i = 0; i < POINT_COUNT; i++)
+        capsule.append(sf::Vertex{(sf::Vector2f)(Vector2::rotate(Vector2{1,0}, i*180.0/POINT_COUNT) * radius + p2), B2SFColor(color)});
+    
+    capsule.append(sf::Vertex{(sf::Vector2f)(Vector2{1,0} * radius + p1), B2SFColor(color)}); // adding the last point
+
+    WindowHandler::getRenderWindow()->draw(capsule);
+}
+
+void DebugDraw::DrawSolidCapsule(b2Vec2 p1, b2Vec2 p2, float radius, b2HexColor color, void *context) // TODO test if this works
+{
+    const int POINT_COUNT = 15; // point count per curved part
+
+    sf::VertexArray capsule;
+    capsule.setPrimitiveType(sf::PrimitiveType::TriangleFan);
+    
+    capsule.append(sf::Vertex{sf::Vector2f{p1.x, p1.y}, B2SFColor(color)}); // adding the center point
+
+    for (int i = 0; i < POINT_COUNT; i++)
+        capsule.append(sf::Vertex{(sf::Vector2f)(Vector2::rotate(Vector2{-1,0}, i*180.0/POINT_COUNT) * radius + p1), B2SFColor(color)});
+
+    for (int i = 0; i < POINT_COUNT; i++)
+        capsule.append(sf::Vertex{(sf::Vector2f)(Vector2::rotate(Vector2{1,0}, i*180.0/POINT_COUNT) * radius + p2), B2SFColor(color)});
+    
+    capsule.append(sf::Vertex{(sf::Vector2f)(Vector2{1,0} * radius + p1), B2SFColor(color)}); // adding the last point
+
+    WindowHandler::getRenderWindow()->draw(capsule);
+    DrawCapsule(p1, p2, radius, color, context); // drawing the outline
+
+    b2Transform transform;
+    transform.p = p1 - p2;
+    transform.q = (b2Rot)Vector2::angle(p1, p2);
+    DrawTransform(transform, context); // so that it has the direction lines
+}
+
+void DebugDraw::DrawSegment(b2Vec2 p1, b2Vec2 p2, b2HexColor color, void *context)
+{
+    sf::VertexArray line;
     line.append(sf::Vertex(sf::Vector2f(p1.x*PIXELS_PER_METER, p1.y*PIXELS_PER_METER), B2SFColor(color)));
     line.append(sf::Vertex(sf::Vector2f(p2.x*PIXELS_PER_METER, p2.y*PIXELS_PER_METER), B2SFColor(color)));
     line.setPrimitiveType(sf::Lines);
     
-    m_renderWindow->draw(line);
+    WindowHandler::getRenderWindow()->draw(line);
 }
 
-void DebugDraw::DrawTransform(const b2Transform& xf)
+void DebugDraw::DrawTransform(b2Transform transform, void *context)
 {
-	float lineProportion = 0.4f;
-    b2Vec2 p1 = xf.p, p2;
+    float lineProportion = 0.4f;
+    b2Vec2 p1 = transform.p, p2;
 
 	//red (X axis)
-	p2 = p1 + (lineProportion * xf.q.GetXAxis());
-    this->DrawSegment(p1, p2, b2Color(255, 0, 0));
+	p2 = p1 + (lineProportion * b2Rot_GetXAxis(transform.q));
+    DrawSegment(p1, p2, b2HexColor::b2_colorRed, context);
 
 	//green (Y axis)
-	p2 = p1 + (lineProportion * xf.q.GetYAxis());
-    this->DrawSegment(p1, p2, b2Color(0, 255, 0));
+	p2 = p1 + (lineProportion * b2Rot_GetYAxis(transform.q));
+    DrawSegment(p1, p2, b2HexColor::b2_colorGreen, context);
 }
 
-void DebugDraw::DrawPoint(const b2Vec2& p, float size, const b2Color& color)
+void DebugDraw::DrawPoint(b2Vec2 p, float size, b2HexColor color, void *context)
 {
     sf::RectangleShape temp({size,size});
     temp.setOrigin(size/2,size/2);
     temp.setPosition(p.x,p.y);
     temp.setFillColor(B2SFColor(color));
-	m_renderWindow->draw(temp);
+	WindowHandler::getRenderWindow()->draw(temp);
 }
 
-void DebugDraw::DrawString(int x, int y, const char* string, ...)
+void DebugDraw::DrawString(b2Vec2 p, const char *s, void *context)
 {
-	return;
-}
-
-void DebugDraw::DrawString(const b2Vec2& pw, const char* string, ...)
-{
-	return;
-}
-
-void DebugDraw::DrawAABB(b2AABB* aabb, const b2Color& c)
-{
-	sf::ConvexShape polygon(4);
-
-    polygon.setPoint(0, sf::Vector2f(aabb->lowerBound.x*PIXELS_PER_METER, aabb->lowerBound.y*PIXELS_PER_METER));
-    polygon.setPoint(1, sf::Vector2f(aabb->upperBound.x*PIXELS_PER_METER, aabb->lowerBound.y*PIXELS_PER_METER));
-    polygon.setPoint(2, sf::Vector2f(aabb->upperBound.x*PIXELS_PER_METER, aabb->upperBound.y*PIXELS_PER_METER));
-    polygon.setPoint(3, sf::Vector2f(aabb->lowerBound.x*PIXELS_PER_METER, aabb->upperBound.y*PIXELS_PER_METER));
-
-    polygon.setFillColor(sf::Color::Transparent);
-    polygon.setOutlineColor(B2SFColor(c));
-    polygon.setOutlineThickness(1.0f);
-	m_renderWindow->draw(polygon);
+    return;
 }

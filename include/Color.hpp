@@ -5,6 +5,7 @@
 
 #include <cstdint>
 
+/// @note if you want helper functions to work with sfml and tgui colors make sure to include them before including "Color"
 class Color
 {
 public:

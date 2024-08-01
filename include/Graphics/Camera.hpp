@@ -12,6 +12,7 @@
 
 class WindowHandler;
 
+// TODO add drawing layers so cameras can ignore certain layers (OR do this with Draw stages)
 /// @note position is always the center of the camera view
 class Camera : virtual public Object
 {

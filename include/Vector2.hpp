@@ -10,7 +10,8 @@
 #include "TGUI/String.hpp"
 #include "Rotation.hpp"
 
-/// @note if you want helper functions to work with tgui, sfml, and box2d vectors make sure to include them before include "Vector2"
+/// @note if you want helper functions to work with tgui, and sfml vectors make sure to include them before including "Vector2"
+/// @note if you want box2d vector conversions define B2_MATH_H before including
 class Vector2
 {
 public:
@@ -78,7 +79,7 @@ public:
     #endif
 
     //* box2d
-    #ifdef B2_MATH_H
+    #ifdef B2_MATH_H // TODO update this for the new version of box2d (box2c-3.0)
     /// @note you MUST include the box2d math header BEFORE including this Vector2 header
     inline Vector2(const b2Vec2& box2DVector) : x(box2DVector.x), y(box2DVector.y) {}
     inline void operator+=(const b2Vec2& vector)

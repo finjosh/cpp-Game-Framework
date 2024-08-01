@@ -11,15 +11,16 @@
 #include "Object.hpp"
 #include "EngineSettings.hpp"
 
+// TODO go through all physics classes and make sure that all box2d functions are able to be used one way or another
 class CollisionManager; // defined early to friend in Collider
 
 class Collider;
 
-class ContactData
+class HitData
 {
 public:
     /// @brief ignore this unless you know what you are doing
-    ContactData(Collider* collider, b2Fixture* thisFixture, b2Fixture* otherFixture, b2Contact* contactData);
+    HitData(Collider* otherCollider, b2ShapeId otherShape, b2ShapeId thisShape, Vector2 normal, Vector2 point, float approachSpeed);
 
     /// @returns the other objects collider
     Collider* getCollider();
@@ -31,113 +32,90 @@ public:
     Fixture getOtherFixture();
     const Fixture getOtherFixture() const;
 
-    class Info
-    {
-    public:
-        /// @brief ignore this unless you know what you are doing
-        Info(b2Contact* contact);
+    /// @returns the point where the shapes hit
+    Vector2 getContactPoint() const;
+    /// @returns the normal vector pointing from shape A to B
+    Vector2 getNormal() const;
+    /// @returns the speed the shapes are approaching
+    float getApproachSpeed() const;
 
-        /// @returns how many contact points there are
-        int32 getPointCount() const;
-
-        /// @warning does not check if index is in range
-        /// @returns returns the point at the given index (size of point count)
-        const Vector2 getContactPoint(uint8 index) const;
-
-        /// @warning does not check if index is in range
-        /// @note negative distance is overlap in meters
-        /// @returns returns the distance at the given index (size of point count)
-        const float getSeparations(uint8 index) const;
-        /// @returns the normal of the collision
-        Vector2 getNormal() const;
-
-    protected:
-        b2WorldManifold m_data;
-        int32 m_points;
-    };
-
-    /// @brief calculates more in-depth contact information
-    /// @note calculates the contact normal, points of contact, and distance of overlap
-    ContactData::Info getInfo() const;
-
-    bool operator < (const ContactData& data) const;
-    bool operator > (const ContactData& data) const;
-    bool operator == (const ContactData& data) const;
-    bool operator != (const ContactData& data) const;
-
-private:
+protected:
     Collider *const m_collider;
-    b2Fixture *const m_thisFixture;
-    b2Fixture *const m_otherFixture;
-    b2Contact *const m_contactData;
+    b2ShapeId m_otherShape;
+    b2ShapeId m_thisShape;
+    Vector2 m_normal;
+    Vector2 m_point;
+    float m_approachSpeed;
 };
 
+class ContactData
+{
+public:
+    /// @brief ignore this unless you know what you are doing
+    ContactData(Collider* otherCollider, b2ShapeId otherShape, b2ShapeId thisShape);
+
+    /// @returns the other objects collider
+    Collider* getCollider();
+    const Collider* getCollider() const;
+    /// @returns the fixture from this object that collided
+    Fixture getThisFixture();
+    const Fixture getThisFixture() const;
+    /// @returns the fixture from the other object that collided
+    Fixture getOtherFixture();
+    const Fixture getOtherFixture() const;
+
+protected:
+    Collider *const m_collider;
+    b2ShapeId m_otherShape;
+    b2ShapeId m_thisShape;
+};
+
+/// @note to disable to current collision make sure to return false in the callback
+/// @note event if you destroy one or both of the bodies the collision will still be active for the current frame (unless you return false)
 class PreSolveData
 {
 public: 
     /// @brief ignore this unless you know what you are doing
-    PreSolveData(Collider* collider, b2Fixture* thisFixture, b2Fixture* otherFixture, b2Contact* contactData);
+    PreSolveData(Collider* collider, b2ShapeId thisFixture, b2ShapeId otherFixture, b2Manifold* manifold);
 
     const Collider* getCollider() const;
-    /// @warning NEVER edit the collider in the pre solve callback this should only be used for storage and editing later
+    /// @warning NEVER edit the collider in the pre solve callback this should only be used for storage for editing later
+    /// @warning it may seem tempting but DONT destroy the collider through this ptr (use the dedicated function)
     /// @returns a non const ptr to the other collider
-    Collider* getNoneConstCollider();
+    Collider* getCollider_NoneConst();
     const Fixture getThisFixture() const;
     const Fixture getOtherFixture() const;
-    ContactData::Info getInfo() const;
-    /// @brief destroys the other collider
-    /// @note also disables the contact for this collision (can be re-enabled if wanted)
-    void destroyCollider();
+    /// @brief adds the collider to a destroy queue for after the physics update
+    /// @note this only takes effect after the physics update has finished
+    void destroyOtherCollider() const;
+    /// @brief adds the collider to a destroy queue for after the physics update
+    /// @note this only takes effect after the physics update has finished
+    void destroyThisCollider() const;
 
-    /// @returns if the two fixtures are touching
-    bool isTouching() const;
-    /// @brief Enable/disable this contact
-	/// @note The contact is only disabled for the curren time step (or sub-step in continuous collisions)
-	void setEnabled(bool flag = true);
-    /// @brief Has this contact been disabled?
-	bool isEnabled() const;
-    /// @brief Override the default friction mixture
-	/// @note This value persists until set or reset.
-	void setFriction(float friction);
-    /// @returns friction mixture
-	float getFriction() const;
-    /// @brief Reset the friction mixture to the default value.
-	void resetFriction();
-    /// @brief Override the default restitution mixture
-	/// @note The value persists until you set or reset.
-	void setRestitution(float restitution);
-    /// @returns restitution mixture
-	float getRestitution() const;
-    /// @brief Reset the restitution to the default value.
-	void resetRestitution();
-    /// @brief Override the default restitution velocity threshold mixture
-	/// @note The value persists until you set or reset.
-	void setRestitutionThreshold(float threshold);
-    /// @returns restitution threshold mixture
-	float getRestitutionThreshold() const;
-    /// @brief Reset the restitution threshold to the default value.
-	void resetRestitutionThreshold();
-    /// @brief Set the desired tangent speed for a conveyor belt behavior. In meters per second.
-	void setTangentSpeed(float speed);
-    /// @returns tangent speed. In meters per second.
-	float getTangentSpeed() const;
+    /// @returns a list of 0-2 contact points
+    std::list<Vector2> getContactPoints() const;
+    /// @returns the normal vector of the contact
+    Vector2 getNormal() const;
 
 private:
     Collider *const m_collider;
-    b2Fixture *const m_thisFixture;
-    b2Fixture *const m_otherFixture;
-    b2Contact *const m_contactData;
+    b2ShapeId m_thisFixture;
+    b2ShapeId m_otherFixture;
+    const b2Manifold *const m_manifold;
 };
 
 typedef ContactData CollisionData;
 
 // TODO make a gui editor for making bodies over an image (prints the code that will produce the given effect) (should also be able to load based on given code)
-// TODO make a wrapper for creating fixtures of different shapes
 // TODO implement contact filtering
 // TODO make parent and child colliders have defined behaviour
+
+// TODO update functions for newer version of box2d
+
 /// @warning If there is a parent and child that have a Collider there is undefined behaviour (try using fixtures instead)
 /// @note positions assume that the origin is in the middle of the shape
 /// @note when added to destroy queue physics is set disabled and removed when fully destroyed
+/// @bug onTransformUpdates is NOT invoked from physics position updates
 class Collider : public virtual Object
 {
 public:
@@ -158,13 +136,13 @@ public:
     /// @param restitutionThreshold Restitution velocity threshold, usually in m/s. Collisions above this speed have restitution applied (will bounce)
     /// @param filter contact filtering data
     /// @returns the new fixture
-    Fixture createFixture(const b2Shape& shape, float friction = 0.1f, float restitution = 0.f, float restitutionThreshold = 0.f, 
+    Fixture createFixture(const b2Polygon& shape, float friction = 0.1f, float restitution = 0.f, float restitutionThreshold = 0.f, 
                           float density = 1.f, const b2Filter& filter = {});
     /// @brief creates a sensor fixture with the given shape and density
     /// @param density the density of the shape
     /// @param filter contact filtering data
     /// @returns the new fixture
-    Fixture createFixtureSensor(const b2Shape& shape, float density = 1.f, const b2Filter& filter = {});
+    Fixture createFixtureSensor(const b2Polygon& shape, float density = 1.f, const b2Filter& filter = {});
 	/// @param fixture the fixture to be removed.
 	void destroyFixture(const Fixture& fixture);
 
@@ -178,23 +156,28 @@ public:
     inline virtual void EndContact(ContactData ContactData) {};
     /// @brief This can be called multiple times in one frame (called before any collision is handled)
     /// @note try to make this efficient as it can be called many times per frame
-    /// @note you can destroy the objects during this callback although the body will not be destroyed until the object is out of the destroy queue
     /// @warning do NOT edit the colliders during this callback
+    /// @warning do NOT create objects during this callback
     /// @param PreContactData the pre solve contact data
-    inline virtual void PreSolve(PreSolveData data) {};
+    /// @returns if the contact should be handled or not
+    inline virtual bool PreSolve(PreSolveData data) { return true; };
     /// @brief called every frame until the two objects are no longer colliding
     /// @note this will also be called on start of contact
     /// @note this is called for each fixture
     inline virtual void OnColliding(ContactData ContactData) {};
+    /// @brief called when the collider has fallen asleep (if sleeping is enabled)
+    inline virtual void OnFellAsleep() {};
+    /// @brief A hit touch event is generated when two shapes collide with a speed faster than the hit speed threshold
+    inline virtual void OnContactHit(HitData HitData) {};
 
     /// @brief Set the sleep state of the body
     /// @note A sleeping body has very low CPU cost.
 	/// @param flag set to true to wake the body, false to put it to sleep
     void setAwake(bool awake = true);
     /// @returns world position of the center of mass.
-	Vector2 getWorldCenter() const;
+	Vector2 getWorldCenterOfMass() const;
     /// @returns local position of the center of mass.
-	Vector2 getLocalCenter() const;
+	Vector2 getLocalCenterOfMass() const;
     /// @brief Set the linear velocity of the center of mass.
 	/// @param v the new linear velocity of the center of mass.
 	void setLinearVelocity(const Vector2& v);
@@ -240,18 +223,10 @@ public:
     /// @brief Get the rotational inertia of the body about the local origin.
 	/// @returns rotational inertia in kg-m^2.
 	float getInertia() const;
-    /// @brief  the mass data of the body.
-	/// @returns a struct containing the mass, inertia and center of the body.
+    /// @brief Get the mass data for a body
 	b2MassData getMassData() const;
-    /// @brief Set the mass properties to override the mass properties of the fixtures.
-	/// @note that this changes the center of mass position.
-	/// @note that creating or destroying fixtures can also alter the mass.
-	/// @note This function has no effect if the body isn't dynamic.
-	/// @param data the mass properties.
-	void setMassData(const b2MassData* data);
-    /// @brief This resets the mass properties to the sum of the mass properties of the fixtures.
-	/// @note This normally does not need to be called unless you called SetMassData to override the mass and you later want to reset the mass.
-	void resetMassData();
+    /// @brief Override the body's mass properties. Normally this is computed automatically using the shape geometry and density. This information is lost if a shape is added or removed or if the	body type changes.
+	void setMassData(b2MassData data);
     /// @returns linear damping of the body.
 	float getLinearDamping() const;
     /// @brief Set the linear damping of the body.
@@ -273,9 +248,13 @@ public:
     /// @brief Is this body treated like a bullet for continuous collision detection?
 	bool isBullet() const;
     /// @brief You can disable sleeping on this body. If you disable sleeping, the body will be woken.
-	void setSleepingAllowed(bool flag = true);
-    /// @brief Is this body allowed to sleep
-	bool isSleepingAllowed() const;
+	void setSleepingEnabled(bool flag = true);
+    /// @brief Is this body Enabled to sleep
+	bool isSleepingEnabled() const;
+    /// @brief Set the sleep threshold, typically in meters per second
+    void setSleepingThreshold(float velocity);
+    /// @brief Get the sleep threshold, typically in meters per second.
+    float getSleepingThreshold() const;
     /// @brief Get the sleeping state of this body.
 	/// @returns true if the body is awake.
 	bool isAwake() const;
@@ -284,11 +263,8 @@ public:
 	void setFixedRotation(bool flag = true);
     /// @returns Does this body have fixed rotation?
 	bool isFixedRotation() const;
-    /// @note use Fixture.GetNext() to iterate through the list
-    /// @note make sure to check if the fixture is valid before use
-    /// @returns the first fixture on this body
-	Fixture getFixtureList();
-    // TODO implement joints
+	FixtureList getFixtureList();
+    // TODO implement joints and chains
     // /// Get the list of all joints attached to this body.
 	// b2JointEdge* GetJointList();
 	// const b2JointEdge* GetJointList() const;
@@ -300,13 +276,13 @@ private:
     friend CollisionManager;
     friend Fixture;
     /// @brief updates the object transform to this colliders body transform
-    void m_update();
+    void m_update(b2Transform transform);
     /// @brief updates the body state (enabled or not)
     void m_updatePhysicsState();
     /// @brief updates the body transform to match the object transform
     void m_updateTransform();
 
-    b2Body* m_body = nullptr;
+    b2BodyId m_body = b2_nullBodyId;
     /// @brief if true follows object else physics are disabled no matter object state
     bool m_enabled = true;
 };
