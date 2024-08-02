@@ -3,60 +3,57 @@
 
 #pragma once
 
-#include "box2d/types.h"
-#include <cstdint>
-#define B2_MATH_H
+#include "box2d/Box2D.h"
 #include "Vector2.hpp"
 
 class WorldHandler
 {
 public:
-    /// @warning this HAS to be called before doing anything with physics
-    void init(const Vector2& gravity = {0,-9.8f});
-    WorldHandler() = default;
-    static WorldHandler& get();
-
-    b2WorldId& getWorld();
-    void updateWorld(double deltaTime);
+    static void init(const Vector2& gravity);
+    static b2World& getWorld();
+    static void updateWorld(double deltaTime);
     /// @note only call this before using any physics
-    /// @param TickRate the number of times physics should update per second (default is 60 which is recommended by Box2d)
-    void setTickRate(int32_t TickRate = 60.0);
-    int32_t getTickRate() const;
+    /// @param ticksPerSecond the number of updates the physics engine will take per second
+    static void setTickRate(int32 ticksPreSecond = 60);
+    static int32 getTickRate();
     /// @note only call this before using any physics
-    /// @note default is 4
-    void setSubSteps(int32_t iterations = 4);
-    int32_t getSubSteps() const;
+    static void setVelocityIterations(int32 iterations = 8);
+    static int32 getVelocityIterations();
+    /// @note only call this before using any physics
+    static void setPositionIterations(int32 iterations = 3);
+    static int32 getPositionIterations();
     /// @brief The max steps per frame
-    void setMaxUpdates(int32_t maxUpdates = 8);
-    int32_t getMaxUpdates() const;
-    void setGravity(const Vector2& gravity);
-    Vector2 getGravity() const;
+    static void setMaxUpdates(int32 maxUpdates = 8);
+    static int32 getMaxUpdates();
+    static void setGravity(const Vector2& gravity);
+    static Vector2 getGravity();
     /// @returns the time that was not able to be calculated this frame
-    double getLeftOverTime() const;
+    static double getLeftOverTime();
     /// @brief the max time that interpolation will be set to
     /// @note leftOverTime > maxTime ? maxTime : leftOverTime
-    void setMaxInterpolationTime(double maxTime);
-    double getMaxInterpolationTime() const;
+    static void setMaxInterpolationTime(double maxTime);
+    static double getMaxInterpolationTime();
     /// @returns the amount of time that should be interpolated for
-    double getInterpolationTime() const;
+    static double getInterpolationTime();
     /// @brief this affects what happens to physics at low frames
     /// @note any time left over after updating physics that is larger than 1/tickRate will be cleared
     /// @note default: True
-    void setKeepLostSimulationTime(bool flag);
-    bool isKeepLostSimulationTime() const;
+    static void setKeepLostSimulationTime(bool flag);
+    static bool isKeepLostSimulationTime();
 
 private:
-    b2WorldId m_world = b2_nullWorldId;
+    inline WorldHandler() = default;
+    
+    static b2World m_world;
     /// @brief if at low frames do we keep the time lost and make up for it later?
-    bool m_keepLostSimulationTime = true;
-    double m_accumulate = 0;
-    double m_interpolateTime = 0;
-    double m_maxInterpolateTime = 1/30.0;
-    int32_t m_tickRate = 60;
-    double m_timeStep = 1.0/m_tickRate;
-    int32_t m_subSteps = 4;
-    int32_t m_maxUpdates = 1/30.0;
+    static bool m_keepLostSimulationTime;
+    static double m_accumulate;
+    static double m_interpolateTime;
+    static double m_maxInterpolateTime;
+    static int32 m_tickRate;
+    static int32 m_velocityIterations;
+    static int32 m_positionIterations; 
+    static int32 m_maxUpdates;
 };
-
 
 #endif

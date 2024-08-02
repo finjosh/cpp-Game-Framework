@@ -1,132 +1,112 @@
 #include "Physics/Fixture.hpp"
 #include "Physics/Collider.hpp"
 
-Fixture::Fixture(Collider* collider, const b2ShapeDef& shapeDef, const b2Polygon& polygonDef)
+Fixture::Fixture(Collider* collider, const b2FixtureDef& fixtureDef)
 {
     if (collider)
     {
-        b2CreatePolygonShape(collider->m_body, &shapeDef, &polygonDef);
+        Fixture(*collider, fixtureDef);
     }
 }
 
-Fixture::Fixture(Collider& collider, const b2ShapeDef& shapeDef, const b2Polygon& polygonDef)
+Fixture::Fixture(Collider& collider, const b2FixtureDef& fixtureDef)
 {
-    b2CreatePolygonShape(collider.m_body, &shapeDef, &polygonDef);
+    collider.m_body->CreateFixture(&fixtureDef);
 }
 
 bool Fixture::isValid() const
 {
-    return b2Shape_IsValid(m_shape);
+    return m_fixture;
+}
+
+void Fixture::setSensor(bool sensor)
+{
+    m_fixture->SetSensor(sensor);
 }
 
 bool Fixture::isSensor() const
 {
-    return b2Shape_IsSensor(m_shape);
+    return m_fixture->IsSensor();
 }
 
-void Fixture::setFilter(const b2Filter& filter)
+void Fixture::setFilterData(const b2Filter& filter)
 {
-    b2Shape_SetFilter(m_shape, filter);
+    m_fixture->SetFilterData(filter);
 }
 
-b2Filter Fixture::getFilter() const
+const b2Filter& Fixture::getFilterData() const
 {
-    return b2Shape_GetFilter(m_shape);
+    return m_fixture->GetFilterData();
+}
+
+bool Fixture::getNext()
+{
+    if (m_fixture->GetNext())
+    {
+        m_fixture = m_fixture->GetNext();
+        return true;
+    }
+    return false;
 }
 
 Collider* Fixture::getCollider()
 {
-    return static_cast<Collider*>(b2Body_GetUserData(b2Shape_GetBody(m_shape)));
+    return static_cast<Collider*>((void*)m_fixture->GetBody()->GetUserData().pointer);
 }
 
 const Collider* Fixture::getCollider() const
 {
-    return static_cast<Collider*>(b2Body_GetUserData(b2Shape_GetBody(m_shape)));
+    return static_cast<Collider*>((void*)m_fixture->GetBody()->GetUserData().pointer);
 }
 
 bool Fixture::testPoint(const Vector2& p) const
 {
-    return b2Shape_TestPoint(m_shape, (b2Vec2)p);
+    return m_fixture->TestPoint((b2Vec2)p);
+}
+
+void Fixture::getMassData(b2MassData* massData) const
+{
+    m_fixture->GetMassData(massData);
 }
 
 void Fixture::setDensity(float density)
 {
-    b2Shape_SetDensity(m_shape, density);
+    m_fixture->SetDensity(density);
 }
 
 float Fixture::getDensity() const
 {
-    return b2Shape_GetDensity(m_shape);
+    return m_fixture->GetDensity();
 }
 
 float Fixture::getFriction() const
 {
-    return b2Shape_GetFriction(m_shape);
+    return m_fixture->GetFriction();
 }
 
 void Fixture::setFriction(float friction)
 {
-    b2Shape_SetFriction(m_shape, friction);
+    m_fixture->SetFriction(friction);
 }
 
 float Fixture::getRestitution() const
 {
-    return b2Shape_GetRestitution(m_shape);
+    return m_fixture->GetRestitution();
 }
 
 void Fixture::setRestitution(float restitution)
 {
-    b2Shape_SetRestitution(m_shape, restitution);
+    m_fixture->SetRestitution(restitution);
 }
 
-void Fixture::destroy()
+float Fixture::getRestitutionThreshold() const
 {
-    b2DestroyShape(m_shape);
+    return m_fixture->GetRestitutionThreshold();
 }
 
-Fixture::Fixture(b2ShapeId shape) : m_shape(shape) {}
-
-FixtureList::FixtureList(b2BodyId id)
+void Fixture::setRestitutionThreshold(float threshold)
 {
-    m_size = b2Body_GetShapeCount(id);
-    if (m_size == 0)
-        return;
-    m_array = (b2ShapeId*)malloc(sizeof(b2ShapeId)*m_size);
-    if (nullptr)
-        throw std::runtime_error("Not enough memory to get fixture list");
-    b2Body_GetShapes(id, m_array, m_size);
+    m_fixture->SetRestitutionThreshold(threshold);
 }
 
-Fixture FixtureList::getFixture(int index) const
-{
-    if (!m_array || index >= m_size)
-        return Fixture(b2_nullShapeId);
-
-    return Fixture(m_array[index]);
-}
-
-Fixture FixtureList::getNextFixture()
-{
-    m_current++;
-    return Fixture(m_array[m_current]);
-}
-
-Fixture FixtureList::getCurrentFixture() const
-{
-    return Fixture(m_array[m_current]);
-}
-
-int FixtureList::getSize() const
-{
-    return m_size;
-}
-
-int FixtureList::getCurrentIndex() const
-{
-    return m_current;
-}
-
-void FixtureList::setCurrentFixture(int index)
-{
-    m_current = index;
-}
+Fixture::Fixture(b2Fixture* fixture) : m_fixture(fixture) {}

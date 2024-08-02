@@ -3,7 +3,7 @@
 
 #pragma once
 
-#include "box2d/types.h"
+#include "Box2D/b2_joint.h"
 
 class Collider;
 
@@ -15,7 +15,7 @@ public:
 protected:
 
 private:
-    b2JointId m_joint;
+    b2Joint* m_joint;
 };
 
 #endif

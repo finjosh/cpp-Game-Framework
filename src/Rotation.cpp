@@ -74,3 +74,23 @@ void Rotation::operator = (Rotation rotation)
     cos = rotation.cos;
     sin = rotation.sin;
 }
+
+Rotation Rotation::operator * (float scaler) const
+{
+    return Rotation{cos*scaler, sin*scaler};
+}
+
+void Rotation::operator *= (float scaler)
+{
+    cos *= scaler; sin *= scaler;
+}
+
+Rotation Rotation::lerp(const Rotation& current, const Rotation& target, float relativeRotation)
+{
+    return current + (target - current) * std::clamp(relativeRotation, 0.f, 1.f);
+}
+
+Rotation Rotation::lerpUnclamped(const Rotation& current, const Rotation& target, float relativeRotation)
+{
+    return current + (target - current) * relativeRotation;
+}

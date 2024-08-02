@@ -33,6 +33,18 @@ public:
 	Vector2 GetXAxis() const;
     /// @returns the rotated y axis (0,1) in terms of this rotation
 	Vector2 GetYAxis() const;
+    /// @note this is clamped so the relative rotation is guarantied to be in the range [0,1]
+    /// @param current the current rotation
+    /// @param wanted the wanted rotation
+    /// @param relativeRotation the relative rotation to travel
+    /// @returns the rotation from current to target
+    static Rotation lerp(const Rotation& current, const Rotation& target, float relativeRotation);
+    /// @note this is not clamped so the relative rotation can be outside of the range [0,1]
+    /// @param current the current rotation
+    /// @param wanted the wanted rotation
+    /// @param relativeRotation the relative rotation to travel
+    /// @returns the rotation from current to target
+    static Rotation lerpUnclamped(const Rotation& current, const Rotation& target, float relativeRotation);
 
     //* box2d functions
     #ifdef B2_MATH_H
@@ -65,9 +77,11 @@ public:
 
     Rotation operator + (Rotation rotation) const;
     void operator += (Rotation rotation);
+    Rotation operator * (float scaler) const;
+    void operator *= (float scaler);
     Rotation operator - (Rotation rotation) const;
-    Rotation operator - () const;
     void operator -= (Rotation rotation);
+    Rotation operator - () const;
     void operator = (Rotation rotation);
 
     float sin = 0.f, cos = 1.f;
