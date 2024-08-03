@@ -1,0 +1,6 @@
+#include "Utils/Settings/Types/IntSetting.hpp"
+#include "Utils/Settings/Types/UIntSetting.hpp"
+#include "Utils/Settings/Types/FloatSetting.hpp"
+#include "Utils/Settings/Types/BoolSetting.hpp"
+#include "Utils/Settings/Types/StringSetting.hpp"
+// #include "Utils/Settings/Types/InputSetting.hpp"

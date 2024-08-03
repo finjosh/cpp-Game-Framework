@@ -77,12 +77,14 @@ void Rotation::operator = (Rotation rotation)
 
 Rotation Rotation::operator * (float scaler) const
 {
-    return Rotation{cos*scaler, sin*scaler};
+    return Rotation{getAngle() * scaler};
 }
 
 void Rotation::operator *= (float scaler)
 {
-    cos *= scaler; sin *= scaler;
+    float angle = getAngle() * scaler;
+    cos = std::cos(angle);
+    sin = std::sin(angle);
 }
 
 Rotation Rotation::lerp(const Rotation& current, const Rotation& target, float relativeRotation)
