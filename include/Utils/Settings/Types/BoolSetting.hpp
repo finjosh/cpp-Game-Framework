@@ -36,7 +36,7 @@ protected:
 
     bool m_value;
     bool m_defaultValue;
-    std::variant<std::list<bool>, std::tuple<bool,bool,bool>, bool(*)(bool)> m_validator;
+    std::variant<bool(*)(bool)> m_validator;
 private:
 
 };

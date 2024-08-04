@@ -43,7 +43,7 @@ protected:
 
     std::string m_value;
     std::string m_defaultValue;
-    std::variant<std::list<std::string>, std::tuple<std::string,std::string,std::string>, bool(*)(std::string)> m_validator;
+    std::variant<std::list<std::string>, bool(*)(std::string)> m_validator;
 private:
 
 };

@@ -3,4 +3,4 @@
 #include "Utils/Settings/Types/FloatSetting.hpp"
 #include "Utils/Settings/Types/BoolSetting.hpp"
 #include "Utils/Settings/Types/StringSetting.hpp"
-// #include "Utils/Settings/Types/InputSetting.hpp"
+#include "Utils/Settings/Types/InputSetting.hpp"

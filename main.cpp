@@ -31,7 +31,7 @@
 #include "Networking/NetworkObject.hpp"
 #include "Networking/NetworkObjectManager.hpp"
 
-#include "Utils/Input.hpp"
+#include "Input.hpp"
 
 #include "Utils/Settings/SettingsUI.hpp"
 #include "Utils/Settings/AllSettingTypes.hpp"
@@ -423,6 +423,13 @@ int main()
     gui->add(fpsLabel);
     // -------------
 
+    auto test = Input::Action{"Test", {{sf::Keyboard::Key::Num1, sf::Keyboard::Key::Num2, sf::Keyboard::Key::Num3, sf::Keyboard::Key::Num4}, {sf::Mouse::Button::Left}}};
+    test.addEvent({{sf::Keyboard::Key::Space}});
+    Input::get().setAction(test);
+
+    Command::Prompt::print(test.toString());
+    Input::get().setAction(Input::fromString_Action("Test2", test.toString()));
+
     sf::Clock deltaClock;
     float fixedUpdate = 0;
     UpdateManager::Start();
@@ -435,20 +442,25 @@ int main()
         secondTimer += deltaTime.asSeconds();
 
         sf::Event event;
+        Input::get().UpdateJustStates();
         while (WindowHandler::getRenderWindow()->pollEvent(event))
         {
             if (event.type == sf::Event::Closed || (event.type == sf::Event::KeyPressed && event.key.code == sf::Keyboard::Key::Escape))
                 WindowHandler::getRenderWindow()->close();
 
+            bool wasHandled = false;
             if (Command::Prompt::UpdateEvent(event))
-                continue;
-            if (CanvasManager::handleEvent(event))
-                continue;
+                wasHandled = true;
+            else if (CanvasManager::handleEvent(event))
+                wasHandled = true;
+            else
+                LiveVar::UpdateLiveVars(event);
 
-            //! Required for LiveVar and CommandPrompt to work as intended
-            LiveVar::UpdateLiveVars(event);
-            //! ----------------------------------------------------------
-        }    
+            Input::get().HandelEvent(event, false);
+        }
+        
+        if (Input::get().isActionJustPressed("Test2"))
+            Command::Prompt::print("Just Pressed");
 
         UpdateManager::Update(deltaTime.asSeconds());
         if (fixedUpdate >= 0.2)

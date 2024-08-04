@@ -11,6 +11,7 @@
 #include "Utils/EventHelper.hpp"
 #include "Utils/Settings/SettingBase.hpp"
 
+// TODO add a way for the compare function to give an error message to this class which can be displayed to the user later
 /// @note settings are only compared by name
 class Settings
 {
