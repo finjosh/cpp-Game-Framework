@@ -45,7 +45,8 @@ public:
             /// @returns true if both lists are NOT empty
             bool isValid() const;
 
-            std::string toString() const;
+            /// @param stored if the string is sorted by ascii values
+            std::string toString(bool stored = true) const;
 
         protected:
             std::list<sf::Keyboard::Scancode> m_keys;
@@ -115,6 +116,40 @@ public:
         Released // held up
     };
 
+    struct FrameData
+    {
+        enum Type
+        {
+            Mouse,
+            Keyboard
+        };
+
+        /// @param state should only be just states (just pressed, just released)
+        inline FrameData(Type type, State state, sf::Keyboard::Scancode scanCode)
+        {
+            this->type = type;
+            this->state = state;
+            this->scanCode = scanCode;
+        }
+
+        /// @param state should only be just states (just pressed, just released)
+        inline FrameData(Type type, State state, sf::Mouse::Button mouseButton)
+        {
+            this->type = type;
+            this->state = state;
+            this->mouseButton = mouseButton;
+        }
+
+        FrameData::Type type;
+        State state;
+
+        union 
+        {
+            sf::Keyboard::Scancode scanCode;
+            sf::Mouse::Button mouseButton;
+        };
+    };
+
     /// @note this uses keyCode to search for the key (first converted to scan code and then searches)
     State getKeyState(sf::Keyboard::Key keyCode) const;
     /// @returns if the given key is down or just pressed
@@ -138,6 +173,11 @@ public:
     bool isReleased(sf::Mouse::Button button) const;
     bool isJustPressed(sf::Mouse::Button button) const;
     bool isJustReleased(sf::Mouse::Button button) const;
+    /// @returns the list of input changes from this frame
+    const std::list<FrameData>& getFrameData() const;
+    /// @param states a list of states that the Input type must have
+    /// @returns an Action::Event that stores all input types with one of the given states 
+    Input::Action::Event getAllOf(std::list<Input::State> states) const;
 
     /// @note throws an assert error if action does not exist (returns false otherwise)
     bool isActionPressed(const std::string& name) const;
@@ -163,37 +203,6 @@ public:
     static Input::Action fromString_Action(const std::string& actionName, const std::string& str);
 
 protected:
-    struct FrameData
-    {
-        enum Type
-        {
-            MouseUp,
-            MouseDown,
-            KeyboardUp,
-            KeyboardDown
-        };
-
-        inline FrameData(Type type, sf::Keyboard::Scancode scanCode)
-        {
-            this->type = type;
-            this->scanCode = scanCode;
-        }
-
-        inline FrameData(Type type, sf::Mouse::Button mouseButton)
-        {
-            this->type = type;
-            this->mouseButton = mouseButton;
-        }
-
-        FrameData::Type type;
-
-        union 
-        {
-            sf::Keyboard::Scancode scanCode;
-            sf::Mouse::Button mouseButton;
-        };
-    };
-
     std::set<Action> m_actions;
 private:
     std::unordered_map<sf::Mouse::Button, State> m_mouse;

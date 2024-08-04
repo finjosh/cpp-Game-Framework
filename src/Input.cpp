@@ -151,19 +151,34 @@ bool Input::Action::Event::isValid() const
     return m_keys.size() != 0 || m_mouseButtons.size() != 0;
 }
 
-std::string Input::Action::Event::toString() const
+std::string Input::Action::Event::toString(bool sorted) const
 {
+    std::list<std::string> strs;
     std::string rtn;
+    
     for (auto button: m_mouseButtons)
-        rtn += Input::toString(button) + " + ";
+        strs.emplace_back(Input::toString(button));
 
-    if (m_keys.size() == 0)
-        rtn.erase(rtn.size() - 3);
+    if (sorted)
+        strs.sort();
+    for (auto str: strs)
+        rtn += str + " + ";
+    strs.clear();
 
     for (auto key: m_keys)
-        rtn += Input::toString(key) + " + ";
+        strs.emplace_back(Input::toString(key));
 
-    rtn.erase(rtn.size() - 3);
+    if (strs.size() == 0 && rtn.size() != 0)
+        rtn.erase(rtn.size() - 3); // removing the extra plus and space if there are not key inputs
+    else
+    {
+        if (sorted)
+            strs.sort();
+        for (auto str: strs)
+            rtn += str + " + ";
+        if (rtn.size() != 0)
+            rtn.erase(rtn.size() - 3);
+    }
 
     return rtn;
 }
@@ -342,6 +357,7 @@ std::unordered_map<std::string, sf::Keyboard::Scancode> Input::m_keyboardDict;
 
 Input::Input()
 {
+    Input::m_keyboardDict.clear();
     for (int i = -1; i <= sf::Keyboard::Scancode::ScancodeCount; i++) // going to the count just in case anyone tries to get the count enum
     {
         m_keyboard[sf::Keyboard::Scancode(i)] = State::Released;
@@ -365,12 +381,12 @@ void Input::HandelEvent(sf::Event event, bool wasHandled)
         if (event.type == sf::Event::KeyReleased && this->isPressed(event.key.scancode))
         {
             m_keyboard[event.key.scancode] = State::JustReleased;
-            m_lastFrame.emplace_back(FrameData::KeyboardUp, event.key.scancode);
+            m_lastFrame.emplace_back(FrameData::Keyboard, State::JustReleased, event.key.scancode);
         }
         else if (event.type == sf::Event::MouseButtonReleased && this->isPressed(event.mouseButton.button))
         {
             m_mouse[event.mouseButton.button] = State::JustReleased;
-            m_lastFrame.emplace_back(FrameData::MouseUp, event.mouseButton.button);
+            m_lastFrame.emplace_back(FrameData::Mouse, State::JustReleased, event.mouseButton.button);
         }
 
         return;
@@ -379,37 +395,34 @@ void Input::HandelEvent(sf::Event event, bool wasHandled)
     if (event.type == sf::Event::KeyPressed)
     {
         m_keyboard[event.key.scancode] = State::JustPressed;
-        m_lastFrame.emplace_back(FrameData::KeyboardDown, event.key.scancode);
+        m_lastFrame.emplace_back(FrameData::Keyboard, State::JustPressed, event.key.scancode);
     }
     else if (event.type == sf::Event::KeyReleased)
     {
         m_keyboard[event.key.scancode] = State::JustReleased;
-        m_lastFrame.emplace_back(FrameData::KeyboardUp, event.key.scancode);
+        m_lastFrame.emplace_back(FrameData::Keyboard, State::JustReleased, event.key.scancode);
     }
     else if (event.type == sf::Event::MouseButtonPressed)
     {
         m_mouse[event.mouseButton.button] = State::JustPressed;
-        m_lastFrame.emplace_back(FrameData::MouseDown, event.mouseButton.button);
+        m_lastFrame.emplace_back(FrameData::Mouse, State::JustPressed, event.mouseButton.button);
     }
     else if (event.type == sf::Event::MouseButtonReleased)
     {
         m_mouse[event.mouseButton.button] = State::JustReleased;
-        m_lastFrame.emplace_back(FrameData::MouseUp, event.mouseButton.button);
+        m_lastFrame.emplace_back(FrameData::Mouse, State::JustReleased, event.mouseButton.button);
     }
 }
 
 void Input::UpdateJustStates()
 {
-    for (FrameData data: m_lastFrame) // updating just down/up to down/up
+    for (const FrameData& data: m_lastFrame) // updating just down/up to down/up
     {
-        if (data.type == FrameData::MouseDown)
-            m_mouse[data.mouseButton] = State::Pressed;
-        else if (data.type == FrameData::MouseUp)
-            m_mouse[data.mouseButton] = State::Released;
-        else if (data.type == FrameData::KeyboardDown)
-            m_keyboard[data.scanCode] = State::Pressed;
-        else if (data.type == FrameData::KeyboardUp)
-            m_keyboard[data.scanCode] = State::Released;
+        State newState = data.state == State::JustPressed ? State::Pressed : State::Released; // since it should only be just states that are added
+        if (data.type == FrameData::Type::Mouse)
+            m_mouse[data.mouseButton] = newState;
+        else if (data.type == FrameData::Keyboard)
+            m_keyboard[data.scanCode] = newState;
     }
     m_lastFrame.clear();
 }
@@ -493,6 +506,30 @@ bool Input::isJustPressed(sf::Mouse::Button button) const
 bool Input::isJustReleased(sf::Mouse::Button button) const
 {
     return m_mouse.find(button)->second == State::JustReleased;
+}
+
+const std::list<Input::FrameData>& Input::getFrameData() const
+{
+    return m_lastFrame;
+}
+
+Input::Action::Event Input::getAllOf(std::list<Input::State> states) const
+{
+    Input::Action::Event rtn;
+
+    for (auto key: m_keyboard)
+    {
+        if (std::find(states.begin(), states.end(), key.second) != states.end())
+            rtn.addInput(sf::Keyboard::Scancode(key.first));
+    }
+
+    for (auto button: m_mouse)
+    {
+        if (std::find(states.begin(), states.end(), button.second) != states.end())
+            rtn.addInput(button.first);
+    }
+
+    return rtn;
 }
 
 std::string Input::toString(sf::Mouse::Button mouseButton)
@@ -609,6 +646,8 @@ void Input::setAction(const Input::Action& action)
 
 Input::Action::Event Input::fromString_Action_Event(const std::string& str)
 {
+    assert("Input must have been initalized before using this function (use Input::get())" && m_keyboardDict.size() != 0);
+
     std::stringstream sstr(str);
     std::string token;
     Input::Action::Event event;

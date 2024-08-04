@@ -66,6 +66,7 @@ public:
 protected:
     friend Settings;
 
+    /// @note you should also invoke the onValueSetStr event after you are done changing the value
     virtual void m_onValueSet(const std::string& valueStr) = 0;
 
     std::string m_name;

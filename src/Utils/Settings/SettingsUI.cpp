@@ -1,6 +1,7 @@
 #include "Utils/Settings/SettingsUI.hpp"
 #include "Utils/StringHelper.hpp"
 #include "Utils/Settings/AllSettingTypes.hpp"
+#include "Utils/TerminatingFunction.hpp"
 #include "TGUI/Widgets/Panel.hpp"
 #include "TGUI/Widgets/ToggleButton.hpp"
 #include "TGUI/Widgets/CheckBox.hpp"
@@ -251,16 +252,16 @@ tgui::Widget::Ptr SettingsUI::createSettingUI(SettingBase* setting)
     label->setVerticalAlignment(tgui::VerticalAlignment::Center);
     label->setTextSize(TEXT_SIZE);
 
-    const tgui::Layout2d inputSize{"47.5%" - tgui::bindHeight(panel)*0.1, "80%"};
-    const tgui::Layout2d inputPos{"52.5%", "10%"};
+    const tgui::Layout2d INPUT_SIZE{"47.5%" - tgui::bindHeight(panel)*0.1, "80%"};
+    const tgui::Layout2d INPUT_POS{"52.5%", "10%"};
 
     if (setting->getInputValidation() == SettingInputValidation::OptionsList) // we dont need any input specific UI
     {
         auto comboBox = tgui::ComboBox::create();
         comboBox->setTextSize(TEXT_SIZE);
         panel->add(comboBox);
-        comboBox->setSize(inputSize);
-        comboBox->setPosition(inputPos);
+        comboBox->setSize(INPUT_SIZE);
+        comboBox->setPosition(INPUT_POS);
         for (auto option: setting->getOptionsStr(m_decimalRounding))
             comboBox->addItem(option);
 
@@ -278,7 +279,7 @@ tgui::Widget::Ptr SettingsUI::createSettingUI(SettingBase* setting)
 
         return panel;
     }
-    else if (setting->getInputValidation() == SettingInputValidation::Range) // we want to do it differently
+    else if (setting->getInputValidation() == SettingInputValidation::Range) // we want to do it differently based on UI input and that it is a range
     {
         float min, max, stepSize, currentValue; // even though the settings have different types the UI takes it in as a float so it does not matter
         if (setting->getType() == "int")
@@ -317,10 +318,10 @@ tgui::Widget::Ptr SettingsUI::createSettingUI(SettingBase* setting)
         slider->setStep(stepSize);
         slider->setValue(currentValue);
 
-        slider->setSize(inputSize.x/2, inputSize.y/2);
-        slider->setPosition(inputPos.x, inputPos.y + inputSize.y/4);
-        editBox->setSize(inputSize.x/2-tgui::Layout{"1%"}, inputSize.y);
-        editBox->setPosition(inputPos.x + tgui::bindWidth(slider) + tgui::Layout{"1%"}, inputPos.y);
+        slider->setSize(INPUT_SIZE.x/2, INPUT_SIZE.y/2);
+        slider->setPosition(INPUT_POS.x, INPUT_POS.y + INPUT_SIZE.y/4);
+        editBox->setSize(INPUT_SIZE.x/2-tgui::Layout{"1%"}, INPUT_SIZE.y);
+        editBox->setPosition(INPUT_POS.x + tgui::bindWidth(slider) + tgui::Layout{"1%"}, INPUT_POS.y);
 
         slider->onValueChange([setting, this](float value){
             setting->setValueStr(std::to_string(value));
@@ -343,8 +344,8 @@ tgui::Widget::Ptr SettingsUI::createSettingUI(SettingBase* setting)
 
     auto editBox = tgui::EditBox::create();
     editBox->setTextSize(TEXT_SIZE);
-    editBox->setSize(inputSize);
-    editBox->setPosition(inputPos);
+    editBox->setSize(INPUT_SIZE);
+    editBox->setPosition(INPUT_POS);
     editBox->setDefaultText(setting->getDefaultValueStr(m_decimalRounding));
     editBox->onReturnOrUnfocus([setting](tgui::String input){
         setting->setValueStr(input.toStdString());
@@ -400,8 +401,8 @@ tgui::Widget::Ptr SettingsUI::createSettingUI(SettingBase* setting)
     {
         auto checkbox = tgui::CheckBox::create();
         checkbox->setChecked(setting->cast<BoolSetting>()->getValue());
-        checkbox->setPosition(inputPos.x + tgui::bindWidth(panel)/4 - tgui::bindWidth(checkbox)/2, inputPos.y);
-        checkbox->setSize(tgui::bindHeight(checkbox), inputSize.y);
+        checkbox->setPosition(INPUT_POS.x + tgui::bindWidth(panel)/4 - tgui::bindWidth(checkbox)/2, INPUT_POS.y);
+        checkbox->setSize(tgui::bindHeight(checkbox), INPUT_SIZE.y);
 
         checkbox->onChange([setting](bool checked){
             setting->setValueStr(std::to_string(checked));
@@ -414,6 +415,46 @@ tgui::Widget::Ptr SettingsUI::createSettingUI(SettingBase* setting)
         });
 
         panel->add(checkbox);
+    }
+    else if (setting->getType() == "input_action_event")
+    {
+        auto toggleBtn = tgui::ToggleButton::create(setting->getValueStr()); // rounding does not matter for input
+        toggleBtn->setPosition(INPUT_POS);
+        toggleBtn->setSize(INPUT_SIZE);
+        toggleBtn->setTextSize(TEXT_SIZE);
+
+        TFunction inputCheck{[setting, toggleBtn](TData* data){
+            data->setRunning();
+            if (data->getTotalTime() > data->getDeltaTime() || data->getTotalTime() >= 0.5f) // either we have more total time than one frame or total time of 0.5f seconds
+            {
+                for (const auto& frameData: Input::get().getFrameData())
+                {
+                    if (frameData.state == Input::State::JustReleased)
+                    {
+                        data->setFinished();
+                        toggleBtn->setDown(false);
+                        break;
+                    }
+                }
+                setting->cast<InputSetting>()->setValue(Input::get().getAllOf({Input::State::Pressed, Input::State::JustReleased, Input::State::JustPressed}));
+            }
+        }};
+
+        toggleBtn->onToggle([inputCheck](bool toggled){ // start taking inputs for this events inputs
+            if (toggled)
+            {
+                TFunc::remove(inputCheck.getTypeid());
+                TFunc::Add(inputCheck);
+            }
+            else
+                TFunc::remove(inputCheck.getTypeid());
+        }); 
+
+        setting->onValueSetStr([toggleBtn](std::string value){
+            toggleBtn->setText(value);
+        });
+
+        panel->add(toggleBtn);
     }
     else
     {

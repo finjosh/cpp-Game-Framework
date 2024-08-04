@@ -125,7 +125,7 @@ std::string FloatSetting::getDefaultValueStr(uint8_t decimalRounding) const
 std::list<std::string> FloatSetting::getOptionsStr(uint8_t decimalRounding) const
 {
     if (m_inputValidation != SettingInputValidation::OptionsList)
-            return {};
+        return {};
     
     std::list<std::string> list;
 

@@ -12,6 +12,7 @@
 #include "TGUI/Widgets/HorizontalWrap.hpp"
 
 /// @note settings are added to the UI as they are made so make them in the order you want them to show up
+/// @note uses termination functions for the input setting type
 class SettingsUI : public Settings, public virtual Object
 {
 public:

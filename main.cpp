@@ -323,6 +323,7 @@ int main()
     DebugDraw debugDraw(WindowHandler::getRenderWindow());
     debugDraw.initCommands();
     WorldHandler::getWorld().SetDebugDraw(&debugDraw); // TODO implement ray cast system
+    Input::get(); // initializing the input dictionary for string conversions
 
     Canvas* gui = new Canvas();
 
@@ -335,27 +336,6 @@ int main()
     // create the UI for the TFuncDisplay
     TFuncDisplay::init(gui->getGroup());
     //! ---------------------------------------------------
-
-    auto temp = new SettingsUI(gui);
-    temp->createSubSectionLabel("Test Section", "Boolean Settings");
-    temp->createSetting("Test Section", new BoolSetting{"Bool", true, "A test for boolean settings"});
-    temp->createSubSectionLabel("Test Section", "Integer Settings");
-    temp->createSetting("Test Section", new IntSetting{"Int1", 1, "A test for int settings with any input"});
-    temp->createSetting("Test Section", new IntSetting{"Int2", 2, "A test for int settings with a conditional input (-7 <= int <= 77)", [](int value){ return -7 <= value && value <= 77; }});
-    temp->createSetting("Test Section", new IntSetting{"Int3", 3, "A test for int settings with a range slider", -7, 77, 1});
-    temp->createSubSectionLabel("Test Section", "Unsigned Integer Settings");
-    temp->createSetting("Test Section", new UIntSetting{"UInt1", 1, "A test for unsigned ints settings with any input"});
-    temp->createSetting("Test Section", new UIntSetting{"UInt2", 2, "A test for unsigned ints settings with a conditional input (7 <= int)", [](unsigned int value){ return 7 <= value; }});
-    temp->createSetting("Test Section", new UIntSetting{"UInt3", 3, "A test for unsigned ints settings with a range slider", 7, 77, 1});
-    temp->createSubSectionLabel("Test Section", "Floating Point Settings");
-    temp->createSetting("Test Section", new FloatSetting{"Float1", 1.f, "A test for float settings with any input"});
-    temp->createSetting("Test Section", new FloatSetting{"Float2", 2.f, "A test for float settings with a conditional input (0.7 <= float <= 7)", [](float value){ return 0.699999 <= value && value <= 7; }});
-    temp->createSetting("Test Section", new FloatSetting{"Float3", 3.f, "A test for float settings with a range slider", 0.7, 77, 0.1});
-    temp->createSubSectionLabel("Test Section", "String Settings");
-    temp->createSetting("Test Section", new StringSetting{"String1", "one", "A test for string settings with any input"});
-    temp->createSetting("Test Section", new StringSetting{"String2", "two", "A test for string settings with a list of input options", {"Cat", "Dog", "Coding", "Math", "Physics"}});
-    temp->createSetting("Test Section", new StringSetting{"String3", "three", "A test for string settings with a conditional input (string must start with \"I\")", [](std::string value){ return value.starts_with("I"); }});
-    temp->setVisible();
 
     //* init code
 

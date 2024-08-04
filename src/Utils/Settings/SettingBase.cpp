@@ -13,7 +13,8 @@ std::string SettingBase::getDescription() const
 void SettingBase::setValueStr(const std::string& value)
 {
     m_onValueSet(value); 
-    onValueSetStr.invoke(getValueStr()); // we want to know what the new str is after checking if input is valid
+    // this should be called when handling the m_onValueSet function
+    // onValueSetStr.invoke(getValueStr()); // we want to know what the new str is after checking if input is valid
 }
 
 std::string SettingBase::getType() const
