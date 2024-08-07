@@ -7,11 +7,11 @@ PROJECT:=main
 # the directory in which all .o and .d files will be made
 OBJ_O_DIR:=bin
 # the include flags for compilation by default includes the project directory and include directory
-INCLUDE_DIRS=/VSCodeFolder/Libraries/SFML-2.6.1/include /VSCodeFolder/Libraries/TGUI-1.4/include \VSCodeFolder\Libraries\box2d-2.4\include /Git_projects/cpp-Utilities/include /VSCodeFolder/Libraries/thread-pool-4.1.0/include /Git_projects/cpp-Networking-Library/include
+INCLUDE_DIRS=/VSCodeFolder/Libraries/SFML-2.6.1/include /VSCodeFolder/Libraries/TGUI-1.x/include \VSCodeFolder\Libraries\box2d-2.4\include /Git_projects/cpp-Utilities/include /VSCodeFolder/Libraries/thread-pool-4.1.0/include /Git_projects/cpp-Networking-Library/include
 # extra include flags
 INCLUDE_FLAGS=-D SFML_STATIC
 # the paths to libs for linking
-LIB_DIRS=/VSCodeFolder/Libraries/SFML-2.6.1/lib /VSCodeFolder/Libraries/TGUI-1.4/lib /Git_projects/cpp-Utilities/libs \VSCodeFolder\Libraries\box2d-2.4\bin /Git_projects/cpp-Networking-Library/libs
+LIB_DIRS=/VSCodeFolder/Libraries/SFML-2.6.1/lib /VSCodeFolder/Libraries/TGUI-1.x/lib /Git_projects/cpp-Utilities/libs \VSCodeFolder\Libraries\box2d-2.4\bin /Git_projects/cpp-Networking-Library/libs
 # source files directory (the project directory is automatically added)
 SRC:=src
 # the directory for lib files that are made with "make lib"

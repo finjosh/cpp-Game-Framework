@@ -5,7 +5,7 @@
 
 //* Action::Event defintions
 
-Input::Action::Event::Event(std::list<sf::Keyboard::Key> keyCodes, std::list<sf::Mouse::Button> mouseButtons)
+Input::Action::Event::Event(const std::list<sf::Keyboard::Key>& keyCodes, const std::list<sf::Mouse::Button>& mouseButtons)
 {
     for (auto key: keyCodes)
     {
@@ -14,7 +14,7 @@ Input::Action::Event::Event(std::list<sf::Keyboard::Key> keyCodes, std::list<sf:
     m_mouseButtons = mouseButtons;
 }
 
-void Input::Action::Event::setEvent(std::list<sf::Keyboard::Key> keyCodes, std::list<sf::Mouse::Button> mouseButtons)
+void Input::Action::Event::setEvent(const std::list<sf::Keyboard::Key>& keyCodes, const std::list<sf::Mouse::Button>& mouseButtons)
 {
     m_keys.clear();
     for (auto key: keyCodes)
@@ -24,7 +24,7 @@ void Input::Action::Event::setEvent(std::list<sf::Keyboard::Key> keyCodes, std::
     m_mouseButtons = mouseButtons;
 }
 
-void Input::Action::Event::setEvent_sc(std::list<sf::Keyboard::Scancode> scanCodes, std::list<sf::Mouse::Button> mouseButtons)
+void Input::Action::Event::setEvent_sc(const std::list<sf::Keyboard::Scancode>& scanCodes, const std::list<sf::Mouse::Button>& mouseButtons)
 {
     m_keys = scanCodes;
     m_mouseButtons = mouseButtons;
@@ -173,7 +173,12 @@ std::string Input::Action::Event::toString(bool sorted) const
     else
     {
         if (sorted)
-            strs.sort();
+        {
+            // we want to sort by length then by ascii value so ctrl, alt, ect. are first
+            strs.sort([](const std::string& lhs, const std::string& rhs){
+                return lhs.size() >= rhs.size() && lhs < rhs;
+            });
+        }
         for (auto str: strs)
             rtn += str + " + ";
         if (rtn.size() != 0)
@@ -387,6 +392,29 @@ void Input::HandelEvent(sf::Event event, bool wasHandled)
         {
             m_mouse[event.mouseButton.button] = State::JustReleased;
             m_lastFrame.emplace_back(FrameData::Mouse, State::JustReleased, event.mouseButton.button);
+        }
+
+        return;
+    }
+
+    if (event.type == sf::Event::LostFocus)
+    {
+        for (auto key: m_keyboard)
+        {
+            if (key.second == State::Pressed || key.second == State::JustPressed)
+            {
+                m_keyboard[key.first] = State::JustReleased;
+                m_lastFrame.emplace_back(FrameData::Keyboard, State::JustReleased, key.first);
+            }
+        }
+    
+        for (auto button: m_mouse)
+        {
+            if (button.second == State::Pressed || button.second == State::JustPressed)
+            {
+                m_mouse[button.first] = State::JustReleased;
+                m_lastFrame.emplace_back(FrameData::Mouse, State::JustReleased, button.first);
+            }
         }
 
         return;
@@ -676,6 +704,8 @@ Input::Action::Event Input::fromString_Action_Event(const std::string& str)
 
 Input::Action Input::fromString_Action(const std::string& actionName, const std::string& str)
 {
+    assert("Input must have been initalized before using this function (use Input::get())" && m_keyboardDict.size() != 0);
+
     std::stringstream sstr(str);
     std::string token;
     Input::Action action(actionName);

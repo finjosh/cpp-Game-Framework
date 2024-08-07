@@ -34,7 +34,7 @@ SettingsUI::SettingsUI(Canvas* canvas, const tgui::Layout2d& size, const tgui::L
 
     auto sections = tgui::HorizontalWrap::create();
     auto scrollablePanel = tgui::ScrollablePanel::create({"20%", "100%"});
-    scrollablePanel->setHorizontalScrollbarPolicy(tgui::Scrollbar::Policy::Never);
+    scrollablePanel->getHorizontalScrollbar()->setPolicy(tgui::Scrollbar::Policy::Never);
     m_parent->add(scrollablePanel, "SectionPanel");
     scrollablePanel->add(sections, "SectionSelector");
     sections->getRenderer()->setSpaceBetweenWidgets(SPACE_BETWEEN_WIDGETS);
@@ -48,7 +48,7 @@ SettingsUI::SettingsUI(Canvas* canvas, const tgui::Layout2d& size, const tgui::L
         scrollablePanel->setHeight(tgui::bindMin("100%", sections->getSize().y + scrollablePanel->getSharedRenderer()->getPadding().getTop() + scrollablePanel->getSharedRenderer()->getPadding().getBottom()*2));
 
         auto panel = tgui::ScrollablePanel::create({"79%", "100%"});
-        panel->setHorizontalScrollbarPolicy(tgui::Scrollbar::Policy::Never);
+        panel->getHorizontalScrollbar()->setPolicy(tgui::Scrollbar::Policy::Never);
         panel->setPosition("21%", 0);
         panel->setVisible(button->isDown());
         auto wrap = tgui::HorizontalWrap::create();
@@ -253,6 +253,7 @@ tgui::Widget::Ptr SettingsUI::createSettingUI(SettingBase* setting)
     label->setTextSize(TEXT_SIZE);
 
     const tgui::Layout2d INPUT_SIZE{"47.5%" - tgui::bindHeight(panel)*0.1, "80%"};
+    const tgui::Layout INPUT_SPACING{"1%"}; //* use if you have more than one input widget (this spacing is different from the label and input size spacing)
     const tgui::Layout2d INPUT_POS{"52.5%", "10%"};
 
     if (setting->getInputValidation() == SettingInputValidation::OptionsList) // we dont need any input specific UI
@@ -318,10 +319,10 @@ tgui::Widget::Ptr SettingsUI::createSettingUI(SettingBase* setting)
         slider->setStep(stepSize);
         slider->setValue(currentValue);
 
-        slider->setSize(INPUT_SIZE.x/2, INPUT_SIZE.y/2);
+        slider->setSize(INPUT_SIZE.x/2-INPUT_SPACING/2, INPUT_SIZE.y/2);
         slider->setPosition(INPUT_POS.x, INPUT_POS.y + INPUT_SIZE.y/4);
-        editBox->setSize(INPUT_SIZE.x/2-tgui::Layout{"1%"}, INPUT_SIZE.y);
-        editBox->setPosition(INPUT_POS.x + tgui::bindWidth(slider) + tgui::Layout{"1%"}, INPUT_POS.y);
+        editBox->setSize(INPUT_SIZE.x/2-INPUT_SPACING/2, INPUT_SIZE.y);
+        editBox->setPosition(INPUT_POS.x + tgui::bindWidth(slider) + INPUT_SPACING, INPUT_POS.y);
 
         slider->onValueChange([setting, this](float value){
             setting->setValueStr(std::to_string(value));
@@ -419,9 +420,9 @@ tgui::Widget::Ptr SettingsUI::createSettingUI(SettingBase* setting)
     else if (setting->getType() == "input_action_event")
     {
         auto toggleBtn = tgui::ToggleButton::create(setting->getValueStr()); // rounding does not matter for input
-        toggleBtn->setPosition(INPUT_POS);
-        toggleBtn->setSize(INPUT_SIZE);
         toggleBtn->setTextSize(TEXT_SIZE);
+        toggleBtn->setSize(INPUT_SIZE);
+        toggleBtn->setPosition(INPUT_POS);
 
         TFunction inputCheck{[setting, toggleBtn](TData* data){
             data->setRunning();
@@ -455,6 +456,80 @@ tgui::Widget::Ptr SettingsUI::createSettingUI(SettingBase* setting)
         });
 
         panel->add(toggleBtn);
+    }
+    else if (setting->getType() == "color")
+    {
+        auto colorSetting = setting->cast<ColorSetting>();
+        auto rBox = tgui::EditBox::create();
+        rBox->setSize(INPUT_SIZE.x/4-INPUT_SPACING*3/2, INPUT_SIZE.y);
+        rBox->setPosition(INPUT_POS);
+        rBox->setTextSize(TEXT_SIZE);
+        rBox->setDefaultText(std::to_string(colorSetting->getValue().r));
+        rBox->onReturnOrUnfocus([colorSetting, rBox](tgui::String value){
+            Color temp = colorSetting->getValue();
+            temp.r = static_cast<std::uint8_t>(value.toInt());
+            colorSetting->setValue(temp);
+        });
+        
+        auto gBox = tgui::EditBox::create();
+        gBox->setSize(INPUT_SIZE.x/4-INPUT_SPACING*3/2, INPUT_SIZE.y);
+        gBox->setPosition(INPUT_POS.x + INPUT_SIZE.x/4-INPUT_SPACING*3/2 + INPUT_SPACING/2, INPUT_POS.y);
+        gBox->setTextSize(TEXT_SIZE);
+        gBox->setDefaultText(std::to_string(colorSetting->getValue().g));
+        gBox->onReturnOrUnfocus([colorSetting, gBox](tgui::String value){
+            Color temp = colorSetting->getValue();
+            temp.g = static_cast<std::uint8_t>(value.toInt());
+            colorSetting->setValue(temp);
+        });
+
+        auto bBox = tgui::EditBox::create();
+        bBox->setSize(INPUT_SIZE.x/4-INPUT_SPACING*3/2, INPUT_SIZE.y);
+        bBox->setPosition(INPUT_POS.x + (INPUT_SIZE.x/4-INPUT_SPACING*3/2)*2 + INPUT_SPACING/2, INPUT_POS.y);
+        bBox->setTextSize(TEXT_SIZE);
+        bBox->setDefaultText(std::to_string(colorSetting->getValue().r));
+        bBox->onReturnOrUnfocus([colorSetting, bBox](tgui::String value){
+            Color temp = colorSetting->getValue();
+            temp.b = static_cast<std::uint8_t>(value.toInt());
+            colorSetting->setValue(temp);
+        });
+
+        auto aBox = tgui::EditBox::create();
+        aBox->setSize(INPUT_SIZE.x/4-INPUT_SPACING*3/2, INPUT_SIZE.y);
+        aBox->setPosition(INPUT_POS.x + (INPUT_SIZE.x/4-INPUT_SPACING*3/2)*3 + INPUT_SPACING/2, INPUT_POS.y);
+        aBox->setTextSize(TEXT_SIZE);
+        aBox->setDefaultText(std::to_string(colorSetting->getValue().r));
+        aBox->onReturnOrUnfocus([colorSetting, aBox](tgui::String value){
+            Color temp = colorSetting->getValue();
+            temp.a = static_cast<std::uint8_t>(value.toInt());
+            colorSetting->setValue(temp);
+        });
+
+        colorSetting->onValueSet([rBox, gBox, bBox, aBox, colorSetting](Color color){
+            if (colorSetting->getDefaultValue().r == color.r)
+                rBox->setText("");
+            else
+                rBox->setText(std::to_string(color.r));
+            
+            if (colorSetting->getDefaultValue().g == color.g)
+                gBox->setText("");
+            else
+                gBox->setText(std::to_string(color.g));
+            
+            if (colorSetting->getDefaultValue().b == color.b)
+                bBox->setText("");
+            else
+                bBox->setText(std::to_string(color.b));
+            
+            if (colorSetting->getDefaultValue().a == color.a)
+                aBox->setText("");
+            else
+                aBox->setText(std::to_string(color.a));
+        });
+
+        panel->add(rBox, "rBox");
+        panel->add(gBox, "gBox");
+        panel->add(bBox, "bBox");
+        panel->add(aBox, "aBox");
     }
     else
     {

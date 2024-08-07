@@ -152,6 +152,9 @@ public:
         /// @param rawPtr the new ptr
         inline void set(T* rawPtr)
         {
+            if (m_ptr == rawPtr)
+                return; // no point in re connecting this ptr to the same object
+
             if (this->m_ptr != nullptr)
             {
                 m_ptr->m_onDestroy.disconnect(m_eventID);

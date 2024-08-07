@@ -403,12 +403,36 @@ int main()
     gui->add(fpsLabel);
     // -------------
 
-    auto test = Input::Action{"Test", {{sf::Keyboard::Key::Num1, sf::Keyboard::Key::Num2, sf::Keyboard::Key::Num3, sf::Keyboard::Key::Num4}, {sf::Mouse::Button::Left}}};
-    test.addEvent({{sf::Keyboard::Key::Space}});
-    Input::get().setAction(test);
-
-    Command::Prompt::print(test.toString());
-    Input::get().setAction(Input::fromString_Action("Test2", test.toString()));
+    auto temp = new SettingsUI(gui);
+    temp->setShowEffect(tgui::ShowEffectType::Scale, 500);
+    temp->createSubSectionLabel("Test Section", "Boolean Settings");
+    temp->createSetting("Test Section", new BoolSetting{"Bool", true, "A test for boolean settings"});
+    temp->createSubSectionLabel("Test Section", "Integer Settings");
+    temp->createSetting("Test Section", new IntSetting{"Int1", 1, "A test for int settings with any input"});
+    temp->createSetting("Test Section", new IntSetting{"Int2", 2, "A test for int settings with a conditional input (-7 <= int <= 77)", [](int value){ return -7 <= value && value <= 77; }});
+    temp->createSetting("Test Section", new IntSetting{"Int3", 3, "A test for int settings with a range slider", -7, 77, 1});
+    temp->createSubSectionLabel("Test Section", "Unsigned Integer Settings");
+    temp->createSetting("Test Section", new UIntSetting{"UInt1", 1, "A test for unsigned ints settings with any input"});
+    temp->createSetting("Test Section", new UIntSetting{"UInt2", 2, "A test for unsigned ints settings with a conditional input (7 <= int)", [](unsigned int value){ return 7 <= value; }});
+    temp->createSetting("Test Section", new UIntSetting{"UInt3", 3, "A test for unsigned ints settings with a range slider", 7, 77, 1});
+    temp->createSubSectionLabel("Test Section", "Floating Point Settings");
+    temp->createSetting("Test Section", new FloatSetting{"Float1", 1.f, "A test for float settings with any input"});
+    temp->createSetting("Test Section", new FloatSetting{"Float2", 2.f, "A test for float settings with a conditional input (0.7 <= float <= 7)", [](float value){ return 0.699999 <= value && value <= 7; }});
+    temp->createSetting("Test Section", new FloatSetting{"Float3", 3.f, "A test for float settings with a range slider", 0.7, 77, 0.1});
+    temp->createSubSectionLabel("Test Section", "String Settings");
+    temp->createSetting("Test Section", new StringSetting{"String1", "one", "A test for string settings with any input"});
+    temp->createSetting("Test Section", new StringSetting{"String2", "two", "A test for string settings with a list of input options", {"Cat", "Dog", "Coding", "Math", "Physics"}});
+    temp->createSetting("Test Section", new StringSetting{"String3", "three", "A test for string settings with a conditional input (string must start with \"I\")", [](std::string value){ return value.starts_with("I"); }});
+    temp->createSubSectionLabel("Test Section", "Input Settings");
+    temp->createSetting("Test Section", new InputSetting{"Input1", Input::Action::Event{{sf::Keyboard::Key::Num1}}, "A test for input settings with any input and a default of one key"});
+    temp->createSetting("Test Section", new InputSetting{"Input2", Input::Action::Event{{sf::Keyboard::Key::Num2}}, "A test for input settings with only keyboard inputs", [](const Input::Action::Event& event){ return event.getMouseButtons().size() == 0; }});
+    temp->createSetting("Test Section", new InputSetting{"Input3", Input::Action::Event{{}, {sf::Mouse::Button::Left}}, "A test for input settings with only mouse inputs", [](const Input::Action::Event& event){ return event.getKeyCodes().size() == 0; }});
+    temp->createSetting("Test Section", new InputSetting{"Input4", Input::Action::Event{{sf::Keyboard::Key::Num3}}, "A test for input settings that can only have 0 or 1 input", [](const Input::Action::Event& event){ return event.getKeyCodes().size() + event.getMouseButtons().size() == 1; }});
+    temp->createSubSectionLabel("Test Section", "Color Settings");
+    temp->createSetting("Test Section", new ColorSetting{"Color1", Color{255,0,255,255}, "A test setting for colors"});
+    temp->createSetting("Test Section", new ColorSetting{"Color2", Color{255,0,255,255}, "A test setting for colors where color has to have a r value >= 100", [](Color color){ return color.r >= 100; }});
+    temp->createSetting("Test Section", new ColorSetting{"Color3", Color{255,0,255,255}, "A test setting for colors where there is a list of colors", {Color{255,255,255,255}, Color{255,0,255,255}, Color{0,0,255,255}}});
+    temp->setVisible();
 
     sf::Clock deltaClock;
     float fixedUpdate = 0;
@@ -436,12 +460,9 @@ int main()
             else
                 LiveVar::UpdateLiveVars(event);
 
-            Input::get().HandelEvent(event, false);
+            Input::get().HandelEvent(event, wasHandled && !temp->isVisible());
         }
         
-        if (Input::get().isActionJustPressed("Test2"))
-            Command::Prompt::print("Just Pressed");
-
         UpdateManager::Update(deltaTime.asSeconds());
         if (fixedUpdate >= 0.2)
         {

@@ -56,6 +56,9 @@ Canvas::~Canvas()
 
 void Canvas::Draw(sf::RenderTarget* target, const Transform& parentTransform)
 {
+    if (!m_group->isVisible())
+        return;
+
     tgui::RenderStates widgetStates;
     if (!isScreenSpace()) // only draw in the set position and rotation IF NOT in screen space
     {
@@ -99,6 +102,16 @@ void Canvas::setGlobalSpace()
 bool Canvas::isScreenSpace() const
 {
     return m_screenSpace;
+}
+
+void Canvas::setVisible(bool visible)
+{
+    m_group->setVisible(visible);
+}
+
+bool Canvas::isVisible() const
+{
+    return m_group->isVisible();
 }
 
 // void Canvas::setRotationLocked(bool locked)

@@ -24,10 +24,10 @@ public:
         class Event
         {
         public:
-            Event(std::list<sf::Keyboard::Key> keyCodes = {}, std::list<sf::Mouse::Button> mouseButtons = {});
-            // Event(std::list<sf::Keyboard::Key> keyCodes, std::list<sf::Mouse::Button> mouseButtons);
-            void setEvent(std::list<sf::Keyboard::Key> keyCodes = {}, std::list<sf::Mouse::Button> mouseButtons = {});
-            void setEvent_sc(std::list<sf::Keyboard::Scancode> scanCodes = {}, std::list<sf::Mouse::Button> mouseButtons = {});
+            Event(const std::list<sf::Keyboard::Key>& keyCodes = {}, const std::list<sf::Mouse::Button>& mouseButtons = {});
+            // Event(const std::list<sf::Keyboard::Key>& keyCodes, const std::list<sf::Mouse::Button>& mouseButtons);
+            void setEvent(const std::list<sf::Keyboard::Key>& keyCodes = {}, const std::list<sf::Mouse::Button>& mouseButtons = {});
+            void setEvent_sc(const std::list<sf::Keyboard::Scancode>& scanCodes = {}, const std::list<sf::Mouse::Button>& mouseButtons = {});
             /// @brief add the given input to this event
             void addInput(sf::Keyboard::Key keyCode);
             /// @brief add the given input to this event
@@ -104,6 +104,7 @@ public:
     static Input& get();
 
     /// @param wasHandled if the event was handled by something else (this stops states from changing unless it is a release event)
+    /// @note if window focus is lost then all inputs that are pressed or just pressed will be set to just released
     void HandelEvent(sf::Event event, bool wasHandled = false);
     /// @note call this before handling any sfml input but NOT in the event loop
     void UpdateJustStates();

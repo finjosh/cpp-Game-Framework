@@ -48,7 +48,7 @@ bool BoolSetting::getDefaultValue() const
 
 std::string BoolSetting::getValueStr(uint8_t decimalRounding) const
 {
-    return m_defaultValue ? "True" : "False"; // dont care about rounding because its an bool
+    return m_value ? "True" : "False"; // dont care about rounding because its an bool
 }
 
 std::string BoolSetting::getDefaultValueStr(uint8_t decimalRounding) const

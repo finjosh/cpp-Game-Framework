@@ -10,7 +10,7 @@ A work in progress game engine/framework.
     - Version 2.6.1
 
 ### [TGUI](https://tgui.eu/)
-    - Version: 1.4
+    - Version: 1.x (2024-08-05)
 
 ### [Box2D](https://box2d.org/)
     - Version: 2.4

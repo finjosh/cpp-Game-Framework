@@ -41,7 +41,12 @@ bool Settings::tryLoadFromFile(const std::string& fileName, const std::list<std:
     {
         for (auto setting: section.second)
         {
-            setting->setValueStr(fileData.getValue(section.first, setting->getName()));
+            std::string value = fileData.getValue(section.first, setting->getName());
+            if (value == "\0" || value == "\0\0" || value == "\0\0\0")
+            {
+                continue;
+            }
+            setting->setValueStr(value);
         }
     }
 

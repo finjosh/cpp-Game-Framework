@@ -64,6 +64,7 @@ private:
 
 // //* test settings
 // auto temp = new SettingsUI(gui);
+// temp->setShowEffect(tgui::ShowEffectType::Scale, 500);
 // temp->createSubSectionLabel("Test Section", "Boolean Settings");
 // temp->createSetting("Test Section", new BoolSetting{"Bool", true, "A test for boolean settings"});
 // temp->createSubSectionLabel("Test Section", "Integer Settings");
@@ -87,6 +88,10 @@ private:
 // temp->createSetting("Test Section", new InputSetting{"Input2", Input::Action::Event{{sf::Keyboard::Key::Num2}}, "A test for input settings with only keyboard inputs", [](const Input::Action::Event& event){ return event.getMouseButtons().size() == 0; }});
 // temp->createSetting("Test Section", new InputSetting{"Input3", Input::Action::Event{{}, {sf::Mouse::Button::Left}}, "A test for input settings with only mouse inputs", [](const Input::Action::Event& event){ return event.getKeyCodes().size() == 0; }});
 // temp->createSetting("Test Section", new InputSetting{"Input4", Input::Action::Event{{sf::Keyboard::Key::Num3}}, "A test for input settings that can only have 0 or 1 input", [](const Input::Action::Event& event){ return event.getKeyCodes().size() + event.getMouseButtons().size() == 1; }});
+// temp->createSubSectionLabel("Test Section", "Color Settings");
+// temp->createSetting("Test Section", new ColorSetting{"Color1", Color{255,0,255,255}, "A test setting for colors"});
+// temp->createSetting("Test Section", new ColorSetting{"Color2", Color{255,0,255,255}, "A test setting for colors where color has to have a r value >= 100", [](Color color){ return color.r >= 100; }});
+// temp->createSetting("Test Section", new ColorSetting{"Color3", Color{255,0,255,255}, "A test setting for colors where there is a list of colors", {Color{255,255,255,255}, Color{255,0,255,255}, Color{0,0,255,255}}});
 // temp->setVisible();
 
 #endif

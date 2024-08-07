@@ -13,6 +13,8 @@
 
 /// @note settings are added to the UI as they are made so make them in the order you want them to show up
 /// @note uses termination functions for the input setting type
+/// @warning input settings wont work properly unless you tell Input that no input was handled while this is visible
+/// @bug if a section has any setting which uses a button to change data (e.x. InputSetting) as the first setting AND you are using a scale show effect the program will run into an infinite loop and crash (to fix add something above it that does not use a button e.x. a subSectionLabel or another setting)
 class SettingsUI : public Settings, public virtual Object
 {
 public:

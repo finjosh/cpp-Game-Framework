@@ -30,6 +30,9 @@ public:
     void setGlobalSpace();
     bool isScreenSpace() const;
 
+    void setVisible(bool visible = true);
+    bool isVisible() const;
+
     // void setRotationLocked(bool locked = true);
     // bool isRotationLocked() const;
 

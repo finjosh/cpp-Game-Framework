@@ -4,6 +4,7 @@
 #pragma once
 
 #include <cstdint>
+#include <string>
 
 /// @note if you want helper functions to work with sfml and tgui colors make sure to include them before including "Color"
 class Color
@@ -44,7 +45,7 @@ public:
     //* SFML
     #ifdef SFML_COLOR_HPP
      /// @note you MUST include the sfml Color header BEFORE including this Color header
-    inline Vector2(const sf::Color& color) : r(color.r), g(color.g), b(color.b), a(color.a) {}
+    inline Color(const sf::Color& color) : r(color.r), g(color.g), b(color.b), a(color.a) {}
     /// @returns the equivalent sf::Color
     explicit inline operator sf::Color() const
     {
@@ -55,13 +56,17 @@ public:
     //* TGUI
     #ifdef TGUI_COLOR_HPP
      /// @note you MUST include the TGUI Color header BEFORE including this Color header
-    inline Vector2(const tgui::Color& color) : r(color.r), g(color.g), b(color.b), a(color.a) {}
+    inline Color(const tgui::Color& color) : r(color.getRed()), g(color.getGreen()), b(color.getBlue()), a(color.getAlpha()) {}
     /// @returns the equivalent tgui::Color
     explicit inline operator tgui::Color() const
     {
         return tgui::Color{r,g,b,a};
     } 
     #endif
+
+    std::string toString() const;
+    /// @param defaultColor if failed to convert string to color the returned color
+    static Color fromString(const std::string& str, Color defaultColor = {255,255,255,255});
 
     uint8_t r = 255, g = 255, b = 255, a = 255;
 protected:
