@@ -87,7 +87,7 @@ Color Color::fromString(const std::string& str, Color defaultColor)
     std::string string = StringHelper::toLower_copy(StringHelper::trim_copy(str));
 
     if (string.starts_with("rgba("))
-        string.substr(0,5);
+        string.erase(0,5);
     else
         return defaultColor;
 

@@ -35,6 +35,7 @@ A work in progress game engine/framework.
 | `Object.hpp` | The base object class storing information every object has (Transform, id, enabled, and children) |
 | `UpdateInterface.hpp` | An interface that can be derived from to implement update functions |
 | `WindowHandler.hpp` | A simple wrapper for a SFML window with a few helper functions |
+| `Input.hpp` | Easy to use implementation for simple input handling. Has basic functionality with just sf::Keyboard::Key and sf::Mouse::Button. Also implements Input::Action(s) which are compared by name. Input::Action::Event are how actions change state, each Action can have multiple events which can also have multiple keys/buttons |
 | `DrawableObject.hpp` | An interface for drawable objects which can be derived from to implement drawing |
 | `Renderer.hpp` | A object implementation of the DrawableObject interface for SFML shapes |
 | `Camera.hpp` | A camera object for drawing to the screen. Cameras can be layered (this does not affect what is drawn to the camera) |
@@ -46,6 +47,6 @@ A work in progress game engine/framework.
 | `NetworkObject.hpp` | A very simple implementation of objects which will be used in a multiplayer game (Not finished) |
 | `NetworkTypes.hpp` | Used for initializing network types so that they can be created over the network (Not finished) |
 | `SettingBase.hpp` | The base class for a setting |
-| `Setting.hpp` | Template driven settings class which derives from SettingBase |
 | `Settings.hpp` | A Settings "Manager" which handles the creation and management of settings |
 | `SettingsUI.hpp` | Derived from Settings.hpp and is an object which creates UI for the settings that are added to it |
+| Setting Classes | setting types that are derived from SettingBase and implemented in SettingsUI |

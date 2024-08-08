@@ -33,10 +33,10 @@ public:
     void createSection(const std::string& section);
     /// @param setting should has control given over to this (will be deleted when this object is deleted)
     /// @note Setting is ONLY compared by name NOT type
-    /// @note if the setting already exists does NOT replace
+    /// @note deletes the given setting if one with the same name already existed
     /// @note creates section if it does not exist
-    /// @returns false if setting with the same name and section already exists
-    bool createSetting(const std::string& section, SettingBase* setting);
+    /// @returns the setting that was added or already existed in this settings object
+    SettingBase* createSetting(const std::string& section, SettingBase* setting);
     /// @brief tries to find the given section and returns the set of all settings in the set
     /// @returns nullptr if the section is not found
     const std::set<SettingBase*, _SettingBaseComp>* getSection(const std::string& section) const;

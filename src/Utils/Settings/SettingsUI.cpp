@@ -319,7 +319,7 @@ tgui::Widget::Ptr SettingsUI::createSettingUI(SettingBase* setting)
         slider->setStep(stepSize);
         slider->setValue(currentValue);
 
-        slider->setSize(INPUT_SIZE.x/2-INPUT_SPACING/2, INPUT_SIZE.y/2);
+        slider->setSize(INPUT_SIZE.x/2, INPUT_SIZE.y/2);
         slider->setPosition(INPUT_POS.x, INPUT_POS.y + INPUT_SIZE.y/4);
         editBox->setSize(INPUT_SIZE.x/2-INPUT_SPACING/2, INPUT_SIZE.y);
         editBox->setPosition(INPUT_POS.x + tgui::bindWidth(slider) + INPUT_SPACING, INPUT_POS.y);
@@ -459,48 +459,50 @@ tgui::Widget::Ptr SettingsUI::createSettingUI(SettingBase* setting)
     }
     else if (setting->getType() == "color")
     {
+        const tgui::Layout COLOR_BOX_WIDTH = (INPUT_SIZE.x-INPUT_SPACING*3)/4;
+
         auto colorSetting = setting->cast<ColorSetting>();
         auto rBox = tgui::EditBox::create();
-        rBox->setSize(INPUT_SIZE.x/4-INPUT_SPACING*3/2, INPUT_SIZE.y);
+        rBox->setSize(COLOR_BOX_WIDTH, INPUT_SIZE.y);
         rBox->setPosition(INPUT_POS);
         rBox->setTextSize(TEXT_SIZE);
         rBox->setDefaultText(std::to_string(colorSetting->getValue().r));
         rBox->onReturnOrUnfocus([colorSetting, rBox](tgui::String value){
             Color temp = colorSetting->getValue();
-            temp.r = static_cast<std::uint8_t>(value.toInt());
+            temp.r = static_cast<std::uint8_t>(value.toInt(colorSetting->getDefaultValue().r));
             colorSetting->setValue(temp);
         });
         
         auto gBox = tgui::EditBox::create();
-        gBox->setSize(INPUT_SIZE.x/4-INPUT_SPACING*3/2, INPUT_SIZE.y);
-        gBox->setPosition(INPUT_POS.x + INPUT_SIZE.x/4-INPUT_SPACING*3/2 + INPUT_SPACING/2, INPUT_POS.y);
+        gBox->setSize(COLOR_BOX_WIDTH, INPUT_SIZE.y);
+        gBox->setPosition(INPUT_POS.x + COLOR_BOX_WIDTH + INPUT_SPACING, INPUT_POS.y);
         gBox->setTextSize(TEXT_SIZE);
         gBox->setDefaultText(std::to_string(colorSetting->getValue().g));
         gBox->onReturnOrUnfocus([colorSetting, gBox](tgui::String value){
             Color temp = colorSetting->getValue();
-            temp.g = static_cast<std::uint8_t>(value.toInt());
+            temp.g = static_cast<std::uint8_t>(value.toInt(colorSetting->getDefaultValue().g));
             colorSetting->setValue(temp);
         });
 
         auto bBox = tgui::EditBox::create();
-        bBox->setSize(INPUT_SIZE.x/4-INPUT_SPACING*3/2, INPUT_SIZE.y);
-        bBox->setPosition(INPUT_POS.x + (INPUT_SIZE.x/4-INPUT_SPACING*3/2)*2 + INPUT_SPACING/2, INPUT_POS.y);
+        bBox->setSize(COLOR_BOX_WIDTH, INPUT_SIZE.y);
+        bBox->setPosition(INPUT_POS.x + (COLOR_BOX_WIDTH)*2 + INPUT_SPACING*2, INPUT_POS.y);
         bBox->setTextSize(TEXT_SIZE);
         bBox->setDefaultText(std::to_string(colorSetting->getValue().r));
         bBox->onReturnOrUnfocus([colorSetting, bBox](tgui::String value){
             Color temp = colorSetting->getValue();
-            temp.b = static_cast<std::uint8_t>(value.toInt());
+            temp.b = static_cast<std::uint8_t>(value.toInt(colorSetting->getDefaultValue().b));
             colorSetting->setValue(temp);
         });
 
         auto aBox = tgui::EditBox::create();
-        aBox->setSize(INPUT_SIZE.x/4-INPUT_SPACING*3/2, INPUT_SIZE.y);
-        aBox->setPosition(INPUT_POS.x + (INPUT_SIZE.x/4-INPUT_SPACING*3/2)*3 + INPUT_SPACING/2, INPUT_POS.y);
+        aBox->setSize(COLOR_BOX_WIDTH, INPUT_SIZE.y);
+        aBox->setPosition(INPUT_POS.x + (COLOR_BOX_WIDTH)*3 + INPUT_SPACING*3, INPUT_POS.y);
         aBox->setTextSize(TEXT_SIZE);
         aBox->setDefaultText(std::to_string(colorSetting->getValue().r));
         aBox->onReturnOrUnfocus([colorSetting, aBox](tgui::String value){
             Color temp = colorSetting->getValue();
-            temp.a = static_cast<std::uint8_t>(value.toInt());
+            temp.a = static_cast<std::uint8_t>(value.toInt(colorSetting->getDefaultValue().a));
             colorSetting->setValue(temp);
         });
 

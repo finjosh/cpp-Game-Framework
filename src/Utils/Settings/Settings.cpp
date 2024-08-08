@@ -1,6 +1,7 @@
 #include "Utils/Settings/Settings.hpp"
 #include "Utils/iniParser.hpp"
 #include <filesystem>
+#include <cassert>
 
 Settings::~Settings()
 {
@@ -83,7 +84,7 @@ void Settings::createSection(const std::string& section)
     }
 }
 
-bool Settings::createSetting(const std::string& section, SettingBase* setting)
+SettingBase* Settings::createSetting(const std::string& section, SettingBase* setting)
 {
     auto settings = m_settings.find(section); // getting/creating the section and getting its set
     if (settings == m_settings.end())
@@ -96,16 +97,21 @@ bool Settings::createSetting(const std::string& section, SettingBase* setting)
     if (temp.second) // returning if the setting was added or already existed
     {
         onSettingCreated.invoke(section, *temp.first);
-        return true;
+        return setting;
     }
-    return false;
+
+    delete(setting);
+    return nullptr;
 }
 
 const std::set<SettingBase*, _SettingBaseComp>* Settings::getSection(const std::string& section) const
 {
     auto sectionIter = m_settings.find(section);
     if (sectionIter == m_settings.cend())
+    {
+        assert(section == "Section does not exist");
         return nullptr;
+    }
     else
         return &(sectionIter->second);
 }
@@ -125,13 +131,19 @@ SettingBase* Settings::getSetting(const std::string& section, const std::string&
 {
     auto settings = m_getSection(section);
     if (settings == nullptr)
+    {
+        assert(section == "Section does not exist");
         return nullptr;
+    }
     else
     {
         BoolSetting temp(name, false, "");
         auto setting = settings->find(&temp);
         if (setting == settings->end())
+        {
+            assert(section + " " + name == "Setting does not exist");
             return nullptr;
+        }
         else
             return (*setting);
     }
