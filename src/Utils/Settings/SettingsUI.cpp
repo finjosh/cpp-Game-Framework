@@ -466,6 +466,7 @@ tgui::Widget::Ptr SettingsUI::createSettingUI(SettingBase* setting)
         rBox->setSize(COLOR_BOX_WIDTH, INPUT_SIZE.y);
         rBox->setPosition(INPUT_POS);
         rBox->setTextSize(TEXT_SIZE);
+        rBox->setInputValidator(tgui::EditBox::Validator::UInt);
         rBox->setDefaultText(std::to_string(colorSetting->getValue().r));
         rBox->onReturnOrUnfocus([colorSetting, rBox](tgui::String value){
             Color temp = colorSetting->getValue();
@@ -477,6 +478,7 @@ tgui::Widget::Ptr SettingsUI::createSettingUI(SettingBase* setting)
         gBox->setSize(COLOR_BOX_WIDTH, INPUT_SIZE.y);
         gBox->setPosition(INPUT_POS.x + COLOR_BOX_WIDTH + INPUT_SPACING, INPUT_POS.y);
         gBox->setTextSize(TEXT_SIZE);
+        gBox->setInputValidator(tgui::EditBox::Validator::UInt);
         gBox->setDefaultText(std::to_string(colorSetting->getValue().g));
         gBox->onReturnOrUnfocus([colorSetting, gBox](tgui::String value){
             Color temp = colorSetting->getValue();
@@ -488,6 +490,7 @@ tgui::Widget::Ptr SettingsUI::createSettingUI(SettingBase* setting)
         bBox->setSize(COLOR_BOX_WIDTH, INPUT_SIZE.y);
         bBox->setPosition(INPUT_POS.x + (COLOR_BOX_WIDTH)*2 + INPUT_SPACING*2, INPUT_POS.y);
         bBox->setTextSize(TEXT_SIZE);
+        bBox->setInputValidator(tgui::EditBox::Validator::UInt);
         bBox->setDefaultText(std::to_string(colorSetting->getValue().r));
         bBox->onReturnOrUnfocus([colorSetting, bBox](tgui::String value){
             Color temp = colorSetting->getValue();
@@ -499,6 +502,7 @@ tgui::Widget::Ptr SettingsUI::createSettingUI(SettingBase* setting)
         aBox->setSize(COLOR_BOX_WIDTH, INPUT_SIZE.y);
         aBox->setPosition(INPUT_POS.x + (COLOR_BOX_WIDTH)*3 + INPUT_SPACING*3, INPUT_POS.y);
         aBox->setTextSize(TEXT_SIZE);
+        aBox->setInputValidator(tgui::EditBox::Validator::UInt);
         aBox->setDefaultText(std::to_string(colorSetting->getValue().r));
         aBox->onReturnOrUnfocus([colorSetting, aBox](tgui::String value){
             Color temp = colorSetting->getValue();
@@ -540,4 +544,67 @@ tgui::Widget::Ptr SettingsUI::createSettingUI(SettingBase* setting)
     }
 
     return panel;
+}
+
+tgui::Button::Ptr SettingsUI::createButton(const std::string& section, const Vector2& sizeScale)
+{
+    tgui::Group::Ptr parent = createSpacer(section, sizeScale.y);
+    tgui::Button::Ptr widget = tgui::Button::create();
+    widget->setSize(tgui::Layout{"100%"} * sizeScale.x, "100%");
+    widget->setPosition(("100%" - tgui::bindWidth(widget)) / 2, 0.f);
+    widget->setTextSize(TEXT_SIZE);
+    parent->add(widget);
+
+    return widget;
+}
+
+tgui::BitmapButton::Ptr SettingsUI::createBitmapButton(const std::string& section, const Vector2& sizeScale)
+{
+    tgui::Group::Ptr parent = createSpacer(section, sizeScale.y);
+    tgui::BitmapButton::Ptr widget = tgui::BitmapButton::create();
+    widget->setSize(tgui::Layout{"100%"} * sizeScale.x, "100%");
+    widget->setPosition(("100%" - tgui::bindWidth(widget)) / 2, 0.f);
+    widget->setTextSize(TEXT_SIZE);
+    parent->add(widget);
+
+    return widget;
+}
+
+void SettingsUI::createResetButton(const std::string& section, const std::list<std::string>& settings, const std::string& tooltip, const Vector2& sizeScale)
+{
+    tgui::Button::Ptr button = createButton(section, sizeScale);
+    button->setText("Reset to Default");
+
+    if (tooltip != "")
+    {
+        auto panel = tgui::Panel::create();
+        auto label = tgui::Label::create(tooltip);
+        panel->setSize(tgui::bindSize(label) + panel->getSharedRenderer()->getPadding().getOffset()*2);
+        panel->add(label);
+        panel->setOrigin(0,1);
+        button->setToolTip(panel);
+        m_onUpdateTheme([panel, label](){
+            panel->setSize(tgui::bindSize(label) + panel->getSharedRenderer()->getPadding().getOffset()*2);
+        });
+    }
+
+    button->onClick([this](std::string section, std::list<std::string> settings){
+        for (const std::string& setting: settings)
+        {
+            SettingBase* temp = Settings::getSetting(section, setting);
+            temp->setValueStr(temp->getDefaultValueStr());
+        }
+    }, section, settings);
+}
+
+tgui::Group::Ptr SettingsUI::createSpacer(const std::string& section, float heightScale)
+{
+    Settings::createSection(section);
+    auto sectionWrap = m_sections.find(section)->second; // guarantied to exist
+    
+    tgui::Group::Ptr widget = tgui::Group::create({"100%", HEIGHT * heightScale});
+    sectionWrap->add(widget);
+    sectionWrap->setHeight(widget->getPosition().y + widget->getFullSize().y + sectionWrap->getParent()->cast<tgui::ScrollablePanel>()->getSharedRenderer()->getPadding().getBottom());
+
+    return widget;
 }

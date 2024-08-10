@@ -126,6 +126,20 @@ std::list<std::string> Settings::getSections() const
     return list;
 }
 
+std::list<std::string> Settings::getSettings(const std::string& section) const
+{
+    auto sectionIter = m_settings.find(section);
+    if (sectionIter == m_settings.end())
+        return {};
+
+    std::list<std::string> list;
+    for (auto setting: sectionIter->second)
+    {
+        list.emplace_back(setting->getName());
+    }
+    return list;
+}
+
 #include "Utils/Settings/Types/BoolSetting.hpp" // used for comparing settings
 SettingBase* Settings::getSetting(const std::string& section, const std::string& name)
 {

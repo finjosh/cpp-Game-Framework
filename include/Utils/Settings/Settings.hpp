@@ -42,6 +42,9 @@ public:
     const std::set<SettingBase*, _SettingBaseComp>* getSection(const std::string& section) const;
     /// @returns a list of all the section names
     std::list<std::string> getSections() const;
+    /// @note list is empty if section does no exist
+    /// @returns a list of all setting names in the given section
+    std::list<std::string> getSettings(const std::string& section) const;
     /// @param section the section the setting is in
     /// @param name the name of the setting
     /// @returns nullptr if not found 

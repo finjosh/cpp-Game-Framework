@@ -432,6 +432,10 @@ int main()
     temp->createSetting("Test Section", new ColorSetting{"Color1", Color{255,0,255,255}, "A test setting for colors"});
     temp->createSetting("Test Section", new ColorSetting{"Color2", Color{255,0,255,255}, "A test setting for colors where color has to have a r value >= 100", [](Color color){ return color.r >= 100; }});
     temp->createSetting("Test Section", new ColorSetting{"Color3", Color{255,0,255,255}, "A test setting for colors where there is a list of colors", {Color{255,255,255,255}, Color{255,0,255,255}, Color{0,0,255,255}}});
+    temp->createSpacer("Test Section"); // adding a normal sized spacer
+    temp->createButton("Test Section")->setText("Random button");
+    temp->createBitmapButton("Test Section")->setText("Random bitmapBtn");
+    temp->createResetButton("Test Section", temp->getSettings("Test Section"), "Resets all settings in \"Test Section\"", {0.65f,1.f});
     temp->setVisible();
 
     sf::Clock deltaClock;
