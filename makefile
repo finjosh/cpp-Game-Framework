@@ -39,7 +39,7 @@ RELEASE_FLAGS = -O3
 # any compiler options
 # put -Werror for warnings to be treated as errors
 # use -Wextra -Wall every so often to find possible bugs
-COMPILE_OPTIONS:=-std=c++20 -static ${DEBUG_FLAGS}
+COMPILE_OPTIONS:=-std=c++20 -static ${RELEASE_FLAGS}
 
 #! DONT EDIT ANYTHING FROM HERE DOWN
 

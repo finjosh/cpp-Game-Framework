@@ -12,6 +12,7 @@ sf::VideoMode WindowHandler::m_videoMode;
 sf::ContextSettings WindowHandler::m_contextSettings;
 sf::Uint32 WindowHandler::m_style;
 std::string WindowHandler::m_title;
+unsigned int WindowHandler::m_FPSLimit = 0;
 
 sf::RenderWindow* WindowHandler::getRenderWindow()
 {
@@ -28,6 +29,7 @@ void WindowHandler::initRenderWindow(sf::VideoMode mode, const sf::String &title
         delete(m_renderWindow);
 
     m_renderWindow = new sf::RenderWindow(mode, title, style, settings);
+    m_renderWindow->setFramerateLimit(m_FPSLimit);
     onRenderWindowChanged.invoke(m_renderWindow);
 }
 
@@ -146,4 +148,15 @@ void WindowHandler::setTitle(const std::string& title)
 std::string WindowHandler::getTitle()
 {
     return m_title;
+}
+
+void WindowHandler::setFPSLimit(unsigned int value)
+{
+    m_FPSLimit = value;
+    m_renderWindow->setFramerateLimit(value);
+}
+
+unsigned int WindowHandler::getFPSLimit()
+{
+    return m_FPSLimit;
 }

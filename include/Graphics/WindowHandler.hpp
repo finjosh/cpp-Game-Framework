@@ -38,6 +38,11 @@ public:
     static sf::Uint32 getStyle();
     static std::string getTitle();
     static void setTitle(const std::string& title);
+    /// @brief sets the windows max fps
+    /// @note this has to be done here or else it will not update properly when context settings are set
+    /// @param value the max fps (0 means no limit)
+    static void setFPSLimit(unsigned int value);
+    static unsigned int getFPSLimit();
 
     static EventHelper::EventDynamic<sf::RenderWindow*> onRenderWindowChanged;
 
@@ -50,6 +55,7 @@ private:
     static sf::Uint32 m_style;
     static std::string m_title;
     static Vector2 m_lastMousePos;
+    static unsigned int m_FPSLimit;
 };
 
 #endif

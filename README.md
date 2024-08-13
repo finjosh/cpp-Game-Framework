@@ -2,7 +2,7 @@
 A work in progress game engine/framework.
 
 ### Tested with: 
-    - Compiler: MSYS2
+    - Compiler: g++
     - Version: g++.exe (Rev3, Built by MSYS2 project) 12.1.0
     - OS: Windows 11
 
