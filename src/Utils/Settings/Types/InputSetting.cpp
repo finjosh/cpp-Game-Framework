@@ -1,4 +1,5 @@
 #include "Utils/Settings/Types/InputSetting.hpp"
+#include "Input.hpp"
 
 InputSetting::InputSetting(const std::string& name, Input::Action::Event defaultValue, const std::string& description)
 {
@@ -10,10 +11,28 @@ InputSetting::InputSetting(const std::string& name, Input::Action::Event default
     m_type = "input_action_event";
 }
 
+InputSetting::InputSetting(const std::string& name, const std::string& actionName, Input::Action::Event defaultValue, const std::string& description) : InputSetting(name, defaultValue, description)
+{
+    Input::get().setAction({actionName, defaultValue});
+    
+    this->onValueSet([actionName](const Input::Action::Event& InputActionEvent){
+        Input::get().setAction({actionName, InputActionEvent});
+    });
+}
+
 InputSetting::InputSetting(const std::string& name, Input::Action::Event defaultValue, const std::string& description, bool(*compare)(const Input::Action::Event&)) : InputSetting(name, defaultValue, description)
 {
     m_inputValidation = SettingInputValidation::CompareFunc;
     m_validator = compare;
+}
+
+InputSetting::InputSetting(const std::string& name, const std::string& actionName, Input::Action::Event defaultValue, const std::string& description, bool(*compare)(const Input::Action::Event&)) : InputSetting(name, defaultValue, description, compare)
+{
+    Input::get().setAction({actionName, defaultValue});
+    
+    this->onValueSet([actionName](const Input::Action::Event& InputActionEvent){
+        Input::get().setAction({actionName, InputActionEvent});
+    });
 }
 
 void InputSetting::setValue(const Input::Action::Event& value)

@@ -33,6 +33,8 @@ public:
     void showWithEffect(tgui::ShowEffectType showEffect, tgui::Duration duration);
     void hideWithEffect(tgui::ShowEffectType hideEffect, tgui::Duration duration);
     bool isVisible() const;
+    /// @brief 
+    /// @returns the container that holds all UI elements made from this class 
     tgui::Container::Ptr getParentGUI();
     /// @brief creates a label that separates the last setting from the new ones in the given section
     /// @param subSectionText the text that will be applied the the label

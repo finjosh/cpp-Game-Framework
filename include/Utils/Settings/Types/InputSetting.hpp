@@ -20,8 +20,21 @@ public:
     /// @param name the name of the setting
     /// @param description the description of the setting
     /// @param defaultValue the default value of the description
+    /// @param actionName the action that this input will automatically update when the input value is changed (also creates it if non-existant)
+    /// @note update action by adding an callback to the onValueSet Event. So dont clear all if you want it to stay functional
+    InputSetting(const std::string& name, const std::string& actionName, Input::Action::Event defaultValue, const std::string& description);
+    /// @param name the name of the setting
+    /// @param description the description of the setting
+    /// @param defaultValue the default value of the description
     /// @param compare a function that will return if the value is valid
     InputSetting(const std::string& name, Input::Action::Event defaultValue, const std::string& description, bool(*compare)(const Input::Action::Event&));
+    /// @param name the name of the setting
+    /// @param description the description of the setting
+    /// @param defaultValue the default value of the description
+    /// @param compare a function that will return if the value is valid
+    /// @param actionName the action that this input will automatically update when the input value is changed (also creates it if non-existant)
+    /// @note update action by adding an callback to the onValueSet Event. So dont clear all if you want it to stay functional
+    InputSetting(const std::string& name, const std::string& actionName, Input::Action::Event defaultValue, const std::string& description, bool(*compare)(const Input::Action::Event&));
     void setValue(const Input::Action::Event& value);
     Input::Action::Event getValue() const;
     Input::Action::Event getDefaultValue() const;
