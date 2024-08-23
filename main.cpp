@@ -14,7 +14,7 @@
 
 #include "ObjectManager.hpp"
 #include "UpdateManager.hpp"
-// #include "ParticleEmitter.hpp"
+#include "Particles/ParticleEmitter.hpp"
 
 #include "Graphics/Renderer.hpp"
 #include "Graphics/WindowHandler.hpp"
@@ -25,11 +25,6 @@
 #include "Physics/WorldHandler.hpp"
 #include "Physics/CollisionManager.hpp"
 #include "Physics/DebugDraw.hpp"
-
-#include "Networking/NetworkTypes.hpp"
-#include "Networking/SocketUI.hpp"
-#include "Networking/NetworkObject.hpp"
-#include "Networking/NetworkObjectManager.hpp"
 
 #include "Input.hpp"
 
@@ -42,7 +37,6 @@ using namespace std;
 // TODO implement fixture and joint isValid functions that connect the the collider with the body that relates to them
 // TODO update managers to be singletons and make the getter function thread safe
 
-void addThemeCommands();
 /// @param themes in order of most wanted
 /// @param directories directories to check in ("" for current)
 void tryLoadTheme(std::list<std::string> themes, std::list<std::string> directories);
@@ -70,8 +64,7 @@ class Player : public virtual Object, public Collider, public Renderer<sf::Recta
 {
 public:
     std::string name = "Random Name";
-    // sf::Texture temp;
-    // Object::Ptr<ParticleEmitter> m_hitParticle;
+    ParticleEmitter::Ptr m_hitParticle = nullptr;
     static sf::RectangleShape m_particle;
     static Camera::Ptr m_camera; // default is nullptr
     static std::set<Object*> m_players;
@@ -88,18 +81,15 @@ public:
         setSize({5,5});
         setOrigin(2.5,2.5);
         setFillColor(sf::Color::White);
-        // temp.loadFromFile("Assets/test.png");
-        // setTexture(&temp);
 
         m_particle.setFillColor(sf::Color::Green);
         m_particle.setSize({5,5});
         m_particle.setOrigin({2.5,2.5});
-        // m_hitParticle.set(new ParticleEmitter(&m_particle, {0,0}, 10, 0, 0, 1, 10, 0.5, 360));
+        m_hitParticle.set(new ParticleEmitter(&m_particle, {0,0}, 10, 0, 0, 1, 10, 0.5, 360));
 
         if (!m_camera)
         {
             m_camera = new Camera();
-            // m_camera->setParent(this);
             m_camera->setMainCamera();
             m_camera->setRotationLocked(true);
         }
@@ -115,32 +105,26 @@ public:
         if (sf::Keyboard::isKeyPressed(sf::Keyboard::Key::W))
         {
             applyForceToCenter({0,-120000*deltaTime});
-            // move({0,-12*deltaTime});
         }
         if (sf::Keyboard::isKeyPressed(sf::Keyboard::Key::A))
         {
             applyForceToCenter({-120000*deltaTime,0});
-            // move({-12*deltaTime,0});
         }
         if (sf::Keyboard::isKeyPressed(sf::Keyboard::Key::S))
         {
             applyForceToCenter({0,120000*deltaTime});
-            // move({0,12*deltaTime});
         }
         if (sf::Keyboard::isKeyPressed(sf::Keyboard::Key::D))
         {
             applyForceToCenter({120000*deltaTime,0});
-            // move({12*deltaTime,0});
         }
         if (sf::Keyboard::isKeyPressed(sf::Keyboard::Key::E))
         {
             applyTorque(500000*deltaTime);
-            // rotate(PI * deltaTime);
         }
         if (sf::Keyboard::isKeyPressed(sf::Keyboard::Key::Q))
         {
             applyTorque(-500000*deltaTime);
-            // rotate(-PI * deltaTime);
         }
     }
 
@@ -163,8 +147,8 @@ public:
         auto info = data.getInfo();
         if (info.getPointCount() > 0 && getLinearVelocity().lengthSquared() > 250 && data.getCollider()->cast<Wall>())
         {
-            // m_hitParticle->setPosition(info.getContactPoint(0));
-            // m_hitParticle->emit();
+            m_hitParticle->setPosition(info.getContactPoint(0));
+            m_hitParticle->emit();
         }
     }
 };
@@ -270,49 +254,8 @@ private:
     std::set<const Collider*> m_freeFlow;
 };
 
-class NetObj : public virtual Object, public Renderer<sf::CircleShape>, public Collider, public NetworkObject
-{
-public:
-    inline NetObj() : NetworkObject(1)
-    {
-        setRadius(5);
-        setOrigin(5,5);
-    }
-
-protected:
-    sf::Packet OnServerSendData() override
-    {
-        sf::Packet temp;
-        temp << this->getPosition().x << this->getPosition().y << this->getRotation().getAngle();
-        return temp;
-    }
-
-    void OnClientReceivedData(sf::Packet& packet) override
-    {
-        float x, y, angle;
-        packet >> x >> y >> angle;
-        this->setPosition(x,y);
-        this->setRotation(angle);
-    }
-
-    sf::Packet OnClientSendData() override
-    {
-        return sf::Packet(); // empty packet
-    }
-
-    void OnServerReceivedData(sf::Packet& packet) override
-    {
-        // dont care about this data
-    }
-
-private:
-};
-
 int main()
 {
-    // setup for sfml and tgui
-    // sf::RenderWindow window(sf::VideoMode::getDesktopMode(), "Game Framework"); // , sf::Style::Fullscreen
-    // window.setFramerateLimit(60);
     WindowHandler::initRenderWindow(sf::VideoMode::getDesktopMode(), "Game Framework");
     CanvasManager::initGUI();
 
@@ -332,111 +275,32 @@ int main()
     VarDisplay::init(gui->getGroup()); 
     // creates the UI for the CommandPrompt
     Command::Prompt::init(gui->getGroup());
-    addThemeCommands();
     // create the UI for the TFuncDisplay
     TFuncDisplay::init(gui->getGroup());
     //! ---------------------------------------------------
 
     //* init code
 
-    // NetworkType::initType(1, {[](){ return static_cast<NetworkObject*>(new NetObj()); }});
-    // NetworkType::initType(2, {[](){ return static_cast<NetworkObject*>(new Player()); }});
-
-    // using namespace udp;
-    // SocketUI socketUI(gui->getGroup(), 50001);
-    // Command::Handler::addCommand(Command::command{"net", "Commands for the network UI", {Command::helpCommand, "net"}, {}, {
-    //     {"SetConnectionWindowVisible", "sets visiblity of connection window", {[&socketUI](Command::Data* data){ socketUI.setConnectionVisible(StringHelper::toBool(data->getToken())); }}, {"True", "False"}},
-    //     {"SetInfoWindowVisible", "sets visiblity of info window", {[&socketUI](Command::Data* data){ socketUI.setInfoVisible(StringHelper::toBool(data->getToken())); }}, {"True", "False"}},
-    // }});
-    // socketUI.setConnectionVisible();
-    // socketUI.setInfoVisible();
-    // socketUI.getInfoWindow()->setPosition({socketUI.getConnectionWindow()->getSize().x, 0});
-    // NetworkObjectManager::init(&socketUI.getServer(), &socketUI.getClient());
-
     new Wall({96,108}, {192,10});
     new Wall({96,0}, {192,10});
     new Wall({192, 54}, {10, 108});
     new Wall({0, 54}, {10, 108});
 
-    // for (int i = 0; i < 50000; i++)
-    //     new Renderer<sf::CircleShape>();
-
-    // for (int i = 0; i < 100; i++)
-    //     (new Player())->setPosition({50,50});
     auto p = new Player();
     p->setPosition({15,10});
-    // p->setRotation(45);
-    // p->name = "Something";
 
     sf::RectangleShape particleShape;
     particleShape.setSize({10,10});
     particleShape.setOrigin({5,5});
     particleShape.setFillColor(sf::Color::Magenta);
 
-    // Object::Ptr<ParticleEmitter> emitter(new ParticleEmitter(&particleShape, {50,50}, 10, 0, 0.1, 3, 25, 1, 360));
-    // emitter->setPosition({50, window.getSize().y/PIXELS_PER_METER - 10});
-    // emitter->setLayer(100); // since player default layer is 0
-    // emitter->setDrawStage(DrawStage::Particles);
-    // emitter->setSpawning();
-    // emitter->setDrawStage(DrawStage::Particles);
-    
-    // (new Sensor({[&emitter](){ emitter->setSpawning(!emitter->isSpawning()); }}, nullptr))->setPosition(50,50);
-
     new OneWay({40,25}, {40,10});
-
-    // NetworkObject* temp = nullptr;
-    // NetworkObjectManager::getServer()->onConnectionOpen([&temp](){
-    //     temp = new Player(true);
-    //     temp->createNetworkObject();
-    // });
-
-    // TODO fix the global space canvases
-    // auto canvas = new Canvas();
-    // canvas->setGlobalSpace();
-    // canvas->setPosition({50,50});
-    // canvas->add(tgui::Panel::create());
-    // canvas->add(tgui::ChildWindow::create());
 
     float secondTimer = 0;
     int fps = 0;
     auto fpsLabel = tgui::Label::create("FPS");
     gui->add(fpsLabel);
     // -------------
-
-    auto temp = new SettingsUI(gui);
-    temp->setShowEffect(tgui::ShowEffectType::Scale, 500);
-    temp->createSubSectionLabel("Test Section", "Boolean Settings");
-    temp->createSetting("Test Section", new BoolSetting{"Bool", true, "A test for boolean settings"});
-    temp->createSubSectionLabel("Test Section", "Integer Settings");
-    temp->createSetting("Test Section", new IntSetting{"Int1", 1, "A test for int settings with any input"});
-    temp->createSetting("Test Section", new IntSetting{"Int2", 2, "A test for int settings with a conditional input (-7 <= int <= 77)", [](int value){ return -7 <= value && value <= 77; }});
-    temp->createSetting("Test Section", new IntSetting{"Int3", 3, "A test for int settings with a range slider", -7, 77, 1});
-    temp->createSubSectionLabel("Test Section", "Unsigned Integer Settings");
-    temp->createSetting("Test Section", new UIntSetting{"UInt1", 1, "A test for unsigned ints settings with any input"});
-    temp->createSetting("Test Section", new UIntSetting{"UInt2", 2, "A test for unsigned ints settings with a conditional input (7 <= int)", [](unsigned int value){ return 7 <= value; }});
-    temp->createSetting("Test Section", new UIntSetting{"UInt3", 3, "A test for unsigned ints settings with a range slider", 7, 77, 1});
-    temp->createSubSectionLabel("Test Section", "Floating Point Settings");
-    temp->createSetting("Test Section", new FloatSetting{"Float1", 1.f, "A test for float settings with any input"});
-    temp->createSetting("Test Section", new FloatSetting{"Float2", 2.f, "A test for float settings with a conditional input (0.7 <= float <= 7)", [](float value){ return 0.699999 <= value && value <= 7; }});
-    temp->createSetting("Test Section", new FloatSetting{"Float3", 3.f, "A test for float settings with a range slider", 0.7, 77, 0.1});
-    temp->createSubSectionLabel("Test Section", "String Settings");
-    temp->createSetting("Test Section", new StringSetting{"String1", "one", "A test for string settings with any input"});
-    temp->createSetting("Test Section", new StringSetting{"String2", "two", "A test for string settings with a list of input options", {"Cat", "Dog", "Coding", "Math", "Physics"}});
-    temp->createSetting("Test Section", new StringSetting{"String3", "three", "A test for string settings with a conditional input (string must start with \"I\")", [](std::string value){ return value.starts_with("I"); }});
-    temp->createSubSectionLabel("Test Section", "Input Settings");
-    temp->createSetting("Test Section", new InputSetting{"Input1", Input::Action::Event{{sf::Keyboard::Key::Num1}}, "A test for input settings with any input and a default of one key"});
-    temp->createSetting("Test Section", new InputSetting{"Input2", Input::Action::Event{{sf::Keyboard::Key::Num2}}, "A test for input settings with only keyboard inputs", [](const Input::Action::Event& event){ return event.getMouseButtons().size() == 0; }});
-    temp->createSetting("Test Section", new InputSetting{"Input3", Input::Action::Event{{}, {sf::Mouse::Button::Left}}, "A test for input settings with only mouse inputs", [](const Input::Action::Event& event){ return event.getKeyCodes().size() == 0; }});
-    temp->createSetting("Test Section", new InputSetting{"Input4", Input::Action::Event{{sf::Keyboard::Key::Num3}}, "A test for input settings that can only have 0 or 1 input", [](const Input::Action::Event& event){ return event.getKeyCodes().size() + event.getMouseButtons().size() == 1; }});
-    temp->createSubSectionLabel("Test Section", "Color Settings");
-    temp->createSetting("Test Section", new ColorSetting{"Color1", Color{255,0,255,255}, "A test setting for colors"});
-    temp->createSetting("Test Section", new ColorSetting{"Color2", Color{255,0,255,255}, "A test setting for colors where color has to have a r value >= 100", [](Color color){ return color.r >= 100; }});
-    temp->createSetting("Test Section", new ColorSetting{"Color3", Color{255,0,255,255}, "A test setting for colors where there is a list of colors", {Color{255,255,255,255}, Color{255,0,255,255}, Color{0,0,255,255}}});
-    temp->createSpacer("Test Section"); // adding a normal sized spacer
-    temp->createButton("Test Section")->setText("Random button");
-    temp->createBitmapButton("Test Section")->setText("Random bitmapBtn");
-    temp->createResetButton("Test Section", temp->getSettings("Test Section"), "Resets all settings in \"Test Section\"", {0.65f,1.f});
-    temp->setVisible();
 
     sf::Clock deltaClock;
     float fixedUpdate = 0;
@@ -464,7 +328,7 @@ int main()
             else
                 LiveVar::UpdateLiveVars(event);
 
-            Input::get().HandelEvent(event, wasHandled && !temp->isVisible());
+            Input::get().HandelEvent(event, wasHandled);
         }
         
         UpdateManager::Update(deltaTime.asSeconds());
@@ -508,41 +372,7 @@ int main()
     CanvasManager::closeGUI();
     WindowHandler::getRenderWindow()->close();
 
-    // NetworkObjectManager::getClient()->closeConnection(); // TODO do this in a function
-    // NetworkObjectManager::getServer()->closeConnection();
-
     return 0;
-}
-
-void addThemeCommands()
-{
-    Command::Handler::addCommand(Command::command{"setTheme", "Function used to set the theme of the UI (The previous outputs in the command prompt will not get updated color)", 
-        {Command::print, "Trying calling one of the sub commands"}, {},
-        std::list<Command::command>{
-            // Command::command{"default", "(Currently does not work, coming soon) Sets the theme back to default", {[](){ 
-            //     tgui::Theme::setDefault(""); //! This does not work due to a tgui issue
-            //     // Note that command color does not update with theme so you have to set the default color
-            //     Command::color::setDefaultColor({0,0,0,255}); // black
-            // }}},
-            // Dark theme is a custom theme made by me 
-            // It can be found here: https://github.com/finjosh/TGUI-DarkTheme
-            Command::command{"dark", "Sets the them to the dark theme", {[](){ 
-                tgui::Theme::getDefault()->load("Assets/themes/Dark.txt"); 
-                // Note that command color does not update with theme so you have to set the default color
-                Command::Prompt::UpdateDefaultColor();
-            }}}, 
-            Command::command{"black", "Sets the them to the black theme", {[](){ 
-                tgui::Theme::getDefault()->load("Assets/themes/Black.txt"); 
-                // Note that command color does not update with theme so you have to set the default color
-                Command::Prompt::UpdateDefaultColor();
-            }}},
-            Command::command{"grey", "Sets the them to the transparent grey theme", {[](){ 
-                tgui::Theme::getDefault()->load("Assets/themes/TransparentGrey.txt"); 
-                // Note that command color does not update with theme so you have to set the default color
-                Command::Prompt::UpdateDefaultColor();
-            }}}
-        }
-    });
 }
 
 void tryLoadTheme(std::list<std::string> themes, std::list<std::string> directories)

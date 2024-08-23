@@ -334,7 +334,12 @@ tgui::Widget::Ptr SettingsUI::createSettingUI(SettingBase* setting)
             slider->onValueChange.setEnabled(false);
             slider->setValue(StringHelper::toFloat(value));
             slider->onValueChange.setEnabled(true);
-            editBox->setText(setting->getValueStr(m_decimalRounding));
+            
+            std::string newValue = setting->getValueStr(m_decimalRounding);
+            if (newValue == setting->getDefaultValueStr(m_decimalRounding))
+                editBox->setText("");
+            else
+                editBox->setText(newValue);
         });
 
         panel->add(editBox);
@@ -491,7 +496,7 @@ tgui::Widget::Ptr SettingsUI::createSettingUI(SettingBase* setting)
         bBox->setPosition(INPUT_POS.x + (COLOR_BOX_WIDTH)*2 + INPUT_SPACING*2, INPUT_POS.y);
         bBox->setTextSize(TEXT_SIZE);
         bBox->setInputValidator(tgui::EditBox::Validator::UInt);
-        bBox->setDefaultText(std::to_string(colorSetting->getValue().r));
+        bBox->setDefaultText(std::to_string(colorSetting->getValue().b));
         bBox->onReturnOrUnfocus([colorSetting, bBox](tgui::String value){
             Color temp = colorSetting->getValue();
             temp.b = static_cast<std::uint8_t>(value.toInt(colorSetting->getDefaultValue().b));
@@ -503,7 +508,7 @@ tgui::Widget::Ptr SettingsUI::createSettingUI(SettingBase* setting)
         aBox->setPosition(INPUT_POS.x + (COLOR_BOX_WIDTH)*3 + INPUT_SPACING*3, INPUT_POS.y);
         aBox->setTextSize(TEXT_SIZE);
         aBox->setInputValidator(tgui::EditBox::Validator::UInt);
-        aBox->setDefaultText(std::to_string(colorSetting->getValue().r));
+        aBox->setDefaultText(std::to_string(colorSetting->getValue().a));
         aBox->onReturnOrUnfocus([colorSetting, aBox](tgui::String value){
             Color temp = colorSetting->getValue();
             temp.a = static_cast<std::uint8_t>(value.toInt(colorSetting->getDefaultValue().a));

@@ -3,7 +3,7 @@
 #include "Graphics/DrawableManager.hpp"
 #include "Graphics/CameraManager.hpp"
 
-Canvas::Canvas() : DrawableObject(0, DrawStage::UI)
+Canvas::Canvas() : DrawableObject(0, DrawStage::GUI)
 {
     DrawableManager::removeDrawable(this);
 

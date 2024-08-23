@@ -10,7 +10,7 @@
                 "/VSCodeFolder/Libraries/thread-pool-4.1.0/include",
                 "/VSCodeFolder/Libraries/box2d-2.4/include",
                 "/Git_projects/cpp-Networking-Library/include",
-                "/VSCodeFolder/Libraries/TGUI-1.4/include"
+                "/VSCodeFolder/Libraries/TGUI-1.x/include"
             ],
             "defines": [
                 "_DEBUG",

@@ -3,16 +3,14 @@
 
 #pragma once
 
-// TODO do this better
-
-const float PIXELS_PER_METER = 10.0F;
+#define PIXELS_PER_METER 10.0f
 
 /// @brief draws from low to high
 enum DrawStage
 {
     Particles = 0,
     Default = 10,
-    UI = 20,
+    GUI = 20,
 };
 
 #endif

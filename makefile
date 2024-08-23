@@ -2,6 +2,8 @@
 PROJECT_DIR_TEMP:=$(patsubst %/makefile,%, $(abspath $(lastword ${MAKEFILE_LIST})))
 #! DONT EDIT ABOVE THIS
 
+# the number is how many tasks are going to be used for compiling (should be the number of threads your cpu has for best performance)
+MAKEFLAGS=-j16
 # exe name
 PROJECT:=main
 # the directory in which all .o and .d files will be made
