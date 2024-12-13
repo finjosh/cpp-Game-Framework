@@ -42,12 +42,12 @@ bool Settings::tryLoadFromFile(const std::string& fileName, const std::list<std:
     {
         for (auto setting: section.second)
         {
-            std::string value = fileData.getValue(section.first, setting->getName());
-            if (value == "\0" || value == "\0\0" || value == "\0\0\0")
+            const std::string* value = fileData.getValue(section.first, setting->getName());
+            if (value == nullptr)
             {
                 continue;
             }
-            setting->setValueStr(value);
+            setting->setValueStr(*value);
         }
     }
 
@@ -69,7 +69,7 @@ void Settings::save(const std::string& file) const
         fileData.addSection(section.first);
         for (auto setting: section.second)
         {
-            fileData.addValue(section.first, setting->getName(), setting->getValueStr());
+            fileData.setValue(section.first, setting->getName(), setting->getValueStr());
         }
     }
 

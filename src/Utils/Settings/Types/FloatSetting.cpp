@@ -1,5 +1,6 @@
 #include "Utils/Settings/Types/FloatSetting.hpp"
 #include "Utils/StringHelper.hpp"
+#include <algorithm>
 
 FloatSetting::FloatSetting(const std::string& name, float defaultValue, const std::string& description)
 {

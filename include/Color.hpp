@@ -65,6 +65,7 @@ public:
     #endif
 
     std::string toString() const;
+    std::string toHexString() const;
     /// @param defaultColor if failed to convert string to color the returned color
     static Color fromString(const std::string& str, Color defaultColor = {255,255,255,255});
 

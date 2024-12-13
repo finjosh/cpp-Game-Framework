@@ -1,4 +1,5 @@
 #include "Utils/Settings/Types/ColorSetting.hpp"
+#include <algorithm>
 
 ColorSetting::ColorSetting(const std::string& name, Color defaultValue, const std::string& description)
 {

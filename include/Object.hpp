@@ -16,7 +16,7 @@ class ObjectManager;
 class _objectCompare;
 
 /// @note never use smart ptrs for any object classes instead use Object::Ptr<T> for a pointer to an object which keeps track of its life time
-/// @note never create objects on the heap only create them using "new" 
+/// @note never create objects on the stack only create them using "new" (on the heap)
 class Object
 {
 public:

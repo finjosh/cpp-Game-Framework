@@ -3,7 +3,7 @@ A work in progress game engine/framework.
 
 ### Tested with: 
     - Compiler: g++
-    - Version: g++.exe (Rev3, Built by MSYS2 project) 12.1.0
+    - Version: g++.exe (Rev2, Built by MSYS2 project) 14.2.0
     - OS: Windows 11
 
 ### [SFML](https://www.sfml-dev.org/index.php)

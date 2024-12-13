@@ -82,6 +82,11 @@ std::string Color::toString() const
     return "rgba(" + std::to_string(r) + "," + std::to_string(g) + "," + std::to_string(b) + "," + std::to_string(a) + ")";
 }
 
+std::string Color::toHexString() const
+{
+    return "#" + StringHelper::intToHex(this->r) + StringHelper::intToHex(this->g) + StringHelper::intToHex(this->b);
+}
+
 Color Color::fromString(const std::string& str, Color defaultColor)
 {
     std::string string = StringHelper::toLower_copy(StringHelper::trim_copy(str));
@@ -98,10 +103,10 @@ Color Color::fromString(const std::string& str, Color defaultColor)
 
     if (tokens.size() == 4)
     {
-        return Color{static_cast<std::uint8_t>(StringHelper::toInt(tokens[0])),
-                     static_cast<std::uint8_t>(StringHelper::toInt(tokens[1])),
-                     static_cast<std::uint8_t>(StringHelper::toInt(tokens[2])),
-                     static_cast<std::uint8_t>(StringHelper::toInt(tokens[3]))};
+        return Color{static_cast<std::uint8_t>(StringHelper::toInt(tokens[0], defaultColor.r)),
+                     static_cast<std::uint8_t>(StringHelper::toInt(tokens[1], defaultColor.g)),
+                     static_cast<std::uint8_t>(StringHelper::toInt(tokens[2], defaultColor.b)),
+                     static_cast<std::uint8_t>(StringHelper::toInt(tokens[3], defaultColor.a))};
     }
 
     return defaultColor;

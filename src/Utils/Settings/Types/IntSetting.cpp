@@ -1,5 +1,6 @@
 #include "Utils/Settings/Types/IntSetting.hpp"
 #include "Utils/StringHelper.hpp"
+#include <algorithm>
 
 IntSetting::IntSetting(const std::string& name, int defaultValue, const std::string& description)
 {

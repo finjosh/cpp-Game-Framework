@@ -1,5 +1,6 @@
 #include "Utils/Settings/Types/StringSetting.hpp"
 #include "Utils/StringHelper.hpp"
+#include <algorithm>
 
 StringSetting::StringSetting(const std::string& name, std::string defaultValue, const std::string& description)
 {

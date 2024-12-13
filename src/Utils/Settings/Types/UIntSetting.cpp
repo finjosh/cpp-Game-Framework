@@ -1,5 +1,6 @@
 #include "Utils/Settings/Types/UIntSetting.hpp"
 #include "Utils/StringHelper.hpp"
+#include <algorithm>
 
 UIntSetting::UIntSetting(const std::string& name, unsigned int defaultValue, const std::string& description)
 {
