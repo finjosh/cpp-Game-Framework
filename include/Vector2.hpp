@@ -3,14 +3,14 @@
 
 #pragma once
 
-// #include "SFML/System/Vector2.hpp" (SFML_VECTOR2_HPP)
 // #include "TGUI/Vector2.hpp" (TGUI_VECTOR2_HPP)
 // #include "Box2D/b2_math.h" (B2_MATH_H)
+#include "SFML/System/Vector2.hpp"
 
 #include "TGUI/String.hpp"
 #include "Rotation.hpp"
 
-/// @note if you want helper functions to work with tgui, and sfml vectors make sure to include them before including "Vector2"
+/// @note if you want helper functions to work with tgui vectors make sure to include them before including "Vector2"
 /// @note if you want box2d vector conversions define B2_MATH_H before including
 class Vector2
 {
@@ -45,7 +45,6 @@ public:
     bool operator!=(const Vector2& vector) const;
 
     //* sfml additions and subtractions
-    #ifdef SFML_VECTOR2_HPP
     /// @note you MUST include the sfml vector header BEFORE including this Vector2 header
     /// @note converts from the given typename to a float
     template <typename T>
@@ -76,7 +75,6 @@ public:
     {
         return sf::Vector2<T>{static_cast<T>(x), static_cast<T>(y)};
     }
-    #endif
 
     //* box2d
     #ifdef B2_MATH_H // TODO update this for the new version of box2d (box2c-3.0)

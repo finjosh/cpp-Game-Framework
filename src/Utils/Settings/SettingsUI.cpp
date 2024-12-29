@@ -442,7 +442,7 @@ tgui::Widget::Ptr SettingsUI::createSettingUI(SettingBase* setting)
                         break;
                     }
                 }
-                setting->cast<InputSetting>()->setValue(Input::get().getAllOf({Input::State::Pressed, Input::State::JustReleased, Input::State::JustPressed}));
+                setting->cast<InputSetting>()->setValue(Input::get().getAllOfState({Input::State::Pressed, Input::State::JustReleased, Input::State::JustPressed}));
             }
         }};
 

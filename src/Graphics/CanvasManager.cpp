@@ -183,6 +183,6 @@ void CanvasManager::updateViewForCamera(Camera* camera)
     m_gui->setAbsoluteView(tgui::FloatRect{(camera->getPosition().x-camera->getSize().x/2)*PIXELS_PER_METER, (camera->getPosition().y-camera->getSize().y/2)*PIXELS_PER_METER, camera->getSize().x*PIXELS_PER_METER, camera->getSize().y*PIXELS_PER_METER});
     // m_gui->setAbsoluteView_notContainer(tgui::FloatRect{(camera->getPosition().x-camera->getSize().x/2)*PIXELS_PER_METER, (camera->getPosition().y-camera->getSize().y/2)*PIXELS_PER_METER, camera->getSize().x*PIXELS_PER_METER, camera->getSize().y*PIXELS_PER_METER});
     auto temp = camera->getScreenRect();
-    m_gui->setRelativeViewport(tgui::FloatRect{temp.left, temp.top, temp.width, temp.height});
+    m_gui->setRelativeViewport(tgui::FloatRect{temp.position.x - temp.size.x/2, temp.position.y - temp.size.y/2, temp.size.x, temp.size.y});
     // m_gui->setRelativeViewport_notContainer({temp.left, temp.top, temp.width, temp.height});
 }

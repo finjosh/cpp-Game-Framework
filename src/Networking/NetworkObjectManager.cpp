@@ -18,7 +18,7 @@ NetworkObjectManager::_networkObject NetworkObjectManager::m_networkComp;
 NetworkObjectManager::_networkObject::_networkObject() : Object(0), NetworkObject(0) // the value does not matter as we never use the create function
 {}
 
-void NetworkObjectManager::_networkObject::setID(sf::Uint32 id)
+void NetworkObjectManager::_networkObject::setID(std::uint32_t id)
 {
     NetworkObject::m_id = id;
 }
@@ -56,7 +56,7 @@ bool NetworkObjectManager::isServer()
     return m_server->isConnectionOpen();
 }
 
-NetworkObject* NetworkObjectManager::getObject(sf::Uint64 networkID)
+NetworkObject* NetworkObjectManager::getObject(std::uint64_t networkID)
 {
     m_networkComp.setID(networkID);
     auto obj = m_objects.find(&m_networkComp);
@@ -76,7 +76,7 @@ void NetworkObjectManager::m_sendData()
     }
 
     //* Adding object data
-    packet << (sf::Uint64)m_objects.size();
+    packet << (std::uint64_t)m_objects.size();
     for (NetworkObject* obj: m_objects)
     {
         if (!obj->isEnabled())
@@ -111,12 +111,12 @@ void NetworkObjectManager::m_handleData(sf::Packet packet)
     }
 
     //* Unpacking object data
-    sf::Uint64 objects; // the number of packets we will need to unpack
+    std::uint64_t objects; // the number of packets we will need to unpack
     packet >> objects;
-    for (sf::Uint64 i = 0; i < objects; i++)
+    for (std::uint64_t i = 0; i < objects; i++)
     {
-        sf::Uint64 netID;
-        sf::Uint64 typeID;
+        std::uint64_t netID;
+        std::uint64_t typeID;
         packet >> netID >> typeID >> temp;
         
         NetworkObject* obj = NetworkObjectManager::getObject(netID);

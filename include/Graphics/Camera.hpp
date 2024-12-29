@@ -91,7 +91,7 @@ private:
     Vector2 m_size;
     bool m_enabled = true;
     bool m_rotationLock = false;
-    sf::FloatRect m_screenRect = {0,0,1,1};
+    sf::FloatRect m_screenRect = {{0,0},{1,1}};
     bool m_displaying = true;
     /// @brief canvases to ignore when drawing to this camera
     std::list<Object::Ptr<Canvas>> m_canvases;

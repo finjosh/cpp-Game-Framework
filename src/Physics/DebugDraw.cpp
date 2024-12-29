@@ -18,7 +18,7 @@ sf::RenderWindow* DebugDraw::getRenderWindow() const
 //convert a Box2D (float 0.0f - 1.0f range) color to a SFML color (uint8 0 - 255 range)
 sf::Color B2SFColor(const b2Color &color, int alpha = 255)
 {
-	sf::Color result((sf::Uint8)(color.r*255), (sf::Uint8)(color.g*255), (sf::Uint8)(color.b*255), (sf::Uint8) alpha);
+	sf::Color result((std::uint8_t)(color.r*255), (std::uint8_t)(color.g*255), (std::uint8_t)(color.b*255), (std::uint8_t) alpha);
 	return result;
 }
 
@@ -55,7 +55,7 @@ void DebugDraw::DrawSolidPolygon(const b2Vec2* vertices, int32 vertexCount, cons
 void DebugDraw::DrawCircle(const b2Vec2& center, float radius, const b2Color& color)
 {
 	sf::CircleShape circle((radius*PIXELS_PER_METER));
-    circle.setPosition(center.x*PIXELS_PER_METER-radius*PIXELS_PER_METER, center.y*PIXELS_PER_METER-radius*PIXELS_PER_METER);
+    circle.setPosition({center.x*PIXELS_PER_METER-radius*PIXELS_PER_METER, center.y*PIXELS_PER_METER-radius*PIXELS_PER_METER});
     circle.setFillColor(sf::Color::Transparent);
     circle.setOutlineColor(B2SFColor(color));
     circle.setOutlineThickness(1.f);
@@ -66,7 +66,7 @@ void DebugDraw::DrawSolidCircle(const b2Vec2& center, float radius, const b2Vec2
 {
 	b2Color fillColor(0.5f * color.r, 0.5f * color.g, 0.5f * color.b, 0.5f);
 	sf::CircleShape circle((radius*PIXELS_PER_METER));
-    circle.setPosition(center.x*PIXELS_PER_METER-radius*PIXELS_PER_METER, center.y*PIXELS_PER_METER-radius*PIXELS_PER_METER);
+    circle.setPosition({center.x*PIXELS_PER_METER-radius*PIXELS_PER_METER, center.y*PIXELS_PER_METER-radius*PIXELS_PER_METER});
     circle.setFillColor(B2SFColor(fillColor));
     circle.setOutlineColor(B2SFColor(color));
     circle.setOutlineThickness(1.f);
@@ -78,7 +78,7 @@ void DebugDraw::DrawSegment(const b2Vec2& p1, const b2Vec2& p2, const b2Color& c
 	sf::VertexArray line;
     line.append(sf::Vertex(sf::Vector2f(p1.x*PIXELS_PER_METER, p1.y*PIXELS_PER_METER), B2SFColor(color)));
     line.append(sf::Vertex(sf::Vector2f(p2.x*PIXELS_PER_METER, p2.y*PIXELS_PER_METER), B2SFColor(color)));
-    line.setPrimitiveType(sf::Lines);
+    line.setPrimitiveType(sf::PrimitiveType::Lines);
     
     m_renderWindow->draw(line);
 }
@@ -100,8 +100,8 @@ void DebugDraw::DrawTransform(const b2Transform& xf)
 void DebugDraw::DrawPoint(const b2Vec2& p, float size, const b2Color& color)
 {
     sf::RectangleShape temp({size,size});
-    temp.setOrigin(size/2,size/2);
-    temp.setPosition(p.x,p.y);
+    temp.setOrigin({size/2,size/2});
+    temp.setPosition({p.x,p.y});
     temp.setFillColor(B2SFColor(color));
 	m_renderWindow->draw(temp);
 }

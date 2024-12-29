@@ -2,14 +2,14 @@
 #include "Networking/NetworkObject.hpp"
 #include "Networking/NetworkObjectManager.hpp"
 
-std::unordered_map<sf::Uint64, funcHelper::func<NetworkObject*>> NetworkType::m_factories;
+std::unordered_map<std::uint64_t, funcHelper::func<NetworkObject*>> NetworkType::m_factories;
 
-bool NetworkType::initType(sf::Uint64 type, const funcHelper::func<NetworkObject*>& factoryFunc)
+bool NetworkType::initType(std::uint64_t type, const funcHelper::func<NetworkObject*>& factoryFunc)
 {
     return m_factories.emplace(type, factoryFunc).second;
 }
 
-NetworkObject* NetworkType::createObject(sf::Uint64 value, sf::Uint32 netID)
+NetworkObject* NetworkType::createObject(std::uint64_t value, std::uint32_t netID)
 {
     auto iter = m_factories.find(value);
     if (iter == m_factories.end())

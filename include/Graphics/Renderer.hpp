@@ -23,12 +23,12 @@ public:
 
     inline Renderer()
     {
-        T::setScale(PIXELS_PER_METER, PIXELS_PER_METER);
+        T::setScale({PIXELS_PER_METER, PIXELS_PER_METER});
     }
 
     inline Renderer(const T& shape) : T(shape)
     {
-        T::setScale(PIXELS_PER_METER, PIXELS_PER_METER);
+        T::setScale({PIXELS_PER_METER, PIXELS_PER_METER});
     }
 
     inline virtual ~Renderer() = default;
@@ -44,12 +44,12 @@ public:
 
     inline void setScale(Vector2 scale)
     {
-        T::setScale(PIXELS_PER_METER * scale.x, PIXELS_PER_METER * scale.y);
+        T::setScale({PIXELS_PER_METER * scale.x, PIXELS_PER_METER * scale.y});
     }
 
     inline void setScale(float x, float y)
     {
-        T::setScale(PIXELS_PER_METER * x, PIXELS_PER_METER * y);
+        T::setScale({PIXELS_PER_METER * x, PIXELS_PER_METER * y});
     }
 
     inline Vector2 getScale() const
@@ -60,10 +60,10 @@ public:
     inline sf::FloatRect getGlobalBounds() const
     {
         sf::FloatRect globalBounds = T::getGlobalBounds();
-        globalBounds.height /= PIXELS_PER_METER;
-        globalBounds.width /= PIXELS_PER_METER;
-        globalBounds.left /= PIXELS_PER_METER;
-        globalBounds.top /= PIXELS_PER_METER;
+        globalBounds.size.x /= PIXELS_PER_METER;
+        globalBounds.size.y /= PIXELS_PER_METER;
+        globalBounds.position.x /= PIXELS_PER_METER;
+        globalBounds.position.y /= PIXELS_PER_METER;
         return globalBounds;
     }
 
@@ -71,7 +71,7 @@ protected:
     inline void Draw(sf::RenderTarget* target, const Transform& thisTransform) override
     {
         T::setPosition({thisTransform.position.x*PIXELS_PER_METER, thisTransform.position.y*PIXELS_PER_METER});
-        T::setRotation(thisTransform.rotation.getAngleInDegrees());
+        T::setRotation((sf::Angle)thisTransform.rotation);
         target->draw(*this);
     }
 
@@ -113,12 +113,12 @@ public:
 
     inline void setScale(Vector2 scale)
     {
-        T::setScale(PIXELS_PER_METER * scale.x, PIXELS_PER_METER * scale.y);
+        T::setScale({PIXELS_PER_METER * scale.x, PIXELS_PER_METER * scale.y});
     }
 
     inline void setScale(float x, float y)
     {
-        T::setScale(PIXELS_PER_METER * x, PIXELS_PER_METER * y);
+        T::setScale({PIXELS_PER_METER * x, PIXELS_PER_METER * y});
     }
 
     inline Vector2 getScale() const
@@ -130,7 +130,7 @@ protected:
     inline void Draw(sf::RenderTarget* target, const Transform& thisTransform) override
     {
         T::setPosition({thisTransform.position.x*PIXELS_PER_METER, thisTransform.position.y*PIXELS_PER_METER});
-        T::setRotation(thisTransform.rotation.getAngle()*180/PI);
+        T::setRotation((sf::Angle)thisTransform.rotation);
         target->draw(*this);
     }
 

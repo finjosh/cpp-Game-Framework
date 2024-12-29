@@ -177,8 +177,8 @@ public:
     /// @returns the list of input changes from this frame
     const std::list<FrameData>& getFrameData() const;
     /// @param states a list of states that the Input type must have
-    /// @returns an Action::Event that stores all input types with one of the given states 
-    Input::Action::Event getAllOf(std::list<Input::State> states) const;
+    /// @returns an Action::Event that stores all input types (keys, mouse, ect.) with one of the given states 
+    Input::Action::Event getAllOfState(const std::list<Input::State>& states) const;
 
     /// @note throws an assert error if action does not exist (returns false otherwise)
     bool isActionPressed(const std::string& name) const;

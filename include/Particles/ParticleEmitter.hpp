@@ -22,7 +22,7 @@ public:
     /// @param shape make sure that the given drawable is accessible over the lifetime of this object
     /// @param pos the position of the emitter
     /// @param vel the initial velocity of the particles
-    /// @param rot rotation radians
+    /// @param rotation the rotation in radians
     /// @param spawnRate the spawn rate of particles if spawning
     /// @param lifetime the particle lifetime
     /// @param spawnAmount the amount of partials spawned at once
@@ -30,7 +30,7 @@ public:
     /// @param spread the max angle of spread (degrees)
     /// @param randomColor the max random addition to the default color
     ParticleEmitter(sf::Shape* shape,
-                    const Vector2& pos, float vel, float rot = 0.f, float spawnRate = 0.1f, 
+                    const Vector2& pos, float vel, Rotation rotation = 0.f, float spawnRate = 0.1f, 
                     float lifetime = 1.f, int spawnAmount = 0, float fadeOutTime = 0.f, 
                     float spread = 0.f, sf::Color randomColor = sf::Color{0,0,0,0});
 
@@ -108,15 +108,15 @@ protected:
     {
     public:
         Particle() = default;
-        Particle(const Vector2& pos, const Vector2& vel, float rotation, sf::Color color);
+        Particle(const Vector2& pos, const Vector2& vel, sf::Angle rotation, sf::Color color);
         void setPosition(const Vector2& position);
         Vector2 getPosition() const;
         void setVelocity(const Vector2& velocity);
         Vector2 getVelocity() const;
         /// @param rot in degrees
-        void setRotation(float rot);
+        void setRotation(sf::Angle rot);
         /// @returns rotation in degrees
-        float getRotation() const;
+        sf::Angle getRotation() const;
         float getLifetime() const;
         sf::Color getColor() const;
         void setColor(sf::Color color);
@@ -135,7 +135,7 @@ protected:
         Vector2 m_position = {0,0};
         Vector2 m_velocity = {0,0};
         /// @brief in degrees
-        float m_rotation = 0.f;
+        sf::Angle m_rotation = sf::Angle::Zero;
         float m_lifetime = 0.f;
         sf::Color m_color;
     };

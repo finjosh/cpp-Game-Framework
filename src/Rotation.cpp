@@ -1,6 +1,7 @@
 #include "Rotation.hpp"
 #include "Vector2.hpp"
-#include "math.h"
+#include <math.h>
+#include <algorithm>
 
 Rotation::Rotation(float radians) : cos(std::cos(radians)), sin(std::sin(radians)) {}
 

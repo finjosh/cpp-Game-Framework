@@ -31,7 +31,7 @@ public:
 
     /// @warning do NOT store this ptr, get the object pointer if storage is required
     /// @returns nullptr if the network object does not exist 
-    static NetworkObject* getObject(sf::Uint64 networkID);
+    static NetworkObject* getObject(std::uint64_t networkID);
 
     static EventHelper::Event onConnectionOpen;
     static EventHelper::Event onConnectionClose;
@@ -78,7 +78,7 @@ private:
     {
     public:
         _networkObject();
-        void setID(sf::Uint32 id);
+        void setID(std::uint32_t id);
         inline void OnClientReceivedData(sf::Packet& data) override {}
         inline sf::Packet OnClientSendData() override { return sf::Packet(); }
         inline void OnServerReceivedData(sf::Packet& data) {}

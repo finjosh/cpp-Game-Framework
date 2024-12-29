@@ -55,7 +55,7 @@ public:
         Collider::setType(b2BodyType::b2_staticBody);
 
         setSize({size.x,size.y});
-        setOrigin(size.x/2,size.y/2);
+        setOrigin({size.x/2,size.y/2});
         setFillColor(sf::Color::Red);
     }
 };
@@ -79,7 +79,7 @@ public:
         Collider::createFixture(b2shape, 1, 0.1);
 
         setSize({5,5});
-        setOrigin(2.5,2.5);
+        setOrigin({2.5,2.5});
         setFillColor(sf::Color::White);
 
         m_particle.setFillColor(sf::Color::Green);
@@ -203,7 +203,7 @@ public:
         // Collider::setType(b2BodyType::b2_staticBody);
 
         setSize({size.x,size.y});
-        setOrigin(size.x/2,size.y/2);
+        setOrigin({size.x/2,size.y/2});
         setFillColor(sf::Color::Transparent);
         setOutlineThickness(0.5);
         setOutlineColor(sf::Color::Blue);
@@ -212,7 +212,7 @@ public:
         opening->setParent(this);
         opening->setSize({size.x, size.y/8});
         opening->setFillColor(sf::Color::Green);
-        opening->setOrigin(size.x/2, -size.y/2);
+        opening->setOrigin({size.x/2, -size.y/2});
 
         setPosition(pos);
     }
@@ -281,41 +281,6 @@ int main()
 
     //* init code
 
-    auto temp = new SettingsUI(gui);
-    temp->setShowEffect(tgui::ShowEffectType::Scale, 500);
-    temp->createSubSectionLabel("Test Section", "Boolean Settings");
-    temp->createSetting("Test Section", new BoolSetting{"Bool", true, "A test for boolean settings"});
-    temp->createSubSectionLabel("Test Section", "Integer Settings");
-    temp->createSetting("Test Section", new IntSetting{"Int1", 1, "A test for int settings with any input"});
-    temp->createSetting("Test Section", new IntSetting{"Int2", 2, "A test for int settings with a conditional input (-7 <= int <= 77)", [](int value){ return -7 <= value && value <= 77; }});
-    temp->createSetting("Test Section", new IntSetting{"Int3", 3, "A test for int settings with a range slider", -7, 77, 1});
-    temp->createSubSectionLabel("Test Section", "Unsigned Integer Settings");
-    temp->createSetting("Test Section", new UIntSetting{"UInt1", 1, "A test for unsigned ints settings with any input"});
-    temp->createSetting("Test Section", new UIntSetting{"UInt2", 2, "A test for unsigned ints settings with a conditional input (7 <= int)", [](unsigned int value){ return 7 <= value; }});
-    temp->createSetting("Test Section", new UIntSetting{"UInt3", 3, "A test for unsigned ints settings with a range slider", 7, 77, 1});
-    temp->createSubSectionLabel("Test Section", "Floating Point Settings");
-    temp->createSetting("Test Section", new FloatSetting{"Float1", 1.f, "A test for float settings with any input"});
-    temp->createSetting("Test Section", new FloatSetting{"Float2", 2.f, "A test for float settings with a conditional input (0.7 <= float <= 7)", [](float value){ return 0.699999 <= value && value <= 7; }});
-    temp->createSetting("Test Section", new FloatSetting{"Float3", 3.f, "A test for float settings with a range slider", 0.7, 77, 0.1});
-    temp->createSubSectionLabel("Test Section", "String Settings");
-    temp->createSetting("Test Section", new StringSetting{"String1", "one", "A test for string settings with any input"});
-    temp->createSetting("Test Section", new StringSetting{"String2", "two", "A test for string settings with a list of input options", {"Cat", "Dog", "Coding", "Math", "Physics"}});
-    temp->createSetting("Test Section", new StringSetting{"String3", "three", "A test for string settings with a conditional input (string must start with \"I\")", [](std::string value){ return value.starts_with("I"); }});
-    temp->createSubSectionLabel("Test Section", "Input Settings");
-    temp->createSetting("Test Section", new InputSetting{"Input1", Input::Action::Event{{sf::Keyboard::Key::Num1}}, "A test for input settings with any input and a default of one key"});
-    temp->createSetting("Test Section", new InputSetting{"Input2", Input::Action::Event{{sf::Keyboard::Key::Num2}}, "A test for input settings with only keyboard inputs", [](const Input::Action::Event& event){ return event.getMouseButtons().size() == 0; }});
-    temp->createSetting("Test Section", new InputSetting{"Input3", Input::Action::Event{{}, {sf::Mouse::Button::Left}}, "A test for input settings with only mouse inputs", [](const Input::Action::Event& event){ return event.getKeyCodes().size() == 0; }});
-    temp->createSetting("Test Section", new InputSetting{"Input4", Input::Action::Event{{sf::Keyboard::Key::Num3}}, "A test for input settings that can only have 0 or 1 input", [](const Input::Action::Event& event){ return event.getKeyCodes().size() + event.getMouseButtons().size() == 1; }});
-    temp->createSubSectionLabel("Test Section", "Color Settings");
-    temp->createSetting("Test Section", new ColorSetting{"Color1", Color{255,0,255,255}, "A test setting for colors"});
-    temp->createSetting("Test Section", new ColorSetting{"Color2", Color{255,0,255,255}, "A test setting for colors where color has to have a r value >= 100", [](Color color){ return color.r >= 100; }});
-    temp->createSetting("Test Section", new ColorSetting{"Color3", Color{255,0,255,255}, "A test setting for colors where there is a list of colors", {Color{255,255,255,255}, Color{255,0,255,255}, Color{0,0,255,255}}});
-    temp->createSpacer("Test Section"); // adding a normal sized spacer
-    temp->createButton("Test Section")->setText("Random button");
-    temp->createBitmapButton("Test Section")->setText("Random bitmapBtn");
-    temp->createResetButton("Test Section", temp->getSettings("Test Section"), "Resets all settings in \"Test Section\"", {0.65f,1.f});
-    temp->setVisible();
-
     new Wall({96,108}, {192,10});
     new Wall({96,0}, {192,10});
     new Wall({192, 54}, {10, 108});
@@ -348,22 +313,24 @@ int main()
         fixedUpdate += deltaTime.asSeconds();
         secondTimer += deltaTime.asSeconds();
 
-        sf::Event event;
         Input::get().UpdateJustStates();
-        while (WindowHandler::getRenderWindow()->pollEvent(event))
+        while (const std::optional<sf::Event> event = WindowHandler::getRenderWindow()->pollEvent())
         {
-            if (event.type == sf::Event::Closed || (event.type == sf::Event::KeyPressed && event.key.code == sf::Keyboard::Key::Escape))
+            if (event->is<sf::Event::Closed>())
                 WindowHandler::getRenderWindow()->close();
+            else if (const auto* keyPressed = event->getIf<sf::Event::KeyPressed>()) 
+                if (keyPressed->code == sf::Keyboard::Key::Escape)
+                    WindowHandler::getRenderWindow()->close();
 
             bool wasHandled = false;
-            if (Command::Prompt::UpdateEvent(event))
+            if (Command::Prompt::UpdateEvent(event.value()))
                 wasHandled = true;
-            else if (CanvasManager::handleEvent(event))
+            else if (CanvasManager::handleEvent(event.value()))
                 wasHandled = true;
             else
-                LiveVar::UpdateLiveVars(event);
+                LiveVar::UpdateLiveVars(event.value());
 
-            Input::get().HandelEvent(event, wasHandled);
+            Input::get().HandelEvent(event.value(), wasHandled);
         }
         
         UpdateManager::Update(deltaTime.asSeconds());

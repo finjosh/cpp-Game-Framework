@@ -1,5 +1,6 @@
 #include "Vector2.hpp"
-#include "math.h"
+#include <math.h>
+#include <algorithm>
 
 Vector2::Vector2(float x, float y) : x(x), y(y) {}
 Vector2::Vector2(const Vector2& vector) : x(vector.x), y(vector.y) {}

@@ -17,16 +17,16 @@ public:
     /// @param type the object type that is being added (derive from Object, NetworkObject, and have a constructor with no inputs)
     /// @param factoryFunc a function that creates the type defined
     /// @returns true if the type was added (only added if type does not already exists)
-    static bool initType(sf::Uint64 type, const funcHelper::func<NetworkObject*>& factoryFunc);
+    static bool initType(std::uint64_t type, const funcHelper::func<NetworkObject*>& factoryFunc);
 
     /// @param netID the network id of the new object
     /// @returns ptr to the created object (nullptr if not found)
-    static NetworkObject* createObject(sf::Uint64 type, sf::Uint32 netID);
+    static NetworkObject* createObject(std::uint64_t type, std::uint32_t netID);
 
 protected:
 
 private:
-    static std::unordered_map<sf::Uint64, funcHelper::func<NetworkObject*>> m_factories;
+    static std::unordered_map<std::uint64_t, funcHelper::func<NetworkObject*>> m_factories;
 };
 
 #endif

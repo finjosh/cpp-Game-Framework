@@ -23,7 +23,7 @@ public:
 
     /// @brief the network ID is the id of either a client or the server to the network connection
     /// @returns the id that defined this program on the network
-    sf::Uint64 getNetworkID() const;
+    std::uint64_t getNetworkID() const;
     uint64_t getTypeid() const;
     void createNetworkObject(); // TODO handle if this is a server or client properly
     /// @brief removes this object from the network
@@ -48,10 +48,10 @@ protected:
 
 private:
     /// @brief null id = 0
-    sf::Uint64 m_id = 0;
-    const uint64_t m_typeid = 0;
+    std::uint64_t m_id = 0;
+    const std::uint64_t m_typeid = 0;
 
-    static sf::Uint64 m_nextID;
+    static std::uint64_t m_nextID;
 };
 
 namespace std {

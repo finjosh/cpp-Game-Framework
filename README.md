@@ -4,13 +4,13 @@ A work in progress game engine/framework.
 ### Tested with: 
     - Compiler: g++
     - Version: g++.exe (Rev2, Built by MSYS2 project) 14.2.0
-    - OS: Windows 11
+    - To use the prebuilt libs you have to use the ucrt MSYS2 mingw build for g++ 14.2.0
 
 ### [SFML](https://www.sfml-dev.org/index.php)
-    - Version 2.6.1
+    - Version 3.0.0
 
 ### [TGUI](https://tgui.eu/)
-    - Version: 1.x (2024-08-20)
+    - Version: 1.7
 
 ### [Box2D](https://box2d.org/)
     - Version: 2.4

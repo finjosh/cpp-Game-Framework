@@ -29,7 +29,7 @@ int Camera::getLayer() const
 void Camera::setMainCamera()
 {
     m_layer = -1;
-    m_screenRect = {0,0,1,1};
+    m_screenRect = {{0,0},{1,1}};
     m_size = {WindowHandler::getRenderWindow()->getSize().x / PIXELS_PER_METER, WindowHandler::getRenderWindow()->getSize().y / PIXELS_PER_METER};
     CameraManager::setMainCamera(this);
 }
@@ -86,7 +86,7 @@ sf::View Camera::getCameraView() const
     sf::View temp(sf::Vector2f(Object::getPosition().x*PIXELS_PER_METER, Object::getPosition().y*PIXELS_PER_METER), {m_size.x*PIXELS_PER_METER, m_size.y*PIXELS_PER_METER});
     temp.setViewport(m_screenRect);
     if (!m_rotationLock)
-        temp.setRotation(Object::getRotation().getAngle() * 180 / PI);
+        temp.setRotation((sf::Angle)Object::getRotation());
     return temp;
 }
 

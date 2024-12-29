@@ -94,7 +94,12 @@
         "valarray": "cpp",
         "variant": "cpp",
         "*.m": "cpp",
-        "filesystem": "cpp"
+        "filesystem": "cpp",
+        "format": "cpp",
+        "generator": "cpp",
+        "print": "cpp",
+        "stdfloat": "cpp",
+        "text_encoding": "cpp"
     },
     "makefile.launchConfigurations": [
         {

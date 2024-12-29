@@ -4,6 +4,7 @@
 #pragma once
 
 // #include "Box2D/b2_math.h" (B2_MATH_H)
+#include "SFML/System/Angle.hpp"
 
 #ifndef PI
 #define PI 3.14159265358979323846f
@@ -58,6 +59,15 @@ public:
     }
     #endif
     // ----------------
+
+    //* SFML Funcitons
+
+    inline Rotation(sf::Angle angle) 
+    { this->set(angle.asRadians()); }
+    explicit inline operator sf::Angle() const
+    { return sf::radians(this->getAngle()); }
+
+    // ---------------
 
     //* string conversion function
     #ifdef _BASIC_STRING_H

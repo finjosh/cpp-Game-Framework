@@ -1,6 +1,7 @@
 #include "Input.hpp"
 #include <cassert>
 #include <sstream>
+#include <algorithm>
 #include "Utils/StringHelper.hpp"
 
 //* Action::Event defintions
@@ -355,21 +356,20 @@ std::string Input::Action::toString() const
 std::unordered_map<std::string, sf::Mouse::Button> Input::m_mouseDict = {{"Left Mouse", sf::Mouse::Button::Left},
                                                                          {"Right Mouse", sf::Mouse::Button::Right},
                                                                          {"Middle Mouse", sf::Mouse::Button::Middle},
-                                                                         {"Mouse Extra 1", sf::Mouse::Button::XButton1},
-                                                                         {"Mouse Extra 2", sf::Mouse::Button::XButton2},
-                                                                         {"Unknow Mouse", sf::Mouse::Button::ButtonCount}}; // just in case someone decides to use button count
+                                                                         {"Mouse Extra 1", sf::Mouse::Button::Extra1},
+                                                                         {"Mouse Extra 2", sf::Mouse::Button::Extra2}};
 std::unordered_map<std::string, sf::Keyboard::Scancode> Input::m_keyboardDict;
 
 Input::Input()
 {
     Input::m_keyboardDict.clear();
-    for (int i = -1; i <= sf::Keyboard::Scancode::ScancodeCount; i++) // going to the count just in case anyone tries to get the count enum
+    for (int i = -1; i < (int)sf::Keyboard::ScancodeCount; i++)
     {
         m_keyboard[sf::Keyboard::Scancode(i)] = State::Released;
         Input::m_keyboardDict.emplace(Input::toString(sf::Keyboard::Scancode(i)), sf::Keyboard::Scancode(i));
     }
     
-    for (int i = 0; i <= sf::Mouse::Button::ButtonCount; i++) // going to the count just in case anyone tries to get the count enum
+    for (int i = 0; i < (int)sf::Mouse::ButtonCount; i++)
         m_mouse[sf::Mouse::Button(i)] = State::Released;
 }
 
@@ -383,25 +383,33 @@ void Input::HandelEvent(sf::Event event, bool wasHandled)
 {
     if (wasHandled) // only handling release events if event was already handled
     {
-        if (event.type == sf::Event::KeyReleased && this->isPressed(event.key.scancode))
+        // updating states if needed
+        if (const sf::Event::KeyReleased* key = event.getIf<sf::Event::KeyReleased>())
         {
-            m_keyboard[event.key.scancode] = State::JustReleased;
-            m_lastFrame.emplace_back(FrameData::Keyboard, State::JustReleased, event.key.scancode);
+            if (this->isPressed(key->scancode))
+            {
+                m_keyboard[key->scancode] = State::JustReleased;
+                m_lastFrame.emplace_back(FrameData::Keyboard, State::JustReleased, key->scancode);
+            }
         }
-        else if (event.type == sf::Event::MouseButtonReleased && this->isPressed(event.mouseButton.button))
+        else if (const sf::Event::MouseButtonReleased* mouseButton = event.getIf<sf::Event::MouseButtonReleased>()) 
         {
-            m_mouse[event.mouseButton.button] = State::JustReleased;
-            m_lastFrame.emplace_back(FrameData::Mouse, State::JustReleased, event.mouseButton.button);
+            if (this->isPressed(mouseButton->button))
+            {
+                m_mouse[mouseButton->button] = State::JustReleased;
+                m_lastFrame.emplace_back(FrameData::Mouse, State::JustReleased, mouseButton->button);
+            }
         }
 
-        return;
+        return; // we dont want to handle any other events but release since the event was already handled
     }
 
-    if (event.type == sf::Event::LostFocus)
+    // if we lose focus then we should set every input to being released
+    if (event.is<sf::Event::FocusLost>())
     {
         for (auto key: m_keyboard)
         {
-            if (key.second == State::Pressed || key.second == State::JustPressed)
+            if (this->isPressed(key.first))
             {
                 m_keyboard[key.first] = State::JustReleased;
                 m_lastFrame.emplace_back(FrameData::Keyboard, State::JustReleased, key.first);
@@ -410,7 +418,7 @@ void Input::HandelEvent(sf::Event event, bool wasHandled)
     
         for (auto button: m_mouse)
         {
-            if (button.second == State::Pressed || button.second == State::JustPressed)
+            if (this->isPressed(button.first))
             {
                 m_mouse[button.first] = State::JustReleased;
                 m_lastFrame.emplace_back(FrameData::Mouse, State::JustReleased, button.first);
@@ -420,25 +428,25 @@ void Input::HandelEvent(sf::Event event, bool wasHandled)
         return;
     }
 
-    if (event.type == sf::Event::KeyPressed)
+    if (const sf::Event::KeyPressed* key = event.getIf<sf::Event::KeyPressed>())
     {
-        m_keyboard[event.key.scancode] = State::JustPressed;
-        m_lastFrame.emplace_back(FrameData::Keyboard, State::JustPressed, event.key.scancode);
+        m_keyboard[key->scancode] = State::JustPressed;
+        m_lastFrame.emplace_back(FrameData::Keyboard, State::JustPressed, key->scancode);
     }
-    else if (event.type == sf::Event::KeyReleased)
+    else if (const sf::Event::KeyReleased* key = event.getIf<sf::Event::KeyReleased>())
     {
-        m_keyboard[event.key.scancode] = State::JustReleased;
-        m_lastFrame.emplace_back(FrameData::Keyboard, State::JustReleased, event.key.scancode);
+        m_keyboard[key->scancode] = State::JustReleased;
+        m_lastFrame.emplace_back(FrameData::Keyboard, State::JustReleased, key->scancode);
     }
-    else if (event.type == sf::Event::MouseButtonPressed)
+    else if (const sf::Event::MouseButtonPressed* mouseButton = event.getIf<sf::Event::MouseButtonPressed>())
     {
-        m_mouse[event.mouseButton.button] = State::JustPressed;
-        m_lastFrame.emplace_back(FrameData::Mouse, State::JustPressed, event.mouseButton.button);
+        m_mouse[mouseButton->button] = State::JustPressed;
+        m_lastFrame.emplace_back(FrameData::Mouse, State::JustPressed, mouseButton->button);
     }
-    else if (event.type == sf::Event::MouseButtonReleased)
+    else if (const sf::Event::MouseButtonReleased* mouseButton = event.getIf<sf::Event::MouseButtonReleased>())
     {
-        m_mouse[event.mouseButton.button] = State::JustReleased;
-        m_lastFrame.emplace_back(FrameData::Mouse, State::JustReleased, event.mouseButton.button);
+        m_mouse[mouseButton->button] = State::JustReleased;
+        m_lastFrame.emplace_back(FrameData::Mouse, State::JustReleased, mouseButton->button);
     }
 }
 
@@ -541,7 +549,7 @@ const std::list<Input::FrameData>& Input::getFrameData() const
     return m_lastFrame;
 }
 
-Input::Action::Event Input::getAllOf(std::list<Input::State> states) const
+Input::Action::Event Input::getAllOfState(const std::list<Input::State>& states) const
 {
     Input::Action::Event rtn;
 
@@ -577,11 +585,11 @@ std::string Input::toString(sf::Mouse::Button mouseButton)
         rtn = "Middle Mouse";
         break;
 
-    case sf::Mouse::Button::XButton1:
+    case sf::Mouse::Button::Extra1:
         rtn = "Mouse Extra 1";
         break;
 
-    case sf::Mouse::Button::XButton2:
+    case sf::Mouse::Button::Extra2:
         rtn = "Mouse Extra 2";
         break;
 
@@ -600,7 +608,7 @@ std::string Input::toString(sf::Keyboard::Scancode scanCode)
 {
     std::string rtn = sf::Keyboard::getDescription(scanCode);
     if (rtn == "Unknown")
-        rtn += " " + std::to_string(scanCode);
+        rtn += " " + getDescription(scanCode).toAnsiString();
     return rtn;
 }
 

@@ -10,8 +10,9 @@ Vector2 WindowHandler::m_lastMousePos = {0,0};
 EventHelper::EventDynamic<sf::RenderWindow*> WindowHandler::onRenderWindowChanged;
 sf::VideoMode WindowHandler::m_videoMode;
 sf::ContextSettings WindowHandler::m_contextSettings;
-sf::Uint32 WindowHandler::m_style;
+std::uint32_t WindowHandler::m_style;
 std::string WindowHandler::m_title;
+sf::State WindowHandler::m_state;
 unsigned int WindowHandler::m_FPSLimit = 0;
 
 sf::RenderWindow* WindowHandler::getRenderWindow()
@@ -19,16 +20,17 @@ sf::RenderWindow* WindowHandler::getRenderWindow()
     return m_renderWindow;
 }
 
-void WindowHandler::initRenderWindow(sf::VideoMode mode, const sf::String &title, sf::Uint32 style, const sf::ContextSettings &settings)
+void WindowHandler::initRenderWindow(sf::VideoMode mode, const sf::String &title, std::uint32_t style, sf::State state, const sf::ContextSettings &settings)
 {
     m_videoMode = mode;
     m_contextSettings = settings;
     m_style = style;
+    m_state = state;
 
     if (m_renderWindow)
         delete(m_renderWindow);
 
-    m_renderWindow = new sf::RenderWindow(mode, title, style, settings);
+    m_renderWindow = new sf::RenderWindow(mode, title, style, state, settings);
     m_renderWindow->setFramerateLimit(m_FPSLimit);
     onRenderWindowChanged.invoke(m_renderWindow);
 }
@@ -42,11 +44,9 @@ void WindowHandler::Display()
     if (m_lastMousePos != newMousePos)
     {
         m_lastMousePos = newMousePos;
-        sf::Event event;
-        event.type = sf::Event::MouseMoved;
-        Vector2 mousePos = sf::Mouse::getPosition(*m_renderWindow); // pos in pixel cords
-        event.mouseMove.x = mousePos.x;
-        event.mouseMove.y = mousePos.y;
+        sf::Event::MouseMoved temp;
+        temp.position = sf::Mouse::getPosition(*m_renderWindow);
+        sf::Event event(temp);
         CanvasManager::handleEvent(event);
     }
 
@@ -112,7 +112,7 @@ Vector2 WindowHandler::getScreenSize()
 
 void WindowHandler::setContextSettings(sf::ContextSettings contextSettings)
 {
-    initRenderWindow(m_videoMode, m_title, m_style, contextSettings);
+    initRenderWindow(m_videoMode, m_title, m_style, m_state, contextSettings);
 }
 
 sf::ContextSettings WindowHandler::getContextSettings()
@@ -122,7 +122,17 @@ sf::ContextSettings WindowHandler::getContextSettings()
 
 void WindowHandler::setVideMode(sf::VideoMode mode)
 {
-    initRenderWindow(mode, m_title, m_style, m_contextSettings);
+    initRenderWindow(mode, m_title, m_style, m_state, m_contextSettings);
+}
+
+void WindowHandler::setState(sf::State state)
+{
+    initRenderWindow(m_videoMode, m_title, m_style, state, m_contextSettings);
+}
+
+sf::State WindowHandler::getState()
+{
+    return m_state;
 }
 
 sf::VideoMode WindowHandler::getVideMode()
@@ -130,12 +140,12 @@ sf::VideoMode WindowHandler::getVideMode()
     return m_videoMode;
 }
 
-void WindowHandler::setStyle(sf::Uint32 style)
+void WindowHandler::setStyle(std::uint32_t style)
 {
-    initRenderWindow(m_videoMode, m_title, style, m_contextSettings);
+    initRenderWindow(m_videoMode, m_title, style, m_state, m_contextSettings);
 }
 
-sf::Uint32 WindowHandler::getStyle()
+std::uint32_t WindowHandler::getStyle()
 {
     return m_style;
 }

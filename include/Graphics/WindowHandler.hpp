@@ -15,7 +15,7 @@ class WindowHandler
 public:
     static sf::RenderWindow* getRenderWindow();
     /// @note if called after window is already made will replace the window
-    static void initRenderWindow(sf::VideoMode mode, const sf::String &title, sf::Uint32 style = 7U, const sf::ContextSettings &settings = sf::ContextSettings());
+    static void initRenderWindow(sf::VideoMode mode, const sf::String &title, std::uint32_t style = 7U, sf::State state = sf::State::Windowed, const sf::ContextSettings &settings = sf::ContextSettings());
 
     static void Display();
 
@@ -32,10 +32,12 @@ public:
     static sf::ContextSettings getContextSettings();
     /// @note this recreates the render window with the given video mode
     static void setVideMode(sf::VideoMode mode);
+    static void setState(sf::State state = sf::State::Windowed);
     static sf::VideoMode getVideMode();
     /// @note this recreates the render window with the given style
-    static void setStyle(sf::Uint32 style);
-    static sf::Uint32 getStyle();
+    static void setStyle(std::uint32_t style);
+    static std::uint32_t getStyle();
+    static sf::State getState();
     static std::string getTitle();
     static void setTitle(const std::string& title);
     /// @brief sets the windows max fps
@@ -52,7 +54,8 @@ private:
     static sf::RenderWindow* m_renderWindow;
     static sf::VideoMode m_videoMode;
     static sf::ContextSettings m_contextSettings;
-    static sf::Uint32 m_style;
+    static std::uint32_t m_style;
+    static sf::State m_state;
     static std::string m_title;
     static Vector2 m_lastMousePos;
     static unsigned int m_FPSLimit;
