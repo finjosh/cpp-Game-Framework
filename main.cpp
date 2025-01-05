@@ -3,7 +3,6 @@
 #include "SFML/Graphics.hpp"
 #include "TGUI/TGUI.hpp"
 #include "TGUI/Backend/SFML-Graphics.hpp"
-#include "box2d/Box2D.h"
 // #include "BS_thread_pool.hpp"
 
 #include "Utils/CommandPrompt.hpp"
@@ -48,10 +47,13 @@ public:
     {
         setPosition(pos);
 
-        b2PolygonShape b2shape;
-        b2shape.SetAsBox(size.x/2, size.y/2);
+        Fixture::Shape::Polygon shape;
+        shape.makeBox(size.x, size.y);
 
-        Collider::createFixture(b2shape, 1);
+        FixtureDef fixtureDef;
+        fixtureDef.setFriction(1);
+
+        Collider::createFixture(shape, fixtureDef);
         Collider::setType(b2BodyType::b2_staticBody);
 
         setSize({size.x,size.y});
@@ -73,10 +75,13 @@ public:
     {
         m_players.emplace(this);
 
-        b2PolygonShape b2shape;
-        b2shape.SetAsBox(2.5,2.5);
+        Fixture::Shape::Polygon shape;
+        shape.makeBox(5,5);
 
-        Collider::createFixture(b2shape, 1, 0.1);
+        FixtureDef fixtureDef;
+        fixtureDef.setFriction(1);
+
+        Collider::createFixture(shape, fixtureDef);
 
         setSize({5,5});
         setOrigin({2.5,2.5});
@@ -102,27 +107,27 @@ public:
 
     inline virtual void Update(float deltaTime) override
     {
-        if (sf::Keyboard::isKeyPressed(sf::Keyboard::Key::W))
+        if (Input::get().isPressed(sf::Keyboard::Key::W))
         {
             applyForceToCenter({0,-120000*deltaTime});
         }
-        if (sf::Keyboard::isKeyPressed(sf::Keyboard::Key::A))
+        if (Input::get().isPressed(sf::Keyboard::Key::A))
         {
             applyForceToCenter({-120000*deltaTime,0});
         }
-        if (sf::Keyboard::isKeyPressed(sf::Keyboard::Key::S))
+        if (Input::get().isPressed(sf::Keyboard::Key::S))
         {
             applyForceToCenter({0,120000*deltaTime});
         }
-        if (sf::Keyboard::isKeyPressed(sf::Keyboard::Key::D))
+        if (Input::get().isPressed(sf::Keyboard::Key::D))
         {
             applyForceToCenter({120000*deltaTime,0});
         }
-        if (sf::Keyboard::isKeyPressed(sf::Keyboard::Key::E))
+        if (Input::get().isPressed(sf::Keyboard::Key::E))
         {
             applyTorque(500000*deltaTime);
         }
-        if (sf::Keyboard::isKeyPressed(sf::Keyboard::Key::Q))
+        if (Input::get().isPressed(sf::Keyboard::Key::Q))
         {
             applyTorque(-500000*deltaTime);
         }
@@ -142,15 +147,15 @@ public:
         m_camera->setRotation(getRotation());
     }
 
-    void BeginContact(ContactData data) override
-    {
-        auto info = data.getInfo();
-        if (info.getPointCount() > 0 && getLinearVelocity().lengthSquared() > 250 && data.getCollider()->cast<Wall>())
-        {
-            m_hitParticle->setPosition(info.getContactPoint(0));
-            m_hitParticle->emit();
-        }
-    }
+    // void BeginContact(ContactData data) override
+    // {
+    //     auto info = data.getInfo();
+    //     if (info.getPointCount() > 0 && getLinearVelocity().lengthSquared() > 250 && data.getCollider()->cast<Wall>())
+    //     {
+    //         m_hitParticle->setPosition(info.getContactPoint(0));
+    //         m_hitParticle->emit();
+    //     }
+    // }
 };
 
 Camera::Ptr Player::m_camera = nullptr;
@@ -162,10 +167,11 @@ class Sensor : public virtual Object, public Renderer<sf::RectangleShape>, publi
 public:
     Sensor(funcHelper::func<void> onEnter, const Object::Ptr<>& object = Object::Ptr<>(nullptr))
     {
-        b2PolygonShape shape;
-        shape.SetAsBox(10,10);
+        Fixture::Shape::Polygon shape;
+        shape.makeBox(20,20);
+
         Collider::createFixtureSensor(shape);
-        Collider::setType(b2BodyType::b2_staticBody);
+        Collider::setType(b2_staticBody);
 
         setSize({20,20});
         setOrigin({10,10});
@@ -196,11 +202,10 @@ class OneWay : public virtual Object, public Renderer<sf::RectangleShape>, publi
 public:
     inline OneWay(const Vector2& pos, const Vector2& size)
     {
-        b2PolygonShape b2shape;
-        b2shape.SetAsBox(size.x/2, size.y/2);
+        Fixture::Shape::Polygon shape;
+        shape.makeBox(size.x, size.y);
 
-        Collider::createFixture(b2shape, 1);
-        // Collider::setType(b2BodyType::b2_staticBody);
+        Collider::createFixture(shape);
 
         setSize({size.x,size.y});
         setOrigin({size.x/2,size.y/2});
@@ -230,20 +235,20 @@ public:
         // }
     }
 
-    void PreSolve(PreSolveData data) override
-    {
-        if (data.getCollider()->cast<Wall>() != nullptr)
-            return;
-        if (getLocalVector(data.getInfo().getNormal()).y < -0.5f) // if the object is colliding from the bottom
-        {
-            data.setEnabled(false);
-            m_freeFlow.emplace(data.getCollider());
-        }
-        else if (m_freeFlow.find(data.getCollider()) != m_freeFlow.end())
-        {
-            data.setEnabled(false);
-        }
-    }
+    // void PreSolve(PreSolveData data) override
+    // {
+    //     if (data.getCollider()->cast<Wall>() != nullptr)
+    //         return;
+    //     if (getLocalVector(data.getInfo().getNormal()).y < -0.5f) // if the object is colliding from the bottom
+    //     {
+    //         data.setEnabled(false);
+    //         m_freeFlow.emplace(data.getCollider());
+    //     }
+    //     else if (m_freeFlow.find(data.getCollider()) != m_freeFlow.end())
+    //     {
+    //         data.setEnabled(false);
+    //     }
+    // }
 
     void EndContact(ContactData data) override
     {
@@ -262,10 +267,8 @@ int main()
     tryLoadTheme({"Dark.txt", "Black.txt"}, {"", "Assets/", "themes/", "Themes/", "assets/", "Assets/Themes/", "Assets/themes/", "assets/themes/", "assets/Themes/"});
     // -----------------------
 
-    WorldHandler::init({0.f,0.f});
-    DebugDraw debugDraw(WindowHandler::getRenderWindow());
-    debugDraw.initCommands();
-    WorldHandler::getWorld().SetDebugDraw(&debugDraw); // TODO implement ray cast system
+    WorldHandler::init({0.f,0.f}); // TODO implement ray cast system
+    DebugDraw::get().initCommands();
     Input::get(); // initializing the input dictionary for string conversions
 
     Canvas* gui = new Canvas();

@@ -3,91 +3,128 @@
 #include "Physics/WorldHandler.hpp"
 #include "ObjectManager.hpp"
 
-CollisionManager::m_contactData::m_contactData(Collider* A, Collider* B, b2Contact* contactData) : A(A), B(B), contactData(contactData) {}
+CollisionManager::m_contactData::m_contactData(b2ShapeId A, b2ShapeId B) : A(A), B(B) {}
 bool CollisionManager::m_contactData::operator < (const m_contactData& data) const
 {
-    return this->A < data.A || this->B < data.B || this->contactData < data.contactData;
+    return this->A.world0 < data.A.world0 || this->B.world0 < data.B.world0 ||
+           this->A.revision < data.A.revision || this->B.revision < data.B.revision ||
+           this->A.index1 < data.A.index1 || this->B.index1 < data.B.index1;
 }
 bool CollisionManager::m_contactData::operator == (const m_contactData& data) const
 {
-    return this->A == data.A && this->B == data.B && this->contactData == data.contactData;
+    return this->A.world0 == data.A.world0 && this->B.world0 == data.B.world0 &&
+           this->A.revision == data.A.revision && this->B.revision == data.B.revision &&
+           this->A.index1 == data.A.index1 && this->B.index1 == data.B.index1;
 }
 
 std::unordered_set<Collider*> CollisionManager::m_objects;
-std::list<CollisionManager::m_contactData> CollisionManager::m_beginContact;
-std::list<CollisionManager::m_contactData> CollisionManager::m_endContact;
 std::set<CollisionManager::m_contactData> CollisionManager::m_colliding;
 bool CollisionManager::m_usingCollidingSet = false;
 std::list<CollisionManager::m_contactData> CollisionManager::m_collidingEraseQueue;
 EventHelper::Event CollisionManager::m_updateBodyEvent;
 bool CollisionManager::m_inPhysicsUpdate = false;
 
-void CollisionManager::BeginContact(b2Contact* contact)
-{
-    Collider* A = static_cast<Collider*>((void*)contact->GetFixtureA()->GetBody()->GetUserData().pointer);
-    Collider* B = static_cast<Collider*>((void*)contact->GetFixtureB()->GetBody()->GetUserData().pointer);
+// void CollisionManager::BeginContact(b2Contact* contact)
+// {
+//     Collider* A = static_cast<Collider*>((void*)contact->GetFixtureA()->GetBody()->GetUserData().pointer);
+//     Collider* B = static_cast<Collider*>((void*)contact->GetFixtureB()->GetBody()->GetUserData().pointer);
 
-    // updating all lists for new contact
-    m_beginContact.emplace_back(A, B, contact);
-    m_colliding.emplace(A,B,contact);
-}
+//     // updating all lists for new contact
+//     m_beginContact.emplace_back(A, B, contact);
+//     m_colliding.emplace(A,B,contact);
+// }
 
-void CollisionManager::EndContact(b2Contact* contact)
-{
-    Collider* A = static_cast<Collider*>((void*)contact->GetFixtureA()->GetBody()->GetUserData().pointer);
-    Collider* B = static_cast<Collider*>((void*)contact->GetFixtureB()->GetBody()->GetUserData().pointer);
+// void CollisionManager::EndContact(b2Contact* contact)
+// {
+//     Collider* A = static_cast<Collider*>((void*)contact->GetFixtureA()->GetBody()->GetUserData().pointer);
+//     Collider* B = static_cast<Collider*>((void*)contact->GetFixtureB()->GetBody()->GetUserData().pointer);
 
-    // updating all lists for end contact
-    m_endContact.emplace_back(A, B, contact);
+//     // updating all lists for end contact
+//     m_endContact.emplace_back(A, B, contact);
 
-    if (m_usingCollidingSet)
-        m_collidingEraseQueue.emplace_back(A,B,contact);
-    else
-        m_colliding.erase({A,B,contact});
-}
+//     if (m_usingCollidingSet)
+//         m_collidingEraseQueue.emplace_back(A,B,contact);
+//     else
+//         m_colliding.erase({A,B,contact});
+// }
 
-void CollisionManager::PreSolve(b2Contact* contact, const b2Manifold* oldManifold)
-{
-    m_inPhysicsUpdate = true;
-    Collider* A = static_cast<Collider*>((void*)contact->GetFixtureA()->GetBody()->GetUserData().pointer);
-    Collider* B = static_cast<Collider*>((void*)contact->GetFixtureB()->GetBody()->GetUserData().pointer);
+// void CollisionManager::PreSolve(b2Contact* contact, const b2Manifold* oldManifold)
+// {
+//     m_inPhysicsUpdate = true;
+//     Collider* A = static_cast<Collider*>((void*)contact->GetFixtureA()->GetBody()->GetUserData().pointer);
+//     Collider* B = static_cast<Collider*>((void*)contact->GetFixtureB()->GetBody()->GetUserData().pointer);
 
-    A->PreSolve({B, contact->GetFixtureA(), contact->GetFixtureB(), contact});
-    B->PreSolve({A, contact->GetFixtureB(), contact->GetFixtureA(), contact});
-    m_inPhysicsUpdate = false;
-}
-
-void CollisionManager::PostSolve(b2Contact* contact, const b2ContactImpulse* impulse)
-{
-    // b2Body* body = contact->GetFixtureA()->GetBody();
-    // if (body != nullptr)
-    // {
-    //     Collider* collider = static_cast<Collider*>((void*)body->GetUserData().pointer);
-    //     collider->PostSolve(contact, impulse);
-    // }
-    // body = contact->GetFixtureB()->GetBody();
-    // if (body != nullptr)
-    // {
-    //     Collider* collider = static_cast<Collider*>((void*)body->GetUserData().pointer);
-    //     collider->PostSolve(contact, impulse);
-    // }
-}
+//     A->PreSolve({B, contact->GetFixtureA(), contact->GetFixtureB(), contact});
+//     B->PreSolve({A, contact->GetFixtureB(), contact->GetFixtureA(), contact});
+//     m_inPhysicsUpdate = false;
+// }
 
 void CollisionManager::Update()
 {
+    #define GET_COLLIDER(b2Shape) ((Collider*)b2Body_GetUserData(b2Shape_GetBody(b2Shape)))
     m_updateBodyEvent.invoke();
     m_updateBodyEvent.disconnectAll();
 
+    // updating all collider transforms before doing any callbacks
     for (auto obj: m_objects)
     {
         obj->m_update();
     }
 
+    b2ContactEvents contactEvents = b2World_GetContactEvents(WorldHandler::getWorld());
+
+    //* Calling being contacts
+    for (int i = 0; i < contactEvents.beginCount; ++i)
+    {
+        b2ContactBeginTouchEvent* beginEvent = contactEvents.beginEvents + i;
+        
+        Collider* A = GET_COLLIDER(beginEvent->shapeIdA);
+        Collider* B = GET_COLLIDER(beginEvent->shapeIdB);
+
+        if (A->isDestroyQueued() || B->isDestroyQueued()) // dont want to call on begin contact because it no longer exists
+            continue;
+
+        A->BeginContact(ContactData{B, beginEvent->shapeIdA, beginEvent->shapeIdB});
+        B->BeginContact(ContactData{A, beginEvent->shapeIdB, beginEvent->shapeIdA});
+    }
+    // -----------------------
+
+    //* Calling end contacts
+    for (int i = 0; i < contactEvents.endCount; ++i)
+    { 
+        b2ContactEndTouchEvent* endEvent = contactEvents.endEvents + i;
+        
+        Collider* A = GET_COLLIDER(endEvent->shapeIdA);
+        Collider* B = GET_COLLIDER(endEvent->shapeIdB);
+
+        // might want to know end contact even if it is destroyed therefor no if statement
+        A->EndContact(ContactData{B, endEvent->shapeIdA, endEvent->shapeIdB});
+        B->EndContact(ContactData{A, endEvent->shapeIdB, endEvent->shapeIdA});
+    }
+    // ---------------------
+
+    //* Calling hit events
+    for (int i = 0; i < contactEvents.hitCount; ++i)
+    { 
+        b2ContactHitEvent* hitEvent = contactEvents.hitEvents + i;
+        
+        Collider* A = GET_COLLIDER(hitEvent->shapeIdA);
+        Collider* B = GET_COLLIDER(hitEvent->shapeIdB);
+
+        // might want to know end contact even if it is destroyed therefor no if statement
+        A->OnHit(HitData{B, hitEvent->shapeIdA, hitEvent->shapeIdB, hitEvent});
+        B->OnHit(HitData{A, hitEvent->shapeIdB, hitEvent->shapeIdA, hitEvent});
+    }
+    // ---------------------
+
+    //* Calling ongoing collisions
     m_usingCollidingSet = true;
     for (auto data: m_colliding)
     {
-        data.A->OnColliding({data.B, data.contactData->GetFixtureA(), data.contactData->GetFixtureB(), data.contactData});
-        data.B->OnColliding({data.A, data.contactData->GetFixtureB(), data.contactData->GetFixtureA(), data.contactData});
+        Collider* A = GET_COLLIDER(data.A);
+        Collider* B = GET_COLLIDER(data.B);
+        A->OnColliding(ContactData{B, data.A, data.B});
+        B->OnColliding(ContactData{A, data.B, data.A});
     }
     m_usingCollidingSet = false;
     for (auto eraseData: m_collidingEraseQueue)
@@ -95,23 +132,8 @@ void CollisionManager::Update()
         m_colliding.erase(eraseData);
     }
     m_colliding.clear();
-
-    for (auto data: m_beginContact)
-    {
-        if (data.A->isDestroyQueued() || data.B->isDestroyQueued()) // dont want to call on begin contact because it no longer exists
-            continue;
-
-        data.A->BeginContact({data.B, data.contactData->GetFixtureA(), data.contactData->GetFixtureB(), data.contactData});
-        data.B->BeginContact({data.A, data.contactData->GetFixtureB(), data.contactData->GetFixtureA(), data.contactData});
-    }
-    m_beginContact.clear();
-
-    for (auto data: m_endContact)
-    { // might want to know end contact even if it is destroyed
-        data.A->EndContact({data.B, data.contactData->GetFixtureA(), data.contactData->GetFixtureB(), data.contactData});
-        data.B->EndContact({data.A, data.contactData->GetFixtureB(), data.contactData->GetFixtureA(), data.contactData});
-    }
-    m_endContact.clear();
+    // ---------------------------
+    #undef GET_COLLIDER
 }
 
 void CollisionManager::addCollider(Collider* Collider)

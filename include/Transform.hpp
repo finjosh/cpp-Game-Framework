@@ -3,8 +3,7 @@
 
 #pragma once
 
-// #include "Box2D/b2_math.h" (B2_MATH_H)
-
+#include "box2d/math_functions.h"
 #include "Vector2.hpp"
 #include "Rotation.hpp"
 
@@ -31,13 +30,11 @@ public:
     void operator += (const Transform& localTransform);
 
     //* box2d functions
-    #ifdef B2_MATH_H
     inline Transform(b2Transform transform) : position(transform.p), rotation(transform.q) {}
     explicit inline operator b2Transform() const
     {
         return b2Transform{(b2Vec2)position, (b2Rot)rotation};
     }
-    #endif
     // ----------------
 
     Vector2 position = Vector2(0,0);

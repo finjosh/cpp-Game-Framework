@@ -267,11 +267,11 @@ public:
     /// @brief add this object to the destroy queue
     void destroy();
 
-    /// @param vec global point
+    /// @param point global point
     /// @note rotates around and transforms position
     /// @returns the equivalent local point
     Vector2 getLocalPoint(const Vector2& point) const;
-    /// @param vec local point
+    /// @param point local point
     /// @note rotates around and transforms position
     /// @return the equivalent global point
     Vector2 getGlobalPoint(const Vector2& point) const;
@@ -287,19 +287,25 @@ public:
     /// @note in local space
     /// @param center the point to rotate around
     void rotateAround(const Vector2& center, Rotation rot);
+    /// @brief sets the local position
     void setPosition(const Vector2& position);
+    /// @brief sets the local position
     void setPosition(float x, float y);
     void setGlobalPosition(const Vector2& position);
+    /// @returns the local position (if no parent then it is the same as global position)
     Vector2 getPosition() const;
-    /// @note if no parent returns global position
-    /// @returns position according to parent
+    /// @note if no parent this is the same as position
+    /// @returns global position
     Vector2 getGlobalPosition() const;
+    /// @brief sets the local rotation
     void setRotation(Rotation rotation);
     void setGlobalRotation(Rotation rotation);
+    /// @returns the local rotation (if no parent then it is the same as global rotation)
     Rotation getRotation() const;
-    /// @note if no parent returns global rotation
-    /// @returns rotation according to parent
+    /// @note if no parent this is the same as rotation
+    /// @returns the global rotation i.e. all parent rotations applied together
     Rotation getGlobalRotation() const;
+    /// @brief sets the local transform
     void setTransform(const Transform& transform);
     const Transform& getTransform() const;
     void setGlobalTransform(const Transform& transform);

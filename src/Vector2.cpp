@@ -179,10 +179,23 @@ Rotation Vector2::angle(Vector2 a, Vector2 b)
     return Rotation{b.x, b.y} - Rotation{a.x, a.y};
 }
 
+Rotation Vector2::angle(Vector2 b) const
+{
+    Vector2 a = Vector2::normalize(*this);
+    b.normalize();
+    return Rotation{b.x, b.y} - Rotation{a.x, a.y};
+}
+
 Rotation Vector2::rotation(Vector2 vector)
 {
     vector.normalize();
     return Rotation{vector.x, vector.y};
+}
+
+Rotation Vector2::rotation() const
+{
+    Vector2 temp = Vector2::normalize(*this);
+    return Rotation{temp.x, temp.y};
 }
 
 Vector2 Vector2::lerp(const Vector2& current, const Vector2& target, float relativeDistance)
@@ -249,6 +262,13 @@ void Vector2::scale(const Vector2& vector)
 
 Vector2 Vector2::rotate(const Vector2& vector, Rotation rot)
 { return Vector2{vector.x * rot.cos - vector.y * rot.sin, vector.y * rot.cos + vector.x * rot.sin}; }
+
+void Vector2::rotate(Rotation rot)
+{
+    float temp = this->x;
+    this->x = temp * rot.cos - this->y * rot.sin;
+    this->y = this->y * rot.cos + temp * rot.sin;
+}
 
 void Vector2::setZero()
 { x = 0; y = 0; }

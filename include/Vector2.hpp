@@ -4,14 +4,13 @@
 #pragma once
 
 // #include "TGUI/Vector2.hpp" (TGUI_VECTOR2_HPP)
-// #include "Box2D/b2_math.h" (B2_MATH_H)
+#include "box2d/math_functions.h"
 #include "SFML/System/Vector2.hpp"
 
 #include "TGUI/String.hpp"
 #include "Rotation.hpp"
 
 /// @note if you want helper functions to work with tgui vectors make sure to include them before including "Vector2"
-/// @note if you want box2d vector conversions define B2_MATH_H before including
 class Vector2
 {
 public:
@@ -45,7 +44,6 @@ public:
     bool operator!=(const Vector2& vector) const;
 
     //* sfml additions and subtractions
-    /// @note you MUST include the sfml vector header BEFORE including this Vector2 header
     /// @note converts from the given typename to a float
     template <typename T>
     inline Vector2(const sf::Vector2<T>& SFMLVector) : x(static_cast<float>(SFMLVector.x)), y(static_cast<float>(SFMLVector.y)) {}     
@@ -77,8 +75,6 @@ public:
     }
 
     //* box2d
-    #ifdef B2_MATH_H // TODO update this for the new version of box2d (box2c-3.0)
-    /// @note you MUST include the box2d math header BEFORE including this Vector2 header
     inline Vector2(const b2Vec2& box2DVector) : x(box2DVector.x), y(box2DVector.y) {}
     inline void operator+=(const b2Vec2& vector)
     {
@@ -100,7 +96,6 @@ public:
     {
         return b2Vec2{x,y};
     }
-    #endif
 
     //* tgui
     #ifdef TGUI_VECTOR2_HPP
@@ -158,11 +153,21 @@ public:
     /// @returns the distance between this and the given vector
     float distance(const Vector2& vector) const;
     /// @note angle is +-[0,PI]
+    /// @note this is treating the vectors as directions not positions
     /// @returns the smallest absolute angle from a to b in radians
     static Rotation angle(Vector2 a, Vector2 b);
+    /// @note angle is +-[0,PI]
+    /// @note this is treating the vectors as directions not positions
+    /// @returns the smallest absolute angle from a (this) to b in radians
+    Rotation angle(Vector2 b) const;
     /// @note the returned angle is from 0 to PI
-    /// @returns the rotation of this vector from the positive x axis
+    /// @note treats the vector as a direction not position
+    /// @returns the rotation of the vector from the positive x axis
     static Rotation rotation(Vector2 vector);
+    /// @note the returned angle is from 0 to PI
+    /// @note treats this vector as a direction not position
+    /// @returns the rotation of this vector from the positive x axis
+    Rotation rotation() const;
     /// @note a relativeDistance of 0 will return current, 1 will return target, and 0.5 will return the point midway between current and target
     /// @note relativeDistance is clamped between 0 and 1 (use lerpUnclamped if you dont want this functionality)
     /// @param relativeDistance the relative distance the returned vector will be (0-1)
@@ -192,6 +197,8 @@ public:
     /// @param rot rotation in radians
     /// @returns the rotated vector
     static Vector2 rotate(const Vector2& vector, Rotation rot);
+    /// @param rot rotation in radians
+    void rotate(Rotation rot);
     /// @brief sets this vector to (0,0)
     void setZero();
     /// @returns a Vector with each component of this vector rounded to the nearest whole value

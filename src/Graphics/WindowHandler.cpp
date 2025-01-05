@@ -3,6 +3,7 @@
 #include "Graphics/CameraManager.hpp"
 #include "Graphics/CanvasManager.hpp"
 #include "Physics/WorldHandler.hpp"
+#include "Physics/DebugDraw.hpp"
 #include "SFML/Window/Mouse.hpp"
 
 sf::RenderWindow* WindowHandler::m_renderWindow = nullptr;
@@ -53,8 +54,7 @@ void WindowHandler::Display()
     if (CameraManager::m_cameras.size() == 0)
     {   
         DrawableManager::draw(m_renderWindow, m_contextSettings);
-        // DebugDraw::get().draw();
-        WorldHandler::getWorld().DebugDraw();
+        DebugDraw::get().draw(WorldHandler::getWorld(), m_renderWindow);
     }
     for (auto camera: CameraManager::m_cameras)
     {
@@ -70,9 +70,8 @@ void WindowHandler::Display()
         camera->disableBlacklistedCanvases();
         DrawableManager::draw(m_renderWindow, m_contextSettings);
         camera->enableBlacklistedCanvases();
-        // DebugDraw::get().draw();
-        WorldHandler::getWorld().DebugDraw();
-
+        DebugDraw::get().draw(WorldHandler::getWorld(), m_renderWindow);
+        
         camera->m_drawOverlay((sf::RenderTarget*)m_renderWindow);
     }
 

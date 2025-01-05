@@ -5,21 +5,21 @@
 
 #include <set>
 
-#include "box2d/box2d.h"
+#include "box2d/types.h"
 
 #include "Physics/Fixture.hpp"
+#include "Physics/FixtureArray.hpp"
 #include "Object.hpp"
 #include "EngineSettings.hpp"
 
-class CollisionManager; // defined early to friend in Collider
-
+class CollisionManager;
 class Collider;
 
 class ContactData
 {
 public:
     /// @brief ignore this unless you know what you are doing
-    ContactData(Collider* collider, b2Fixture* thisFixture, b2Fixture* otherFixture, b2Contact* contactData);
+    ContactData(Collider* collider, b2ShapeId thisFixture, b2ShapeId otherFixture);
 
     /// @returns the other objects collider
     Collider* getCollider();
@@ -31,52 +31,76 @@ public:
     Fixture getOtherFixture();
     const Fixture getOtherFixture() const;
 
-    class Info
-    {
-    public:
-        /// @brief ignore this unless you know what you are doing
-        Info(b2Contact* contact);
+    // class Info
+    // {
+    // public:
+    //     /// @brief ignore this unless you know what you are doing
+    //     Info(b2Contact* contact);
 
-        /// @returns how many contact points there are
-        int32 getPointCount() const;
+    //     /// @returns how many contact points there are
+    //     int32 getPointCount() const;
 
-        /// @warning does not check if index is in range
-        /// @returns returns the point at the given index (size of point count)
-        const Vector2 getContactPoint(uint8 index) const;
+    //     /// @warning does not check if index is in range
+    //     /// @returns returns the point at the given index (size of point count)
+    //     const Vector2 getContactPoint(uint8 index) const;
 
-        /// @warning does not check if index is in range
-        /// @note negative distance is overlap in meters
-        /// @returns returns the distance at the given index (size of point count)
-        const float getSeparations(uint8 index) const;
-        /// @returns the normal of the collision
-        Vector2 getNormal() const;
+    //     /// @warning does not check if index is in range
+    //     /// @note negative distance is overlap in meters
+    //     /// @returns returns the distance at the given index (size of point count)
+    //     const float getSeparations(uint8 index) const;
+    //     /// @returns the normal of the collision
+    //     Vector2 getNormal() const;
 
-    protected:
-        b2WorldManifold m_data;
-        int32 m_points;
-    };
+    // protected:
+    //     b2WorldManifold m_data;
+    //     int32 m_points;
+    // };
 
-    /// @brief calculates more in-depth contact information
-    /// @note calculates the contact normal, points of contact, and distance of overlap
-    ContactData::Info getInfo() const;
-
-    bool operator < (const ContactData& data) const;
-    bool operator > (const ContactData& data) const;
-    bool operator == (const ContactData& data) const;
-    bool operator != (const ContactData& data) const;
+    // /// @brief calculates more in-depth contact information
+    // /// @note calculates the contact normal, points of contact, and distance of overlap
+    // ContactData::Info getInfo() const;
 
 private:
     Collider *const m_collider;
-    b2Fixture *const m_thisFixture;
-    b2Fixture *const m_otherFixture;
-    b2Contact *const m_contactData;
+    b2ShapeId const m_thisShape;
+    b2ShapeId const m_otherShape;
 };
 
+class HitData
+{
+public:
+    /// @brief ignore this unless you know what you are doing
+    HitData(Collider* collider, b2ShapeId thisFixture, b2ShapeId otherFixture, const b2ContactHitEvent* m_hitData);
+
+    /// @returns the other objects collider
+    Collider* getCollider();
+    const Collider* getCollider() const;
+    /// @returns the fixture from this object that collided
+    Fixture getThisFixture();
+    const Fixture getThisFixture() const;
+    /// @returns the fixture from the other object that collided
+    Fixture getOtherFixture();
+    const Fixture getOtherFixture() const;
+    /// @brief Point where the fixtures hit
+    Vector2 getContactPoint() const;
+    /// @brief Normal vector pointing from shape A to shape B
+    Vector2 getContactNormal() const;
+    /// @brief The speed the shapes are approaching. Always positive. Typically in meters per second.
+    float getApproachSpeed() const;
+
+private:
+    Collider *const m_collider;
+    b2ShapeId const m_thisShape;
+    b2ShapeId const m_otherShape;
+    const b2ContactHitEvent* const m_hitData;
+};
+
+// TODO implement this and the callback
 class PreSolveData
 {
 public: 
     /// @brief ignore this unless you know what you are doing
-    PreSolveData(Collider* collider, b2Fixture* thisFixture, b2Fixture* otherFixture, b2Contact* contactData);
+    PreSolveData(Collider* collider, b2ShapeId thisFixture, b2ShapeId otherFixture, b2Manifold* contactData);
 
     const Collider* getCollider() const;
     /// @warning NEVER edit the collider in the pre solve callback this should only be used for storage and editing later
@@ -84,59 +108,58 @@ public:
     Collider* getNoneConstCollider();
     const Fixture getThisFixture() const;
     const Fixture getOtherFixture() const;
-    ContactData::Info getInfo() const;
+
+    // ContactData::Info getInfo() const;
+
     /// @brief destroys the other collider
     /// @note also disables the contact for this collision (can be re-enabled if wanted)
     void destroyCollider();
 
-    /// @returns if the two fixtures are touching
-    bool isTouching() const;
-    /// @brief Enable/disable this contact
-	/// @note The contact is only disabled for the curren time step (or sub-step in continuous collisions)
-	void setEnabled(bool flag = true);
-    /// @brief Has this contact been disabled?
-	bool isEnabled() const;
-    /// @brief Override the default friction mixture
-	/// @note This value persists until set or reset.
-	void setFriction(float friction);
-    /// @returns friction mixture
-	float getFriction() const;
-    /// @brief Reset the friction mixture to the default value.
-	void resetFriction();
-    /// @brief Override the default restitution mixture
-	/// @note The value persists until you set or reset.
-	void setRestitution(float restitution);
-    /// @returns restitution mixture
-	float getRestitution() const;
-    /// @brief Reset the restitution to the default value.
-	void resetRestitution();
-    /// @brief Override the default restitution velocity threshold mixture
-	/// @note The value persists until you set or reset.
-	void setRestitutionThreshold(float threshold);
-    /// @returns restitution threshold mixture
-	float getRestitutionThreshold() const;
-    /// @brief Reset the restitution threshold to the default value.
-	void resetRestitutionThreshold();
-    /// @brief Set the desired tangent speed for a conveyor belt behavior. In meters per second.
-	void setTangentSpeed(float speed);
-    /// @returns tangent speed. In meters per second.
-	float getTangentSpeed() const;
+    // /// @returns if the two fixtures are touching
+    // bool isTouching() const;
+    // /// @brief Enable/disable this contact
+	// /// @note The contact is only disabled for the curren time step (or sub-step in continuous collisions)
+	// void setEnabled(bool flag = true);
+    // /// @brief Has this contact been disabled?
+	// bool isEnabled() const;
+    // /// @brief Override the default friction mixture
+	// /// @note This value persists until set or reset.
+	// void setFriction(float friction);
+    // /// @returns friction mixture
+	// float getFriction() const;
+    // /// @brief Reset the friction mixture to the default value.
+	// void resetFriction();
+    // /// @brief Override the default restitution mixture
+	// /// @note The value persists until you set or reset.
+	// void setRestitution(float restitution);
+    // /// @returns restitution mixture
+	// float getRestitution() const;
+    // /// @brief Reset the restitution to the default value.
+	// void resetRestitution();
+    // /// @brief Override the default restitution velocity threshold mixture
+	// /// @note The value persists until you set or reset.
+	// void setRestitutionThreshold(float threshold);
+    // /// @returns restitution threshold mixture
+	// float getRestitutionThreshold() const;
+    // /// @brief Reset the restitution threshold to the default value.
+	// void resetRestitutionThreshold();
+    // /// @brief Set the desired tangent speed for a conveyor belt behavior. In meters per second.
+	// void setTangentSpeed(float speed);
+    // /// @returns tangent speed. In meters per second.
+	// float getTangentSpeed() const;
 
 private:
     Collider *const m_collider;
-    b2Fixture *const m_thisFixture;
-    b2Fixture *const m_otherFixture;
-    b2Contact *const m_contactData;
+    b2ShapeId const m_thisShape;
+    b2ShapeId const m_otherShape;
+    b2Manifold *const m_manifold;
 };
 
 typedef ContactData CollisionData;
 
 // TODO make a gui editor for making bodies over an image (prints the code that will produce the given effect) (should also be able to load based on given code)
-// TODO make a wrapper for creating fixtures of different shapes
-// TODO implement contact filtering
 // TODO make parent and child colliders have defined behaviour
 /// @warning If there is a parent and child that have a Collider there is undefined behaviour (try using fixtures instead)
-/// @note positions assume that the origin is in the middle of the shape
 /// @note when added to destroy queue physics is set disabled and removed when fully destroyed
 class Collider : public virtual Object
 {
@@ -146,26 +169,51 @@ public:
     Collider();
     virtual ~Collider();
 
-    /// @brief sets only physics enabled or disabled, ignores the object state
-    /// @note if disabled object state does not matter if enabled physics will follow object state
+    /// @brief Set the physics enabled state of this object
+    /// @note this is the same as if you where to use "removeFromWorld()" and "addToWorld()"
+    /// @warning this is an expensive operation if the enabled state changes
     void setPhysicsEnabled(bool enabled = true);
-    /// @returns true if physics are enabled
+    /// @note if the object is disabled but physics are enabled this still returns false
+    /// @returns true if the physics are enabled and the object is enabled
     bool isPhysicsEnabled() const;
 
-    /// @param density the density of the shape
-    /// @param friction the friction of the shape usually between [0,1]
-    /// @param restitution the restitution (elasticity) usually in the range [0,1]
-    /// @param restitutionThreshold Restitution velocity threshold, usually in m/s. Collisions above this speed have restitution applied (will bounce)
-    /// @param filter contact filtering data
-    /// @returns the new fixture
-    Fixture createFixture(const b2Shape& shape, float friction = 0.1f, float restitution = 0.f, float restitutionThreshold = 0.f, 
-                          float density = 1.f, const b2Filter& filter = {});
-    /// @brief creates a sensor fixture with the given shape and density
-    /// @param density the density of the shape
-    /// @param filter contact filtering data
-    /// @returns the new fixture
-    Fixture createFixtureSensor(const b2Shape& shape, float density = 1.f, const b2Filter& filter = {});
+    /// @brief creates a fixture with the given data and shape
+    Fixture createFixture(const Fixture::Shape::Circle& shape, const FixtureDef& fixtureDef = FixtureDef{});
+    /// @brief creates a fixture with the given data and shape
+    /// @note ignores the senor option in fixture def
+    Fixture createFixtureSensor(const Fixture::Shape::Circle& shape, FixtureDef fixtureDef = FixtureDef{});
+    /// @brief creates a fixture with the given data and shape
+    Fixture createFixture(const Fixture::Shape::Capsule& shape, const FixtureDef& fixtureDef = FixtureDef{});
+    /// @brief creates a fixture with the given data and shape
+    /// @note ignores the senor option in fixture def
+    Fixture createFixtureSensor(const Fixture::Shape::Capsule& shape, FixtureDef fixtureDef = FixtureDef{});
+    /// @brief creates a fixture with the given data and shape
+    Fixture createFixture(const Fixture::Shape::Segment& shape, const FixtureDef& fixtureDef = FixtureDef{});
+    /// @brief creates a fixture with the given data and shape
+    /// @note ignores the senor option in fixture def
+    Fixture createFixtureSensor(const Fixture::Shape::Segment& shape, FixtureDef fixtureDef = FixtureDef{});
+    /// @brief creates a fixture with the given data and shape
+    /// @warning asserts that the polygon is valid
+    Fixture createFixture(const Fixture::Shape::Polygon& shape, const FixtureDef& fixtureDef = FixtureDef{});
+    /// @brief creates a fixture with the given data and shape
+    /// @note ignores the senor option in fixture def
+    /// @warning asserts that the polygon is valid
+    Fixture createFixtureSensor(const Fixture::Shape::Polygon& shape, FixtureDef fixtureDef = FixtureDef{});
+    // /// @param density the density of the shape
+    // /// @param friction the friction of the shape usually between [0,1]
+    // /// @param restitution the restitution (elasticity) usually in the range [0,1]
+    // /// @param restitutionThreshold Restitution velocity threshold, usually in m/s. Collisions above this speed have restitution applied (will bounce)
+    // /// @param filter contact filtering data
+    // /// @returns the new fixture
+    // Fixture createFixture(const b2Shape& shape, float friction = 0.1f, float restitution = 0.f, float restitutionThreshold = 0.f, 
+    //                       float density = 1.f, const b2Filter& filter = {});
+    // /// @brief creates a sensor fixture with the given shape and density
+    // /// @param density the density of the shape
+    // /// @param filter contact filtering data
+    // /// @returns the new fixture
+    // Fixture createFixtureSensor(const b2Shape& shape, float density = 1.f, const b2Filter& filter = {});
 	/// @param fixture the fixture to be removed.
+    /// @note the given fixture will be invalid after this function is called since it is just a reference to the actual fixture
 	void destroyFixture(const Fixture& fixture);
 
     /// @brief called when a contact begins
@@ -186,15 +234,55 @@ public:
     /// @note this will also be called on start of contact
     /// @note this is called for each fixture
     inline virtual void OnColliding(ContactData ContactData) {};
+    /// @brief Events are only generated if this collider has hitEvents enabled
+    /// @note only reports hit events that have an approach speed larger than hitEventThreshold defined in the physics world
+    /// @param hitData the data for the hit that occurred
+    inline virtual void OnHit(HitData hitData) {};
 
+    /// @returns inertia tensor of this collider, typically in kg*m^2
+    float getInertiaTensor() const;
+    /// @returns center of mass position in local space
+    Vector2 getLocalCenterOfMass() const;
+    /// @returns center of mass position in global space
+    Vector2 getGlobalCenterOfMass() const;
+    /// @brief This updates the mass properties to the sum of the mass properties of the fixtures
+    /// @note This normally does not need to be called unless you called SetMassData to override the mass and you later want to reset the mass.
+    /// @note You may also use this when automatic mass computation has been disabled.
+    void applyMassFromShapes();
+    /// @brief Set the automatic mass setting
+    /// @note default is true
+    void setAutomaticMass(bool automaticMass = true);
+    /// @returns if automatic mass is set to true
+    bool getAutomaticMass() const;
+    /// @brief Set the sleep threshold, typically in meters per second
+    void setSleepThreshold(float sleepVelocity);
+    /// @brief Get the sleep threshold, typically in meters per second.
+    float getSleepThreshold() const;
+    /// @brief Enable/disable hit events on all fixtures
+    void enableHitEvents(bool enableHitEvents);
+    /// @brief set if this body can sleep
+    /// @note If you disable sleeping, the body will be woken
+	void setSleepingEnabled(bool enabled = true);
+    /// @brief Is this body allowed to sleep
+	bool isSleepingEnabled() const;
+
+    /// @returns number of fixtures on this body
+    int getFixtureCount() const;
+    /// @returns a fixture array of fixtures on this body up to the max size given
+    FixtureArray getFixtureArray(int maxSize = INT_MAX);
+    /// @returns a fixture array of fixtures on this body up to the max size given
+    FixtureArray getFixtureArray(int maxSize = INT_MAX) const;
+    // TODO implement joint getter
+
+    /// @brief Get the current world AABB that contains all the attached shapes
+    /// @note this may not encompass the body origin
+    /// @note If there are no shapes attached then the returned AABB is empty and centered on the body origin.
+    b2AABB computeAABB() const;
+    
     /// @brief Set the sleep state of the body
     /// @note A sleeping body has very low CPU cost.
 	/// @param flag set to true to wake the body, false to put it to sleep
     void setAwake(bool awake = true);
-    /// @returns world position of the center of mass.
-	Vector2 getWorldCenter() const;
-    /// @returns local position of the center of mass.
-	Vector2 getLocalCenter() const;
     /// @brief Set the linear velocity of the center of mass.
 	/// @param v the new linear velocity of the center of mass.
 	void setLinearVelocity(const Vector2& v);
@@ -248,10 +336,7 @@ public:
 	/// @note that creating or destroying fixtures can also alter the mass.
 	/// @note This function has no effect if the body isn't dynamic.
 	/// @param data the mass properties.
-	void setMassData(const b2MassData* data);
-    /// @brief This resets the mass properties to the sum of the mass properties of the fixtures.
-	/// @note This normally does not need to be called unless you called SetMassData to override the mass and you later want to reset the mass.
-	void resetMassData();
+	void setMassData(const b2MassData& data);
     /// @returns linear damping of the body.
 	float getLinearDamping() const;
     /// @brief Set the linear damping of the body.
@@ -272,10 +357,6 @@ public:
 	void setBullet(bool flag = true);
     /// @brief Is this body treated like a bullet for continuous collision detection?
 	bool isBullet() const;
-    /// @brief You can disable sleeping on this body. If you disable sleeping, the body will be woken.
-	void setSleepingAllowed(bool flag = true);
-    /// @brief Is this body allowed to sleep
-	bool isSleepingAllowed() const;
     /// @brief Get the sleeping state of this body.
 	/// @returns true if the body is awake.
 	bool isAwake() const;
@@ -284,10 +365,6 @@ public:
 	void setFixedRotation(bool flag = true);
     /// @returns Does this body have fixed rotation?
 	bool isFixedRotation() const;
-    /// @note use Fixture.GetNext() to iterate through the list
-    /// @note make sure to check if the fixture is valid before use
-    /// @returns the first fixture on this body
-	Fixture getFixtureList();
     // TODO implement joints
     // /// Get the list of all joints attached to this body.
 	// b2JointEdge* GetJointList();
@@ -306,8 +383,7 @@ private:
     /// @brief updates the body transform to match the object transform
     void m_updateTransform();
 
-    b2Body* m_body = nullptr;
-    /// @brief if true follows object else physics are disabled no matter object state
+    b2BodyId m_body = b2_nullBodyId;
     bool m_enabled = true;
 };
 

@@ -3,7 +3,7 @@
 
 #pragma once
 
-// #include "Box2D/b2_math.h" (B2_MATH_H)
+#include "box2d/math_functions.h"
 #include "SFML/System/Angle.hpp"
 
 #ifndef PI
@@ -12,7 +12,6 @@
 
 class Vector2;
 
-/// @note if you want helper functions to work with box2d rotations make sure to include them before including "Rotation"
 /// @note if you want the to string function to be defined include this the string include
 class Rotation
 {
@@ -28,6 +27,10 @@ public:
     float getAngle() const;
     /// @returns the rotation/angle in degrees
     float getAngleInDegrees() const;
+    /// @brief same as "getAngleInDegrees()"
+    float getDegrees() const { return getAngleInDegrees(); }
+    /// @brief same as "getAngle()"
+    float getRadians() const { return getAngle(); }
     /// @brief sets the stored rotation to 0
     void setZero();
 	/// @returns the rotated x axis (1,0) in terms of this rotation
@@ -48,7 +51,6 @@ public:
     static Rotation lerpUnclamped(const Rotation& current, const Rotation& target, float relativeRotation);
 
     //* box2d functions
-    #ifdef B2_MATH_H
     inline Rotation(b2Rot rot) : cos(rot.c), sin(rot.s) {}
     explicit inline operator b2Rot() const
     {
@@ -57,16 +59,13 @@ public:
         temp.s = sin;
         return temp;
     }
-    #endif
     // ----------------
 
     //* SFML Funcitons
-
     inline Rotation(sf::Angle angle) 
     { this->set(angle.asRadians()); }
     explicit inline operator sf::Angle() const
     { return sf::radians(this->getAngle()); }
-
     // ---------------
 
     //* string conversion function

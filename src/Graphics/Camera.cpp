@@ -6,7 +6,7 @@
 Camera::Camera(int layer) : m_layer(layer)
 {
     CameraManager::addCamera(this);
-    m_size = {WindowHandler::getRenderWindow()->getSize().x / PIXELS_PER_METER, WindowHandler::getRenderWindow()->getSize().y / PIXELS_PER_METER};
+    m_size = Vector2{WindowHandler::getRenderWindow()->getSize().x / PIXELS_PER_METER, WindowHandler::getRenderWindow()->getSize().y / PIXELS_PER_METER};
 }
 
 Camera::~Camera()
@@ -30,7 +30,7 @@ void Camera::setMainCamera()
 {
     m_layer = -1;
     m_screenRect = {{0,0},{1,1}};
-    m_size = {WindowHandler::getRenderWindow()->getSize().x / PIXELS_PER_METER, WindowHandler::getRenderWindow()->getSize().y / PIXELS_PER_METER};
+    m_size = Vector2{WindowHandler::getRenderWindow()->getSize().x / PIXELS_PER_METER, WindowHandler::getRenderWindow()->getSize().y / PIXELS_PER_METER};
     CameraManager::setMainCamera(this);
 }
 
@@ -46,7 +46,7 @@ void Camera::setViewSize(Vector2 size)
 
 void Camera::setViewSize(float x, float y)
 {
-    m_size = {x,y};
+    m_size = Vector2{x,y};
 }
 
 Vector2 Camera::getSize() const
