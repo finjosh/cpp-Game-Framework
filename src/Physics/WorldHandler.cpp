@@ -1,31 +1,40 @@
 #include "Physics/WorldHandler.hpp"
 #include "Physics/CollisionManager.hpp"
 
-b2WorldId WorldHandler::m_world;
-bool WorldHandler::m_keepLostSimulationTime = true;
-double WorldHandler::m_accumulate = 0;
-std::int32_t WorldHandler::m_tickRate = 60;
-std::int32_t WorldHandler::m_substepCount = 4;
-std::int32_t WorldHandler::m_maxUpdates = 8;
-double WorldHandler::m_interpolateTime = 0;
-double WorldHandler::m_maxInterpolateTime = 1/30.0;
+#ifdef DEBUG
+#define CHECK_IF_IN_PHYSICS_UPDATE() assert(CollisionManager::get()->m_inPhysicsUpdate == 0 && "Must not read/write to any physics related data during a physics update")
+#else
+#define CHECK_IF_IN_PHYSICS_UPDATE()
+#endif
 
-void WorldHandler::init(const Vector2& gravity)
+#define CHECK_VALID_WORLD() assert(b2World_IsValid(m_world) && "World must be initalized before use!")
+
+WorldHandler* WorldHandler::get()
+{
+    static WorldHandler handler;
+    return &handler;
+}
+
+void WorldHandler::init(const Vector2& gravity, unsigned int workerCount)
 {
     b2WorldDef worldDef = b2DefaultWorldDef();
     worldDef.gravity = (b2Vec2)gravity;
+    worldDef.workerCount = worldDef.workerCount == 0 ? 1 : worldDef.workerCount;
 
     m_world = b2CreateWorld(&worldDef);
-    // m_world.SetContactListener(new CollisionManager());
+    CollisionManager::initWorkerThreadLists(worldDef.workerCount);
+    b2World_SetPreSolveCallback(m_world, &CollisionManager::PreSolve, CollisionManager::get());
 }
 
 b2WorldId WorldHandler::getWorld()
 {
+    CHECK_IF_IN_PHYSICS_UPDATE();
     return m_world;
 }
 
 void WorldHandler::updateWorld(double deltaTime)
 {
+    CHECK_VALID_WORLD();
     m_accumulate += deltaTime;
     std::int32_t updates = std::min(int(m_accumulate*m_tickRate), m_maxUpdates);
     m_accumulate -= updates*(1.f/m_tickRate);
@@ -91,11 +100,15 @@ std::int32_t WorldHandler::getMaxUpdates()
 
 void WorldHandler::setGravity(const Vector2& gravity)
 {
+    CHECK_IF_IN_PHYSICS_UPDATE();
+    CHECK_VALID_WORLD();
     b2World_SetGravity(m_world, (b2Vec2)gravity);
 }
 
 Vector2 WorldHandler::getGravity()
 {
+    CHECK_IF_IN_PHYSICS_UPDATE();
+    CHECK_VALID_WORLD();
     return b2World_GetGravity(m_world);
 }
 

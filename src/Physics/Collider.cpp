@@ -2,30 +2,39 @@
 #include "Physics/CollisionManager.hpp"
 #include "Physics/WorldHandler.hpp"
 
+#ifdef DEBUG
+#define CHECK_IF_IN_PHYSICS_UPDATE(note) assert(CollisionManager::m_inPhysicsUpdate == 0 && note)
+#define CHECK_IF_IN_PHYSICS_UPDATE_EDITING_DATA() CHECK_IF_IN_PHYSICS_UPDATE("Cannot edit any physics data while in a physics update")
+#else
+#define CHECK_IF_IN_PHYSICS_UPDATE(note)
+#define CHECK_IF_IN_PHYSICS_UPDATE_EDITING_DATA()
+#endif
+
 Collider::Collider()
 {
     Object::m_onDisabled(&Collider::m_updatePhysicsState, this);
     Object::m_onEnabled(&Collider::m_updatePhysicsState, this);
     Object::m_onDestroyQueued([this](){
+        CHECK_IF_IN_PHYSICS_UPDATE("Cannot destroy collider while in physics update");
         this->setPhysicsEnabled(false);
     });
     Object::m_onTransformUpdated(&Collider::m_updateTransform, this);
 
-    CollisionManager::addCollider(this);
+    CollisionManager::get()->addCollider(this);
 
     // initializing the body in box2d
     b2BodyDef bodyDef = b2DefaultBodyDef();
     bodyDef.type = b2_dynamicBody;
     bodyDef.position = (b2Vec2)Object::getPosition();
     bodyDef.angle = Object::getRotation().getAngle();
-    m_body = b2CreateBody(WorldHandler::getWorld(), &bodyDef);
+    m_body = b2CreateBody(WorldHandler::get()->getWorld(), &bodyDef);
     b2Body_SetUserData(m_body, (void*)this);
 }
 
 Collider::~Collider()
 {
     b2DestroyBody(m_body); // No need to delete user data as it just points to this collider
-    CollisionManager::removeCollider(this);
+    CollisionManager::get()->removeCollider(this);
 }
 
 Fixture Collider::createFixture(const Fixture::Shape::Circle& shape, const FixtureDef& fixtureDef)
@@ -72,30 +81,6 @@ Fixture Collider::createFixtureSensor(const Fixture::Shape::Polygon& shape, Fixt
     return Fixture{b2CreatePolygonShape(m_body, &fixtureDef.m_shapeDef, &shape.m_shape)};
 }
 
-
-// Fixture Collider::createFixture(const b2Shape& shape, float friction, float restitution, float restitutionThreshold, 
-//                       float density, const b2Filter& filter)
-// {
-//     b2FixtureDef temp;
-//     temp.density = density;
-//     temp.friction = friction;
-//     temp.restitution = restitution;
-//     temp.restitutionThreshold = restitutionThreshold;
-//     temp.filter = filter;
-//     temp.shape = &shape;
-//     return Fixture(this, temp);
-// }
-
-// Fixture Collider::createFixtureSensor(const b2Shape& shape, float density, const b2Filter& filter)
-// {
-//     b2FixtureDef temp;
-//     temp.density = density;
-//     temp.filter = filter;
-//     temp.shape = &shape;
-//     temp.isSensor = true;
-//     return Fixture(this, temp);
-// }
-
 void Collider::destroyFixture(const Fixture& fixture)
 {
     b2DestroyShape(fixture.m_fixture);
@@ -103,6 +88,7 @@ void Collider::destroyFixture(const Fixture& fixture)
 
 void Collider::setPhysicsEnabled(bool enabled)
 {
+    CHECK_IF_IN_PHYSICS_UPDATE_EDITING_DATA();
     if (this->isPhysicsEnabled() == enabled)
         return;
     m_enabled = enabled;
@@ -116,20 +102,21 @@ bool Collider::isPhysicsEnabled() const
 
 void Collider::m_updatePhysicsState()
 {
-    if (CollisionManager::m_inPhysicsUpdate)
-    {
-        if (this->isPhysicsEnabled())
-            CollisionManager::m_updateBodyEvent(b2Body_Enable, this->m_body);
-        else
-            CollisionManager::m_updateBodyEvent(b2Body_Disable, this->m_body);
-    }
-    else
-    {
+    CHECK_IF_IN_PHYSICS_UPDATE("Cannot enabled/disable any objects that have a collider during a physics update");
+    // if (CollisionManager::m_inPhysicsUpdate)
+    // {
+    //     if (this->isPhysicsEnabled())
+    //         CollisionManager::m_updateBodyEvent(b2Body_Enable, this->m_body);
+    //     else
+    //         CollisionManager::m_updateBodyEvent(b2Body_Disable, this->m_body);
+    // }
+    // else
+    // {
         if (this->isPhysicsEnabled())
             b2Body_Enable(m_body);
         else
             b2Body_Disable(m_body);
-    }
+    // }
 }
 
 void Collider::m_updateTransform()
@@ -177,6 +164,7 @@ bool Collider::getAutomaticMass() const
 
 void Collider::setSleepThreshold(float sleepVelocity)
 {
+    CHECK_IF_IN_PHYSICS_UPDATE_EDITING_DATA();
     b2Body_SetSleepThreshold(m_body, sleepVelocity);
 }
 
@@ -187,11 +175,13 @@ float Collider::getSleepThreshold() const
 
 void Collider::enableHitEvents(bool enableHitEvents)
 {
+    CHECK_IF_IN_PHYSICS_UPDATE_EDITING_DATA();
     b2Body_EnableHitEvents(m_body, enableHitEvents);
 }
 
 void Collider::setSleepingEnabled(bool enabled)
 {
+    CHECK_IF_IN_PHYSICS_UPDATE_EDITING_DATA();
     b2Body_EnableSleep(m_body, enabled);
 }
 
@@ -226,14 +216,16 @@ b2AABB Collider::computeAABB() const
 
 void Collider::setAwake(bool awake)
 {
-    if (CollisionManager::m_inPhysicsUpdate)
-        CollisionManager::m_updateBodyEvent(b2Body_SetAwake, this->m_body, awake);
-    else
+    CHECK_IF_IN_PHYSICS_UPDATE_EDITING_DATA();
+    // if (CollisionManager::m_inPhysicsUpdate)
+    //     CollisionManager::m_updateBodyEvent(b2Body_SetAwake, this->m_body, awake);
+    // else
         b2Body_SetAwake(m_body, awake);
 }
 
 void Collider::setLinearVelocity(const Vector2& v)
 {
+    CHECK_IF_IN_PHYSICS_UPDATE_EDITING_DATA();
     b2Body_SetLinearVelocity(m_body, (b2Vec2)v);
 }
 
@@ -244,6 +236,7 @@ Vector2 Collider::getLinearVelocity() const
 
 void Collider::setAngularVelocity(float omega)
 {
+    CHECK_IF_IN_PHYSICS_UPDATE_EDITING_DATA();
     b2Body_SetAngularVelocity(m_body, omega);
 }
 
@@ -254,31 +247,37 @@ float Collider::getAngularVelocity() const
 
 void Collider::applyForce(const Vector2& force, const Vector2& point, bool wake)
 {
+    CHECK_IF_IN_PHYSICS_UPDATE_EDITING_DATA();
     b2Body_ApplyForce(m_body, (b2Vec2)force, (b2Vec2)point, wake);
 }
 
 void Collider::applyForceToCenter(const Vector2& force, bool wake)
 {
+    CHECK_IF_IN_PHYSICS_UPDATE_EDITING_DATA();
     b2Body_ApplyForceToCenter(m_body, (b2Vec2)force, wake);
 }
 
 void Collider::applyTorque(float torque, bool wake)
 {
+    CHECK_IF_IN_PHYSICS_UPDATE_EDITING_DATA();
     b2Body_ApplyTorque(m_body, torque, wake);
 }
 
 void Collider::applyLinearImpulse(const Vector2& impulse, const Vector2& point, bool wake)
 {
+    CHECK_IF_IN_PHYSICS_UPDATE_EDITING_DATA();
     b2Body_ApplyLinearImpulse(m_body, (b2Vec2)impulse, (b2Vec2)point, wake);
 }
 
 void Collider::applyLinearImpulseToCenter(const Vector2& impulse, bool wake)
 {
+    CHECK_IF_IN_PHYSICS_UPDATE_EDITING_DATA();
     b2Body_ApplyLinearImpulseToCenter(m_body, (b2Vec2)impulse, wake);
 }
 
 void Collider::applyAngularImpulse(float impulse, bool wake)
 {
+    CHECK_IF_IN_PHYSICS_UPDATE_EDITING_DATA();
     b2Body_ApplyAngularImpulse(m_body, impulse, wake);
 }
 
@@ -294,6 +293,7 @@ b2MassData Collider::getMassData() const
 
 void Collider::setMassData(const b2MassData& data)
 {
+    CHECK_IF_IN_PHYSICS_UPDATE_EDITING_DATA();
     b2Body_SetMassData(m_body, data);
 }
 
@@ -304,6 +304,7 @@ float Collider::getLinearDamping() const
 
 void Collider::setLinearDamping(float linearDamping)
 {
+    CHECK_IF_IN_PHYSICS_UPDATE_EDITING_DATA();
     b2Body_SetLinearDamping(m_body, linearDamping);
 }
 
@@ -314,6 +315,7 @@ float Collider::getAngularDamping() const
 
 void Collider::setAngularDamping(float angularDamping)
 {
+    CHECK_IF_IN_PHYSICS_UPDATE_EDITING_DATA();
     b2Body_SetAngularDamping(m_body, angularDamping);
 }
 
@@ -324,11 +326,13 @@ float Collider::getGravityScale() const
 
 void Collider::setGravityScale(float scale)
 {
+    CHECK_IF_IN_PHYSICS_UPDATE_EDITING_DATA();
     b2Body_SetAngularDamping(m_body, scale);
 }
 
 void Collider::setType(b2BodyType type)
 {
+    CHECK_IF_IN_PHYSICS_UPDATE_EDITING_DATA();
     b2Body_SetType(m_body, type);
 }
 
@@ -339,6 +343,7 @@ b2BodyType Collider::getType() const
 
 void Collider::setBullet(bool flag)
 {
+    CHECK_IF_IN_PHYSICS_UPDATE_EDITING_DATA();
     b2Body_SetBullet(m_body, flag);
 }
 
@@ -354,6 +359,7 @@ bool Collider::isAwake() const
 
 void Collider::setFixedRotation(bool flag)
 {
+    CHECK_IF_IN_PHYSICS_UPDATE_EDITING_DATA();
     b2Body_SetFixedRotation(m_body, flag);
 }
 
@@ -364,7 +370,7 @@ bool Collider::isFixedRotation() const
 
 Transform Collider::getInterpolatedTransform() const
 {
-    return Transform{Object::getPosition() + WorldHandler::getInterpolationTime() * b2Body_GetLinearVelocity(m_body), Object::getRotation() + b2Body_GetAngularVelocity(m_body) * WorldHandler::getInterpolationTime()};
+    return Transform{Object::getPosition() + WorldHandler::get()->getInterpolationTime() * b2Body_GetLinearVelocity(m_body), Object::getRotation() + b2Body_GetAngularVelocity(m_body) * WorldHandler::get()->getInterpolationTime()};
 }
 
 //* Collision Data
@@ -467,17 +473,17 @@ float HitData::getApproachSpeed() const
 
 //* Pre Solve Data
 
-PreSolveData::PreSolveData(Collider* collider, b2ShapeId thisFixture, b2ShapeId otherFixture, b2Manifold* contactData) : 
-    m_collider(collider), m_thisShape(thisFixture), m_otherShape(otherFixture), m_manifold(contactData) {}
+PreSolveData::PreSolveData(Collider* thisCollider, b2ShapeId thisFixture, Collider* otherCollider, b2ShapeId otherFixture, b2Manifold* contactData, EventHelper::Event* updateBodyEvent) : 
+    m_otherCollider(otherCollider), m_thisCollider(thisCollider), m_thisShape(thisFixture), m_otherShape(otherFixture), m_manifold(contactData), m_updateBodyEvent(updateBodyEvent) {}
 
 const Collider* PreSolveData::getCollider() const
 {
-    return m_collider;
+    return m_otherCollider;
 }
 
 Collider* PreSolveData::getNoneConstCollider()
 {
-    return m_collider;
+    return m_otherCollider;
 }
 
 const Fixture PreSolveData::getThisFixture() const
@@ -490,9 +496,16 @@ const Fixture PreSolveData::getOtherFixture() const
     return Fixture(m_otherShape);
 }
 
-void PreSolveData::destroyCollider()
+void PreSolveData::destroyOtherCollider()
 {
-    m_collider->destroy();
+    // TODO implement this via the event system
+    // m_otherCollider->destroy();
+}
+
+void PreSolveData::destroyThisCollider()
+{
+    // TODO implement this via the event system
+    // m_thisCollider->destroy();
 }
 
 // ContactData::Info PreSolveData::getInfo() const

@@ -50,3 +50,7 @@ A work in progress game engine/framework.
 | `Settings.hpp` | A Settings "Manager" which handles the creation and management of settings |
 | `SettingsUI.hpp` | Derived from Settings.hpp and is an object which creates UI for the settings that are added to it |
 | Setting Classes | setting types that are derived from SettingBase and implemented in SettingsUI |
+
+# Compiler Definitions
+When compiling in debug mode define `DEBUG` for extra debugging
+- Note that this does require the library to be compiled with this flag defined and be compiled with the `g` flag (in g++)

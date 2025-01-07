@@ -100,7 +100,7 @@ class PreSolveData
 {
 public: 
     /// @brief ignore this unless you know what you are doing
-    PreSolveData(Collider* collider, b2ShapeId thisFixture, b2ShapeId otherFixture, b2Manifold* contactData);
+    PreSolveData(Collider* thisCollider, b2ShapeId thisFixture, Collider* otherCollider, b2ShapeId otherFixture, b2Manifold* contactData, EventHelper::Event* updateBodyEvent);
 
     const Collider* getCollider() const;
     /// @warning NEVER edit the collider in the pre solve callback this should only be used for storage and editing later
@@ -111,9 +111,11 @@ public:
 
     // ContactData::Info getInfo() const;
 
-    /// @brief destroys the other collider
-    /// @note also disables the contact for this collision (can be re-enabled if wanted)
-    void destroyCollider();
+    /// @brief destroys the other collider AFTER physics is done updating
+    void destroyOtherCollider();
+    /// @brief destroys this collider AFTER physics is done updating
+    /// @warning DO NOT destroy this collider directly only use this function
+    void destroyThisCollider();
 
     // /// @returns if the two fixtures are touching
     // bool isTouching() const;
@@ -149,10 +151,12 @@ public:
 	// float getTangentSpeed() const;
 
 private:
-    Collider *const m_collider;
+    Collider *const m_thisCollider;
     b2ShapeId const m_thisShape;
+    Collider *const m_otherCollider;
     b2ShapeId const m_otherShape;
     b2Manifold *const m_manifold;
+    EventHelper::Event *const m_updateBodyEvent;
 };
 
 typedef ContactData CollisionData;
@@ -224,10 +228,10 @@ public:
     /// @note these are called for each fixture
     /// @param ContactData the collision data
     inline virtual void EndContact(ContactData ContactData) {};
-    /// @brief This can be called multiple times in one frame (called before any collision is handled)
+    /// @brief This is called before any collision is handled
+    /// @warning MUST be thread safe
+    /// @warning do NOT write to the colliders or anything physics related during this callback
     /// @note try to make this efficient as it can be called many times per frame
-    /// @note you can destroy the objects during this callback although the body will not be destroyed until the object is out of the destroy queue
-    /// @warning do NOT edit the colliders during this callback
     /// @param PreContactData the pre solve contact data
     inline virtual void PreSolve(PreSolveData data) {};
     /// @brief called every frame until the two objects are no longer colliding

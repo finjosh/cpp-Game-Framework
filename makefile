@@ -36,7 +36,7 @@ LINKERFLAGS:=-lNetworking -lutils -ltgui-s -lsfml-graphics-s -lsfml-window-s \
 			# -mwindows
 # flags to generate dependencies for all .o files
 DEPFLAGS:=-MP -MD
-DEBUG_FLAGS = -g
+DEBUG_FLAGS = -g -D DEBUG
 RELEASE_FLAGS = -O3
 # any compiler options
 # put -Werror for warnings to be treated as errors

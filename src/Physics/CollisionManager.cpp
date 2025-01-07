@@ -17,53 +17,56 @@ bool CollisionManager::m_contactData::operator == (const m_contactData& data) co
            this->A.index1 == data.A.index1 && this->B.index1 == data.B.index1;
 }
 
-std::unordered_set<Collider*> CollisionManager::m_objects;
-std::set<CollisionManager::m_contactData> CollisionManager::m_colliding;
-bool CollisionManager::m_usingCollidingSet = false;
-std::list<CollisionManager::m_contactData> CollisionManager::m_collidingEraseQueue;
-EventHelper::Event CollisionManager::m_updateBodyEvent;
-bool CollisionManager::m_inPhysicsUpdate = false;
+std::pair<std::mutex, EventHelper::Event>* CollisionManager::m_threadedEvents = nullptr;
+unsigned int CollisionManager::m_threadedEventsSize = 0;
+#ifdef DEBUG
+std::atomic<int> CollisionManager::m_inPhysicsUpdate = 0;
+#endif
 
-// void CollisionManager::BeginContact(b2Contact* contact)
-// {
-//     Collider* A = static_cast<Collider*>((void*)contact->GetFixtureA()->GetBody()->GetUserData().pointer);
-//     Collider* B = static_cast<Collider*>((void*)contact->GetFixtureB()->GetBody()->GetUserData().pointer);
+CollisionManager* CollisionManager::get()
+{
+    static CollisionManager manager;
+    return &manager;
+}
 
-//     // updating all lists for new contact
-//     m_beginContact.emplace_back(A, B, contact);
-//     m_colliding.emplace(A,B,contact);
-// }
+#define GET_COLLIDER(b2Shape) ((Collider*)b2Body_GetUserData(b2Shape_GetBody(b2Shape)))
 
-// void CollisionManager::EndContact(b2Contact* contact)
-// {
-//     Collider* A = static_cast<Collider*>((void*)contact->GetFixtureA()->GetBody()->GetUserData().pointer);
-//     Collider* B = static_cast<Collider*>((void*)contact->GetFixtureB()->GetBody()->GetUserData().pointer);
+bool CollisionManager::PreSolve(b2ShapeId shapeIdA, b2ShapeId shapeIdB, b2Manifold* manifold, void* context)
+{
+    #ifdef DEBUG
+    m_inPhysicsUpdate += 1;
+    #endif
+    Collider* A = GET_COLLIDER(shapeIdA);
+    Collider* B = GET_COLLIDER(shapeIdB);
 
-//     // updating all lists for end contact
-//     m_endContact.emplace_back(A, B, contact);
+    std::pair<std::mutex, EventHelper::Event>* openEvent = nullptr;
+    for (unsigned int i = 0; i < m_threadedEventsSize; ++i)
+    {
+        if (!m_threadedEvents[i].first.try_lock())
+            continue;
+        openEvent = &m_threadedEvents[i];
+        break;
+    }
+    assert(openEvent != nullptr && "ERROR | No open event found!"); // this should never happen
 
-//     if (m_usingCollidingSet)
-//         m_collidingEraseQueue.emplace_back(A,B,contact);
-//     else
-//         m_colliding.erase({A,B,contact});
-// }
+    A->PreSolve(PreSolveData{A, shapeIdA, B, shapeIdB, manifold, &openEvent->second});
+    B->PreSolve(PreSolveData{B, shapeIdB, A, shapeIdA, manifold, &openEvent->second});
+    #ifdef DEBUG
+    m_inPhysicsUpdate -= 1;
+    #endif
 
-// void CollisionManager::PreSolve(b2Contact* contact, const b2Manifold* oldManifold)
-// {
-//     m_inPhysicsUpdate = true;
-//     Collider* A = static_cast<Collider*>((void*)contact->GetFixtureA()->GetBody()->GetUserData().pointer);
-//     Collider* B = static_cast<Collider*>((void*)contact->GetFixtureB()->GetBody()->GetUserData().pointer);
-
-//     A->PreSolve({B, contact->GetFixtureA(), contact->GetFixtureB(), contact});
-//     B->PreSolve({A, contact->GetFixtureB(), contact->GetFixtureA(), contact});
-//     m_inPhysicsUpdate = false;
-// }
+    openEvent->first.unlock();
+    return true; // continue with the collision
+}
 
 void CollisionManager::Update()
 {
-    #define GET_COLLIDER(b2Shape) ((Collider*)b2Body_GetUserData(b2Shape_GetBody(b2Shape)))
-    m_updateBodyEvent.invoke();
-    m_updateBodyEvent.disconnectAll();
+    // There should be no need to care about multiple threads here
+    for (unsigned int i = 0; i < m_threadedEventsSize; ++i)
+    {
+        m_threadedEvents[i].second.invoke();
+        m_threadedEvents[i].second.disconnectAll();
+    }
 
     // updating all collider transforms before doing any callbacks
     for (auto obj: m_objects)
@@ -71,7 +74,7 @@ void CollisionManager::Update()
         obj->m_update();
     }
 
-    b2ContactEvents contactEvents = b2World_GetContactEvents(WorldHandler::getWorld());
+    b2ContactEvents contactEvents = b2World_GetContactEvents(WorldHandler::get()->getWorld());
 
     //* Calling being contacts
     for (int i = 0; i < contactEvents.beginCount; ++i)
@@ -80,6 +83,7 @@ void CollisionManager::Update()
         
         Collider* A = GET_COLLIDER(beginEvent->shapeIdA);
         Collider* B = GET_COLLIDER(beginEvent->shapeIdB);
+        m_colliding.emplace(beginEvent->shapeIdA,beginEvent->shapeIdB);
 
         if (A->isDestroyQueued() || B->isDestroyQueued()) // dont want to call on begin contact because it no longer exists
             continue;
@@ -96,6 +100,7 @@ void CollisionManager::Update()
         
         Collider* A = GET_COLLIDER(endEvent->shapeIdA);
         Collider* B = GET_COLLIDER(endEvent->shapeIdB);
+        m_colliding.erase(m_contactData{endEvent->shapeIdA,endEvent->shapeIdB});
 
         // might want to know end contact even if it is destroyed therefor no if statement
         A->EndContact(ContactData{B, endEvent->shapeIdA, endEvent->shapeIdB});
@@ -133,7 +138,6 @@ void CollisionManager::Update()
     }
     m_colliding.clear();
     // ---------------------------
-    #undef GET_COLLIDER
 }
 
 void CollisionManager::addCollider(Collider* Collider)
@@ -144,4 +148,10 @@ void CollisionManager::addCollider(Collider* Collider)
 void CollisionManager::removeCollider(Collider* collider)
 {
     m_objects.erase({collider});
+}
+
+void CollisionManager::initWorkerThreadLists(unsigned int workers)
+{
+    m_threadedEventsSize = workers;
+    m_threadedEvents = new std::pair<std::mutex, EventHelper::Event>[workers];
 }

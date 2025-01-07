@@ -79,6 +79,7 @@ public:
         shape.makeBox(5,5);
 
         FixtureDef fixtureDef;
+        fixtureDef.setEnablePreSolveEvents(true);
         fixtureDef.setFriction(1);
 
         Collider::createFixture(shape, fixtureDef);
@@ -267,7 +268,7 @@ int main()
     tryLoadTheme({"Dark.txt", "Black.txt"}, {"", "Assets/", "themes/", "Themes/", "assets/", "Assets/Themes/", "Assets/themes/", "assets/themes/", "assets/Themes/"});
     // -----------------------
 
-    WorldHandler::init({0.f,0.f}); // TODO implement ray cast system
+    WorldHandler::get()->init({0.f,0.f}); // TODO implement ray cast system
     DebugDraw::get().initCommands();
     Input::get(); // initializing the input dictionary for string conversions
 
@@ -289,6 +290,11 @@ int main()
     new Wall({192, 54}, {10, 108});
     new Wall({0, 54}, {10, 108});
 
+    for (int i = 0; i < 100; i++)
+    {
+        auto p = new Player();
+        p->setPosition({15,10});
+    }
     auto p = new Player();
     p->setPosition({15,10});
 
@@ -352,8 +358,8 @@ int main()
         //! ------------------------------
 
         //! Do physics before this for consistent physics (in object update)
-        WorldHandler::updateWorld(deltaTime.asSeconds()); // updates the world physics
-        CollisionManager::Update(); // updates the collision callbacks
+        WorldHandler::get()->updateWorld(deltaTime.asSeconds()); // updates the world physics
+        CollisionManager::get()->Update(); // updates the collision callbacks
         //! Draw after this
         UpdateManager::LateUpdate(deltaTime.asSeconds());
 

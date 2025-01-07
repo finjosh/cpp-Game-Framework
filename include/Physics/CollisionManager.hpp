@@ -6,29 +6,33 @@
 #include <unordered_set>
 #include <set>
 #include <list>
+#include <mutex>
 
 #include "box2d/box2d.h"
 
 #include "Physics/Collider.hpp"
 
+class WorldHandler;
+
 class CollisionManager
 {
 public:
-    // void BeginContact(b2Contact* contact) override;
-    // void EndContact(b2Contact* contact) override;
-    // void PreSolve(b2Contact* contact, const b2Manifold* oldManifold) override;
-    // void PostSolve(b2Contact* contact, const b2ContactImpulse* impulse) override;
+    static CollisionManager* get();
+    static bool PreSolve(b2ShapeId shapeIdA, b2ShapeId shapeIdB, b2Manifold* manifold, void* context);
 
     /// @brief Make sure to call this every frame after box2d update
-    static void Update();
+    void Update();
 
 protected:
     /// @brief adds the collider to the manager
-    static void addCollider(Collider* collider);
+    void addCollider(Collider* collider);
     /// @brief removes the collider for the manager
-    static void removeCollider(Collider* collider);
-    
+    void removeCollider(Collider* collider);
+    static void initWorkerThreadLists(unsigned int workers);
+
     friend Collider;
+    friend WorldHandler;
+    friend PreSolveData;
 
 private:
     struct m_contactData
@@ -42,16 +46,18 @@ private:
         b2ShapeId B = b2_nullShapeId;
     };
 
-    static std::unordered_set<Collider*> m_objects;
+    std::unordered_set<Collider*> m_objects;
     /// @brief the set of contact data for all colliding objects
-    static std::set<m_contactData> m_colliding;
+    std::set<m_contactData> m_colliding;
     /// @brief if the colliding set is currently being used
-    static bool m_usingCollidingSet;
-    static std::list<m_contactData> m_collidingEraseQueue;
-    /// @brief so that you can change the enabled state of a collider in a physics callback (destroying in pre solve sets enabled false)
-    /// @note this is only for the deletion of the body not the entire object
-    static EventHelper::Event m_updateBodyEvent;
-    static bool m_inPhysicsUpdate;
+    bool m_usingCollidingSet = false;
+    std::list<m_contactData> m_collidingEraseQueue;
+    /// @note theses events are called after the physics update
+    static std::pair<std::mutex, EventHelper::Event>* m_threadedEvents;
+    static unsigned int m_threadedEventsSize;
+    #ifdef DEBUG
+    static std::atomic<int> m_inPhysicsUpdate;
+    #endif
 };
 
 #endif
