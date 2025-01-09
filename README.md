@@ -2,6 +2,7 @@
 A work in progress game engine/framework.
 
 ### Tested with: 
+    - -std=c++23
     - Compiler: g++
     - Version: g++.exe (Rev2, Built by MSYS2 project) 14.2.0
     - To use the prebuilt libs you have to use the ucrt MSYS2 mingw build for g++ 14.2.0

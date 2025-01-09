@@ -205,6 +205,9 @@ public:
     {
         Fixture::Shape::Polygon shape;
         shape.makeBox(size.x, size.y);
+        
+        FixtureDef fixtureDef;
+        fixtureDef.setFilter({0x0001, 0x0000, 0});
 
         Collider::createFixture(shape);
 
@@ -236,20 +239,20 @@ public:
         // }
     }
 
-    // void PreSolve(PreSolveData data) override
-    // {
-    //     if (data.getCollider()->cast<Wall>() != nullptr)
-    //         return;
-    //     if (getLocalVector(data.getInfo().getNormal()).y < -0.5f) // if the object is colliding from the bottom
-    //     {
-    //         data.setEnabled(false);
-    //         m_freeFlow.emplace(data.getCollider());
-    //     }
-    //     else if (m_freeFlow.find(data.getCollider()) != m_freeFlow.end())
-    //     {
-    //         data.setEnabled(false);
-    //     }
-    // }
+    void PreSolve(PreSolveData data) override
+    {
+        // if (data.getCollider()->cast<Wall>() != nullptr)
+        //     return;
+        // if (getLocalVector(data.getInfo().getNormal()).y < -0.5f) // if the object is colliding from the bottom
+        // {
+        //     data.setEnabled(false);
+        //     m_freeFlow.emplace(data.getCollider());
+        // }
+        // else if (m_freeFlow.find(data.getCollider()) != m_freeFlow.end())
+        // {
+        //     data.setEnabled(false);
+        // }
+    }
 
     void EndContact(ContactData data) override
     {
@@ -270,6 +273,7 @@ int main()
 
     WorldHandler::get()->init({0.f,0.f}); // TODO implement ray cast system
     DebugDraw::get().initCommands();
+    DebugDraw::get().drawAll(true);
     Input::get(); // initializing the input dictionary for string conversions
 
     Canvas* gui = new Canvas();
@@ -297,6 +301,7 @@ int main()
     }
     auto p = new Player();
     p->setPosition({15,10});
+    new Sensor([](){}, p);
 
     sf::RectangleShape particleShape;
     particleShape.setSize({10,10});
@@ -341,7 +346,7 @@ int main()
 
             Input::get().HandelEvent(event.value(), wasHandled);
         }
-        
+
         UpdateManager::Update(deltaTime.asSeconds());
         if (fixedUpdate >= 0.2)
         {

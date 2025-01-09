@@ -9,7 +9,7 @@ PROJECT:=main
 # the directory in which all .o and .d files will be made
 OBJ_O_DIR:=bin
 # the include flags for compilation by default includes the project directory and include directory
-INCLUDE_DIRS=/VSCodeFolder/Libraries/SFML-3.0.0/include /VSCodeFolder/Libraries/TGUI-1.7/include \VSCodeFolder\Libraries\box2c-3.0\include /Git_projects/cpp-Utilities/include /VSCodeFolder/Libraries/thread-pool-4.1.0/include /Git_projects/cpp-Networking-Library/include
+INCLUDE_DIRS=/VSCodeFolder/Libraries/SFML-3.0.0/include /VSCodeFolder/Libraries/TGUI-1.7/include \VSCodeFolder\Libraries\box2c-3.0\include /Git_projects/cpp-Utilities/include /VSCodeFolder/Libraries/thread-pool-4.1.0/include /Git_projects/cpp-Networking-Library/include /VSCodeFolder/Libraries/box2c-3.0
 # extra include flags
 INCLUDE_FLAGS=-D SFML_STATIC
 # the paths to libs for linking
@@ -25,7 +25,10 @@ LIB_SOURCE:=src
 LIB_NAME:=libgameFramework
 
 # compiler command
-CC:=g++
+CPPC:=g++
+CPP_EXT:=cpp
+CC:=gcc
+C_EXT:=c
 # linker flags for compilation
 # add "-mwindows" to disable the terminal
 LINKERFLAGS:=-lNetworking -lutils -ltgui-s -lsfml-graphics-s -lsfml-window-s \
@@ -41,7 +44,8 @@ RELEASE_FLAGS = -O3
 # any compiler options
 # put -Werror for warnings to be treated as errors
 # use -Wextra -Wall every so often to find possible bugs
-COMPILE_OPTIONS:=-std=c++20 -static ${DEBUG_FLAGS}
+CPP_COMPILE_OPTIONS:=-std=c++20 -static ${DEBUG_FLAGS}
+C_COMPILE_OPTIONS:=-std=c11 -static ${DEBUG_FLAGS}
 
 #! DONT EDIT ANYTHING FROM HERE DOWN
 
@@ -72,11 +76,15 @@ INCLUDES:=$(addprefix -I ${DRIVEPATH},$(call FIXPATH,${INCLUDE_DIRS})) ${INCLUDE
 LIBS:=$(addprefix -L ${DRIVEPATH},$(call FIXPATH,${LIB_DIRS}))
 
 # all .cpp file paths
-SRC:=$(foreach D,${SOURCEDIRS},$(wildcard ${D}/*.cpp))
-LIBSRC:=$(foreach D,${LIBSOURCEDIRS},$(wildcard ${D}/*.cpp))
+SRC:=$(foreach D,${SOURCEDIRS},$(wildcard ${D}/*.${CPP_EXT})) $(foreach D,${SOURCEDIRS},$(wildcard ${D}/*.${C_EXT}))
+LIBSRC:=$(foreach D,${LIBSOURCEDIRS},$(wildcard ${D}/*.${CPP_EXT})) $(foreach D,${LIBSOURCEDIRS},$(wildcard ${D}/*.${C_EXT}))
 # Create an object file of every cpp file
-OBJECTS:=$(patsubst ${PROJECT_DIR}%,${PROJECT_DIR}/${OBJ_O_DIR}%,$(call FIXPATH,$(patsubst %.cpp,%.o,${SRC})))
-LIBOBJECTS:=$(patsubst ${PROJECT_DIR}%,${PROJECT_DIR}/${OBJ_O_DIR}%,$(call FIXPATH,$(patsubst %.cpp,%.o,${LIBSRC})))
+CPP_OBJECTS:=$(patsubst ${PROJECT_DIR}%,${PROJECT_DIR}/${OBJ_O_DIR}%,$(call FIXPATH,$(patsubst %.${CPP_EXT},%.o,$(filter %.${CPP_EXT},${SRC}))))
+C_OBJECTS:=$(patsubst ${PROJECT_DIR}%,${PROJECT_DIR}/${OBJ_O_DIR}%,$(call FIXPATH,$(patsubst %.${C_EXT},%.o,$(filter %.${C_EXT},${SRC}))))
+OBJECTS:=${CPP_OBJECTS} ${C_OBJECTS}
+CPP_LIB_OBJECTS:=$(patsubst ${PROJECT_DIR}%,${PROJECT_DIR}/${OBJ_O_DIR}%,$(call FIXPATH,$(patsubst %.${CPP_EXT},%.o,$(filter %.${CPP_EXT},${LIBSRC}))))
+C_LIB_OBJECTS:=$(patsubst ${PROJECT_DIR}%,${PROJECT_DIR}/${OBJ_O_DIR}%,$(call FIXPATH,$(patsubst %.${C_EXT},%.o,$(filter %.${C_EXT},${LIBSRC}))))
+LIB_OBJECTS:=${CPP_LIB_OBJECTS} ${C_LIB_OBJECTS}
 # Creating dependency files
 DEPFILES=$(patsubst %.o,%.d,${OBJECTS})
 # All bin directories
@@ -87,17 +95,18 @@ BIN_DIRS=$(foreach dir,$(call FIXPATH,$(SOURCEDIRS)),$(patsubst $(call FIXPATH,$
 
 all: ${BIN_DIRS} ${PROJECT}
 
-# main build
 ${PROJECT}: ${OBJECTS}
-	${CC} ${COMPILE_OPTIONS} ${INCLUDES} -o ${@} ${^} ${LIBS} ${LINKERFLAGS}
+	${CPPC} ${CPP_COMPILE_OPTIONS} ${INCLUDES} -o ${@} ${^} ${LIBS} ${LINKERFLAGS}
 
-# build objects for the main build
-${PROJECT_DIR}/${OBJ_O_DIR}%.o:${PROJECT_DIR}%.cpp
-	${CC} ${COMPILE_OPTIONS} ${INCLUDES} ${DEPFLAGS} -c -o ${@} ${<}
+${PROJECT_DIR}/${OBJ_O_DIR}%.o:${PROJECT_DIR}%.${CPP_EXT}
+	${CPPC} ${CPP_COMPILE_OPTIONS} ${INCLUDES} ${DEPFLAGS} -c -o ${@} ${<}
+
+${PROJECT_DIR}/${OBJ_O_DIR}%.o:${PROJECT_DIR}%.${C_EXT}
+	${CC} ${C_COMPILE_OPTIONS} ${INCLUDES} ${DEPFLAGS} -c -o ${@} ${<}
 
 # build the lib with the same compile options
-libs: ${BIN_DIRS} ${LIB_DIR} ${LIBOBJECTS}
-	ar rcs $(call FIXPATH,${PROJECT_DIR}/${LIB_DIR}/${LIB_NAME}.a) ${LIBOBJECTS}
+libs: ${BIN_DIRS} ${LIB_DIR} ${LIB_OBJECTS}
+	ar rcs $(call FIXPATH,${PROJECT_DIR}/${LIB_DIR}/${LIB_NAME}.a) ${LIB_OBJECTS}
 	@echo Libs created
 
 # include the dependencies
@@ -130,6 +139,5 @@ info:
 	@echo Project Directory: ${PROJECT_DIR}
 	@echo Source Directories: ${SOURCEDIRS} 
 	@echo Lib Source Directories: ${LIBSOURCEDIRS} 
-	@echo temp: ${COMPILE_OPTIONS} ${INCLUDES}
 	@echo Object Files: ${OBJECTS}
 	@echo Dependencies: ${DEPFILES}

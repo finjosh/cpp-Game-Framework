@@ -19,7 +19,7 @@ void WorldHandler::init(const Vector2& gravity, unsigned int workerCount)
 {
     b2WorldDef worldDef = b2DefaultWorldDef();
     worldDef.gravity = (b2Vec2)gravity;
-    worldDef.workerCount = worldDef.workerCount == 0 ? 1 : worldDef.workerCount;
+    worldDef.workerCount = workerCount == 0 ? 1 : workerCount;
 
     m_world = b2CreateWorld(&worldDef);
     CollisionManager::initWorkerThreadLists(worldDef.workerCount);

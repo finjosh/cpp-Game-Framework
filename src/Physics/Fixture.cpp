@@ -100,15 +100,15 @@ bool Fixture::areSensorEventsEnabled()
     return b2Shape_AreSensorEventsEnabled(m_fixture);
 }
 
-void Fixture::enableContactEvents(bool enabled)
-{
-    b2Shape_EnableContactEvents(m_fixture, enabled);
-}
+// void Fixture::enableContactEvents(bool enabled)
+// {
+//     b2Shape_EnableContactEvents(m_fixture, enabled);
+// }
 
-bool Fixture::areContactEventsEnabled()
-{
-    return b2Shape_AreContactEventsEnabled(m_fixture);
-}
+// bool Fixture::areContactEventsEnabled()
+// {
+//     return b2Shape_AreContactEventsEnabled(m_fixture);
+// }
 
 void Fixture::enablePreSolveEvents(bool enabled)
 {
@@ -120,15 +120,15 @@ bool Fixture::arePreSolveEventsEnabled()
     return b2Shape_ArePreSolveEventsEnabled(m_fixture);
 }
 
-void Fixture::enableHitEvents(bool enabled)
-{
-    b2Shape_EnableHitEvents(m_fixture, enabled);
-}
+// void Fixture::enableHitEvents(bool enabled)
+// {
+//     b2Shape_EnableHitEvents(m_fixture, enabled);
+// }
 
-bool Fixture::areHitEventsEnabled()
-{
-    return b2Shape_AreHitEventsEnabled(m_fixture);
-}
+// bool Fixture::areHitEventsEnabled()
+// {
+//     return b2Shape_AreHitEventsEnabled(m_fixture);
+// }
 
 bool Fixture::testPoint(Vector2 point)
 {

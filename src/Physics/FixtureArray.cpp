@@ -2,7 +2,30 @@
 
 // public 
 
-int FixtureArray::getSize() const
+FixtureArray::FixtureArray(FixtureArray&& other)
+{
+    if (this != &other)
+    {
+        m_shapeArray = other.m_shapeArray;
+        m_capacity = other.m_capacity;
+        other.m_capacity = 0;
+        other.m_shapeArray = nullptr;
+    }
+}
+
+FixtureArray& FixtureArray::operator=(FixtureArray&& other)
+{
+    if (this != &other)
+    {
+        m_shapeArray = other.m_shapeArray;
+        m_capacity = other.m_capacity;
+        other.m_capacity = 0;
+        other.m_shapeArray = nullptr;
+    }
+    return *this;
+}
+
+int FixtureArray::size() const
 {
     return m_capacity;
 }
@@ -46,6 +69,9 @@ b2ShapeId* FixtureArray::getShapeArray()
 
 FixtureArray::~FixtureArray()
 {
+    if (m_shapeArray == nullptr)
+        return;
+        
     delete[] m_shapeArray;
     m_shapeArray = nullptr;
     m_capacity = 0;

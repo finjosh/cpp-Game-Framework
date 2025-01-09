@@ -9,157 +9,14 @@
 
 #include "Physics/Fixture.hpp"
 #include "Physics/FixtureArray.hpp"
+#include "Physics/ContactData.hpp"
 #include "Object.hpp"
 #include "EngineSettings.hpp"
+#include "Physics/ContactDataArray.hpp"
 
 class CollisionManager;
-class Collider;
 
-class ContactData
-{
-public:
-    /// @brief ignore this unless you know what you are doing
-    ContactData(Collider* collider, b2ShapeId thisFixture, b2ShapeId otherFixture);
-
-    /// @returns the other objects collider
-    Collider* getCollider();
-    const Collider* getCollider() const;
-    /// @returns the fixture from this object that collided
-    Fixture getThisFixture();
-    const Fixture getThisFixture() const;
-    /// @returns the fixture from the other object that collided
-    Fixture getOtherFixture();
-    const Fixture getOtherFixture() const;
-
-    // class Info
-    // {
-    // public:
-    //     /// @brief ignore this unless you know what you are doing
-    //     Info(b2Contact* contact);
-
-    //     /// @returns how many contact points there are
-    //     int32 getPointCount() const;
-
-    //     /// @warning does not check if index is in range
-    //     /// @returns returns the point at the given index (size of point count)
-    //     const Vector2 getContactPoint(uint8 index) const;
-
-    //     /// @warning does not check if index is in range
-    //     /// @note negative distance is overlap in meters
-    //     /// @returns returns the distance at the given index (size of point count)
-    //     const float getSeparations(uint8 index) const;
-    //     /// @returns the normal of the collision
-    //     Vector2 getNormal() const;
-
-    // protected:
-    //     b2WorldManifold m_data;
-    //     int32 m_points;
-    // };
-
-    // /// @brief calculates more in-depth contact information
-    // /// @note calculates the contact normal, points of contact, and distance of overlap
-    // ContactData::Info getInfo() const;
-
-private:
-    Collider *const m_collider;
-    b2ShapeId const m_thisShape;
-    b2ShapeId const m_otherShape;
-};
-
-class HitData
-{
-public:
-    /// @brief ignore this unless you know what you are doing
-    HitData(Collider* collider, b2ShapeId thisFixture, b2ShapeId otherFixture, const b2ContactHitEvent* m_hitData);
-
-    /// @returns the other objects collider
-    Collider* getCollider();
-    const Collider* getCollider() const;
-    /// @returns the fixture from this object that collided
-    Fixture getThisFixture();
-    const Fixture getThisFixture() const;
-    /// @returns the fixture from the other object that collided
-    Fixture getOtherFixture();
-    const Fixture getOtherFixture() const;
-    /// @brief Point where the fixtures hit
-    Vector2 getContactPoint() const;
-    /// @brief Normal vector pointing from shape A to shape B
-    Vector2 getContactNormal() const;
-    /// @brief The speed the shapes are approaching. Always positive. Typically in meters per second.
-    float getApproachSpeed() const;
-
-private:
-    Collider *const m_collider;
-    b2ShapeId const m_thisShape;
-    b2ShapeId const m_otherShape;
-    const b2ContactHitEvent* const m_hitData;
-};
-
-// TODO implement this and the callback
-class PreSolveData
-{
-public: 
-    /// @brief ignore this unless you know what you are doing
-    PreSolveData(Collider* thisCollider, b2ShapeId thisFixture, Collider* otherCollider, b2ShapeId otherFixture, b2Manifold* contactData, EventHelper::Event* updateBodyEvent);
-
-    const Collider* getCollider() const;
-    /// @warning NEVER edit the collider in the pre solve callback this should only be used for storage and editing later
-    /// @returns a non const ptr to the other collider
-    Collider* getNoneConstCollider();
-    const Fixture getThisFixture() const;
-    const Fixture getOtherFixture() const;
-
-    // ContactData::Info getInfo() const;
-
-    /// @brief destroys the other collider AFTER physics is done updating
-    void destroyOtherCollider();
-    /// @brief destroys this collider AFTER physics is done updating
-    /// @warning DO NOT destroy this collider directly only use this function
-    void destroyThisCollider();
-
-    // /// @returns if the two fixtures are touching
-    // bool isTouching() const;
-    // /// @brief Enable/disable this contact
-	// /// @note The contact is only disabled for the curren time step (or sub-step in continuous collisions)
-	// void setEnabled(bool flag = true);
-    // /// @brief Has this contact been disabled?
-	// bool isEnabled() const;
-    // /// @brief Override the default friction mixture
-	// /// @note This value persists until set or reset.
-	// void setFriction(float friction);
-    // /// @returns friction mixture
-	// float getFriction() const;
-    // /// @brief Reset the friction mixture to the default value.
-	// void resetFriction();
-    // /// @brief Override the default restitution mixture
-	// /// @note The value persists until you set or reset.
-	// void setRestitution(float restitution);
-    // /// @returns restitution mixture
-	// float getRestitution() const;
-    // /// @brief Reset the restitution to the default value.
-	// void resetRestitution();
-    // /// @brief Override the default restitution velocity threshold mixture
-	// /// @note The value persists until you set or reset.
-	// void setRestitutionThreshold(float threshold);
-    // /// @returns restitution threshold mixture
-	// float getRestitutionThreshold() const;
-    // /// @brief Reset the restitution threshold to the default value.
-	// void resetRestitutionThreshold();
-    // /// @brief Set the desired tangent speed for a conveyor belt behavior. In meters per second.
-	// void setTangentSpeed(float speed);
-    // /// @returns tangent speed. In meters per second.
-	// float getTangentSpeed() const;
-
-private:
-    Collider *const m_thisCollider;
-    b2ShapeId const m_thisShape;
-    Collider *const m_otherCollider;
-    b2ShapeId const m_otherShape;
-    b2Manifold *const m_manifold;
-    EventHelper::Event *const m_updateBodyEvent;
-};
-
-typedef ContactData CollisionData;
+// TODO add vars for enabling/disabling beginContact and endContact events
 
 // TODO make a gui editor for making bodies over an image (prints the code that will produce the given effect) (should also be able to load based on given code)
 // TODO make parent and child colliders have defined behaviour
@@ -174,10 +31,10 @@ public:
     virtual ~Collider();
 
     /// @brief Set the physics enabled state of this object
-    /// @note this is the same as if you where to use "removeFromWorld()" and "addToWorld()"
+    /// @note if the object is disabled then this will not enable physics until the object is enabled
     /// @warning this is an expensive operation if the enabled state changes
     void setPhysicsEnabled(bool enabled = true);
-    /// @note if the object is disabled but physics are enabled this still returns false
+    /// @note if the object is enabled then returns the physics state otherwise returns false
     /// @returns true if the physics are enabled and the object is enabled
     bool isPhysicsEnabled() const;
 
@@ -203,19 +60,6 @@ public:
     /// @note ignores the senor option in fixture def
     /// @warning asserts that the polygon is valid
     Fixture createFixtureSensor(const Fixture::Shape::Polygon& shape, FixtureDef fixtureDef = FixtureDef{});
-    // /// @param density the density of the shape
-    // /// @param friction the friction of the shape usually between [0,1]
-    // /// @param restitution the restitution (elasticity) usually in the range [0,1]
-    // /// @param restitutionThreshold Restitution velocity threshold, usually in m/s. Collisions above this speed have restitution applied (will bounce)
-    // /// @param filter contact filtering data
-    // /// @returns the new fixture
-    // Fixture createFixture(const b2Shape& shape, float friction = 0.1f, float restitution = 0.f, float restitutionThreshold = 0.f, 
-    //                       float density = 1.f, const b2Filter& filter = {});
-    // /// @brief creates a sensor fixture with the given shape and density
-    // /// @param density the density of the shape
-    // /// @param filter contact filtering data
-    // /// @returns the new fixture
-    // Fixture createFixtureSensor(const b2Shape& shape, float density = 1.f, const b2Filter& filter = {});
 	/// @param fixture the fixture to be removed.
     /// @note the given fixture will be invalid after this function is called since it is just a reference to the actual fixture
 	void destroyFixture(const Fixture& fixture);
@@ -229,6 +73,7 @@ public:
     /// @param ContactData the collision data
     inline virtual void EndContact(ContactData ContactData) {};
     /// @brief This is called before any collision is handled
+    /// @note this will be called if this collider or the one colliding with this one has PreSolveEvents enabled
     /// @warning MUST be thread safe
     /// @warning do NOT write to the colliders or anything physics related during this callback
     /// @note try to make this efficient as it can be called many times per frame
@@ -276,6 +121,10 @@ public:
     FixtureArray getFixtureArray(int maxSize = INT_MAX);
     /// @returns a fixture array of fixtures on this body up to the max size given
     FixtureArray getFixtureArray(int maxSize = INT_MAX) const;
+    /// @returns how many contacts this body has
+    int getContactsCount() const;
+    ContactDataArray getContacts(int maxSize = INT_MAX);
+    ContactDataArray getContacts(int maxSize = INT_MAX) const;
     // TODO implement joint getter
 
     /// @brief Get the current world AABB that contains all the attached shapes

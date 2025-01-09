@@ -315,15 +315,15 @@ public:
 	/// @brief Enable sensor events for this fixture
 	/// @note Only applies to kinematic and dynamic bodies
 	/// @note Ignored for sensors
-	void enableSensorEvents(bool enabled = true);
+	void enableSensorEvents(bool enabled = true); // TODO remove this if these are able to be handled without the box2d events
 	/// @returns true if sensor events are enabled
 	bool areSensorEventsEnabled();
-	/// @brief Enable contact events for this fixture 
-	/// @note Only applies to kinematic and dynamic bodies
-	/// @note Ignored for sensors
-	void enableContactEvents(bool enabled = true);
-	/// @returns true if contact events are enabled
-	bool areContactEventsEnabled();
+	// /// @brief Enable contact events for this fixture 
+	// /// @note Only applies to kinematic and dynamic bodies
+	// /// @note Ignored for sensors
+	// void enableContactEvents(bool enabled = true);
+	// /// @returns true if contact events are enabled
+	// bool areContactEventsEnabled();
 	/// @brief Enable pre-solve contact events for this fixture
 	/// @note Only applies to dynamic bodies
 	/// @note Ignored for sensors.
@@ -332,13 +332,13 @@ public:
 	void enablePreSolveEvents(bool enabled = true);
 	/// @returns true if pre-solve events are enabled
 	bool arePreSolveEventsEnabled();
-	/// @brief Enable contact hit events for this fixture
-	/// @note Ignored for sensors
-	/// @note default is false
-	void enableHitEvents(bool enabled = true);
-	/// @brief Check if hit events are enabled
-	/// @returns true if hit events are enabled
-	bool areHitEventsEnabled();
+	// /// @brief Enable contact hit events for this fixture
+	// /// @note Ignored for sensors
+	// /// @note default is false
+	// void enableHitEvents(bool enabled = true);
+	// /// @brief Check if hit events are enabled
+	// /// @returns true if hit events are enabled
+	// bool areHitEventsEnabled();
 	/// @brief Test a point for overlap with a fixture
 	/// @param point The point to test
 	/// @returns true if the point overlaps with the fixture
