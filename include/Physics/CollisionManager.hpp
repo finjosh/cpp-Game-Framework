@@ -55,9 +55,6 @@ private:
     /// @note theses events are called after the physics update
     static std::pair<std::mutex, EventHelper::Event>* m_threadedEvents;
     static unsigned int m_threadedEventsSize;
-    #ifdef DEBUG
-    static std::atomic<int> m_inPhysicsUpdate;
-    #endif
 };
 
 #endif

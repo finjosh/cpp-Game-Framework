@@ -1,10 +1,15 @@
 #include "Physics/ContactData.hpp"
+#include "Physics/Collider.hpp"
 
 //* Collision Data
 
 #define GET_COLLIDER(b2Shape) ((Collider*)b2Body_GetUserData(b2Shape_GetBody(b2Shape)))
 
-ContactData::ContactData(b2ShapeId thisFixture, b2ShapeId otherFixture) : m_thisShape(thisFixture), m_otherShape(otherFixture) {}
+ContactData::ContactData(b2ShapeId thisFixture, b2ShapeId otherFixture, b2Manifold* manifold) : m_thisShape(thisFixture), m_otherShape(otherFixture), m_manifold(manifold) 
+{
+    assert(b2Shape_IsValid(thisFixture) && b2Shape_IsValid(otherFixture) && "Shapes must be valid");
+    assert(manifold != nullptr && "Manifold must not be nullptr");
+}
 
 Collider* ContactData::getCollider()
 {
@@ -36,51 +41,46 @@ const Fixture ContactData::getOtherFixture() const
     return Fixture(m_otherShape);
 }
 
-//* Hit Data
+std::int32_t ContactData::getPointCount() const
+{
+    return m_manifold->pointCount;
+}
 
-HitData::HitData(b2ShapeId thisFixture, b2ShapeId otherFixture, const b2ContactHitEvent* m_hitData) 
-    : m_thisShape(thisFixture), m_otherShape(otherFixture), m_hitData(m_hitData) {}
+const Vector2 ContactData::getContactPoint(std::int32_t index) const
+{
+    assert(index > 0 && index <= m_manifold->pointCount && "Index must be in the range [0,2]");
+    return m_manifold->points[index].point; // TODO implement getter functions for the manifold point data
+}
 
-Collider* HitData::getCollider()
-{ return GET_COLLIDER(m_otherShape); }
+const float ContactData::getSeparations(std::int32_t index) const
+{
+    assert(index > 0 && index <= m_manifold->pointCount && "Index must be in the range [0,2]");
+    return m_manifold->points[index].separation;
+}
 
-const Collider* HitData::getCollider() const
-{ return GET_COLLIDER(m_otherShape); }
-
-Fixture HitData::getThisFixture()
-{ return Fixture{m_thisShape}; }
-
-const Fixture HitData::getThisFixture() const
-{ return Fixture{m_thisShape}; }
-
-Fixture HitData::getOtherFixture()
-{ return Fixture{m_otherShape}; }
-
-const Fixture HitData::getOtherFixture() const
-{ return Fixture{m_otherShape}; }
-
-Vector2 HitData::getContactPoint() const
-{ return Vector2{m_hitData->point}; }
-
-Vector2 HitData::getContactNormal() const
-{ return Vector2{m_hitData->normal}; }
-
-float HitData::getApproachSpeed() const
-{ return m_hitData->approachSpeed; }
+Vector2 ContactData::getNormal() const
+{
+    return m_manifold->normal;
+}
 
 //* Pre Solve Data
 
-PreSolveData::PreSolveData(Collider* thisCollider, b2ShapeId thisFixture, Collider* otherCollider, b2ShapeId otherFixture, b2Manifold* contactData, EventHelper::Event* updateBodyEvent) : 
-    m_otherCollider(otherCollider), m_thisCollider(thisCollider), m_thisShape(thisFixture), m_otherShape(otherFixture), m_manifold(contactData), m_updateBodyEvent(updateBodyEvent) {}
+PreSolveData::PreSolveData(b2ShapeId thisFixture, b2ShapeId otherFixture, const b2Manifold* manifold, EventHelper::Event* updateBodyEvent)
+    : m_thisShape(thisFixture), m_otherShape(otherFixture), m_manifold(manifold), m_updateBodyEvent(updateBodyEvent) 
+{
+    assert(b2Shape_IsValid(thisFixture) && b2Shape_IsValid(otherFixture) && "Shapes must be valid");
+    assert(manifold != nullptr && "Manifold must not be nullptr");
+    assert(updateBodyEvent != nullptr && "Update body event must not be nullptr");
+}
 
 const Collider* PreSolveData::getCollider() const
 {
-    return m_otherCollider;
+    return GET_COLLIDER(m_otherShape);
 }
 
 Collider* PreSolveData::getNoneConstCollider()
 {
-    return m_otherCollider;
+    return GET_COLLIDER(m_otherShape);
 }
 
 const Fixture PreSolveData::getThisFixture() const
@@ -95,89 +95,37 @@ const Fixture PreSolveData::getOtherFixture() const
 
 void PreSolveData::destroyOtherCollider()
 {
-    // TODO implement this via the event system
-    // m_otherCollider->destroy();
-    // m_updateBodyEvent->connect(Collider::destroy, m_otherCollider);
+    m_updateBodyEvent->connect(&Collider::destroy, GET_COLLIDER(m_otherShape));
 }
 
 void PreSolveData::destroyThisCollider()
 {
-    // TODO implement this via the event system
-    // m_thisCollider->destroy();
-    // m_updateBodyEvent->connect(Collider::destroy, m_thisCollider);
+    m_updateBodyEvent->connect(&Collider::destroy, GET_COLLIDER(m_thisShape));
 }
 
-// ContactData::Info PreSolveData::getInfo() const
-// {
-//     return ContactData::Info(m_manifold);
-// }
+EventHelper::Event& PreSolveData::getUpdateEvent()
+{
+    return *m_updateBodyEvent;
+}
 
-// bool PreSolveData::isTouching() const
-// {
-//     return m_manifold->IsTouching();
-// }
+std::int32_t PreSolveData::getPointCount() const
+{
+    return m_manifold->pointCount;
+}
 
-// void PreSolveData::setEnabled(bool flag)
-// {
-//     m_manifold->SetEnabled(flag);
-// }
+const Vector2 PreSolveData::getContactPoint(std::int32_t index) const
+{
+    assert(index > 0 && index <= m_manifold->pointCount && "Index must be in the range [0,2]");
+    return m_manifold->points[index].point; // TODO implement getter functions for the manifold point data
+}
 
-// bool PreSolveData::isEnabled() const
-// {
-//     return m_manifold->IsEnabled();
-// }
+const float PreSolveData::getSeparations(std::int32_t index) const
+{
+    assert(index > 0 && index <= m_manifold->pointCount && "Index must be in the range [0,2]");
+    return m_manifold->points[index].separation;
+}
 
-// void PreSolveData::setFriction(float friction)
-// {
-//     m_manifold->SetFriction(friction);
-// }
-
-// float PreSolveData::getFriction() const
-// {
-//     return m_manifold->GetFriction();
-// }
-
-// void PreSolveData::resetFriction()
-// {
-//     m_manifold->ResetFriction();
-// }
-
-// void PreSolveData::setRestitution(float restitution)
-// {
-//     m_manifold->SetRestitution(restitution);
-// }
-
-// float PreSolveData::getRestitution() const
-// {
-//     return m_manifold->GetRestitution();
-// }
-
-// void PreSolveData::resetRestitution()
-// {
-//     m_manifold->ResetRestitution();
-// }
-
-// void PreSolveData::setRestitutionThreshold(float threshold)
-// {
-//     m_manifold->SetRestitutionThreshold(threshold);
-// }
-
-// float PreSolveData::getRestitutionThreshold() const
-// {
-//     return m_manifold->GetRestitutionThreshold();
-// }
-
-// void PreSolveData::resetRestitutionThreshold()
-// {
-//     m_manifold->ResetRestitutionThreshold();
-// }
-
-// void PreSolveData::setTangentSpeed(float speed)
-// {
-//     m_manifold->SetTangentSpeed(speed);
-// }
-
-// float PreSolveData::getTangentSpeed() const
-// {
-//     return m_manifold->GetTangentSpeed();
-// }
+Vector2 PreSolveData::getNormal() const
+{
+    return m_manifold->normal;
+}

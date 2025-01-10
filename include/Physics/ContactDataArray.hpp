@@ -12,7 +12,8 @@ class Collider;
 /// @note is said to be less efficient then using the contact events 
 /// @note from the world but this is more effective for easy of use 
 /// @warning dont ever store this object
-class ContactDataArray {
+/// @note ContactData returned from this has "thisFixture" as the fixture that is on the collider that owns this array
+class ContactDataArray { // TODO see if this could be done better by using the data straight from the b2World struct
 public:
     // Iterator class definition
     class iterator {
@@ -25,7 +26,7 @@ public:
 
         iterator(b2ContactData* ptr, const Collider* owner) : m_ptr(ptr), m_owner(owner) {}
 
-        ContactData operator*() { /* return ContactData(m_ptr, m_owner); */ return ContactData(m_ptr->shapeIdA, m_ptr->shapeIdB); }
+        ContactData operator*();
         iterator& operator++() { m_ptr++; return *this; }
         iterator operator++(int) { iterator tmp = *this; ++(*this); return tmp; }
         iterator& operator--() { m_ptr--; return *this; }
@@ -48,6 +49,9 @@ public:
     ContactData getContactData(int index);
     const ContactData operator[](int index) const;
     ContactData operator[](int index);
+    /// @note this is basically just what collider the array came from
+    /// @returns a pointer to the collider that "owns" this array
+    const Collider* getOwner() const;
 
     // iterator methods
     iterator begin() { return iterator(m_dataArray, m_owner); }

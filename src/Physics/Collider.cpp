@@ -2,8 +2,8 @@
 #include "Physics/CollisionManager.hpp"
 #include "Physics/WorldHandler.hpp"
 
-#ifdef DEBUG
-#define CHECK_IF_IN_PHYSICS_UPDATE(note) assert(CollisionManager::m_inPhysicsUpdate == 0 && note)
+#ifdef _DEBUG
+#define CHECK_IF_IN_PHYSICS_UPDATE(note) assert(WorldHandler::get()->isInPhysicsUpdate() == 0 && note)
 #define CHECK_IF_IN_PHYSICS_UPDATE_EDITING_DATA() CHECK_IF_IN_PHYSICS_UPDATE("Cannot edit any physics data while in a physics update")
 #else
 #define CHECK_IF_IN_PHYSICS_UPDATE(note)
@@ -102,21 +102,11 @@ bool Collider::isPhysicsEnabled() const
 
 void Collider::m_updatePhysicsState()
 {
-    CHECK_IF_IN_PHYSICS_UPDATE("Cannot enabled/disable any objects that have a collider during a physics update");
-    // if (CollisionManager::m_inPhysicsUpdate)
-    // {
-    //     if (this->isPhysicsEnabled())
-    //         CollisionManager::m_updateBodyEvent(b2Body_Enable, this->m_body);
-    //     else
-    //         CollisionManager::m_updateBodyEvent(b2Body_Disable, this->m_body);
-    // }
-    // else
-    // {
-        if (this->isPhysicsEnabled())
-            b2Body_Enable(m_body);
-        else
-            b2Body_Disable(m_body);
-    // }
+    CHECK_IF_IN_PHYSICS_UPDATE("Cannot enabled/disable any objects that have a collider during a physics update\nMaybe you meant to return true/false to enable/disable the current collision in the PreSolve callback?");
+    if (this->isPhysicsEnabled())
+        b2Body_Enable(m_body);
+    else
+        b2Body_Disable(m_body);
 }
 
 void Collider::m_updateTransform()
@@ -125,10 +115,10 @@ void Collider::m_updateTransform()
     b2Body_SetTransform(m_body, (b2Vec2)Object::getGlobalPosition(), Object::getGlobalRotation().getAngle() /*using atan2 then cos and sin*/); 
 }
 
-void Collider::m_update()
+void Collider::m_update(b2Transform* transform)
 {
     // Object::m_onTransformUpdated.setEnabled(false);
-    Object::setGlobalTransform(b2Body_GetTransform(m_body)); // Note this could lead to slow downs due to the callback which results in 3 trig function calls (also required for other class)
+    Object::setGlobalTransform(*transform); // Note this could lead to slow downs due to the callback which results in 3 trig function calls (also required for other class)
     // Object::m_onTransformUpdated.setEnabled(true);
 }
 
@@ -173,12 +163,6 @@ float Collider::getSleepThreshold() const
     return b2Body_GetSleepThreshold(m_body);
 }
 
-void Collider::enableHitEvents(bool enableHitEvents)
-{
-    CHECK_IF_IN_PHYSICS_UPDATE_EDITING_DATA();
-    b2Body_EnableHitEvents(m_body, enableHitEvents);
-}
-
 void Collider::setSleepingEnabled(bool enabled)
 {
     CHECK_IF_IN_PHYSICS_UPDATE_EDITING_DATA();
@@ -214,10 +198,6 @@ int Collider::getContactsCount() const
     return b2Body_GetContactCapacity(m_body);
 }
 
-//* This should not be included regularly but I need to access some private data to read from
-// #include "src/world.h" // TODO use box2d's backend way of getting contact data to get more info out of the contact data
-#include "Physics/BaseWorld.h"
-
 ContactDataArray Collider::getContacts(int maxSize)
 {
     ContactDataArray rtn(maxSize > b2Body_GetContactCapacity(m_body) ? b2Body_GetContactCapacity(m_body) : maxSize, this);
@@ -240,10 +220,7 @@ b2AABB Collider::computeAABB() const
 void Collider::setAwake(bool awake)
 {
     CHECK_IF_IN_PHYSICS_UPDATE_EDITING_DATA();
-    // if (CollisionManager::m_inPhysicsUpdate)
-    //     CollisionManager::m_updateBodyEvent(b2Body_SetAwake, this->m_body, awake);
-    // else
-        b2Body_SetAwake(m_body, awake);
+    b2Body_SetAwake(m_body, awake);
 }
 
 void Collider::setLinearVelocity(const Vector2& v)

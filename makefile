@@ -39,13 +39,15 @@ LINKERFLAGS:=-lNetworking -lutils -ltgui-s -lsfml-graphics-s -lsfml-window-s \
 			# -mwindows
 # flags to generate dependencies for all .o files
 DEPFLAGS:=-MP -MD
-DEBUG_FLAGS = -g -D DEBUG
+DEBUG_FLAGS = -g
 RELEASE_FLAGS = -O3
+# just so you dont have to change all occurrences of the flags var
+CURRENT_FLAGS =	${DEBUG_FLAGS}
 # any compiler options
 # put -Werror for warnings to be treated as errors
 # use -Wextra -Wall every so often to find possible bugs
-CPP_COMPILE_OPTIONS:=-std=c++20 -static ${DEBUG_FLAGS}
-C_COMPILE_OPTIONS:=-std=c11 -static ${DEBUG_FLAGS}
+CPP_COMPILE_OPTIONS:=-std=c++20 -static ${CURRENT_FLAGS}
+C_COMPILE_OPTIONS:=-std=c11 -static ${CURRENT_FLAGS}
 
 #! DONT EDIT ANYTHING FROM HERE DOWN
 

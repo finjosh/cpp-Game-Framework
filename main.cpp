@@ -148,15 +148,14 @@ public:
         m_camera->setRotation(getRotation());
     }
 
-    // void BeginContact(ContactData data) override
-    // {
-    //     auto info = data.getInfo();
-    //     if (info.getPointCount() > 0 && getLinearVelocity().lengthSquared() > 250 && data.getCollider()->cast<Wall>())
-    //     {
-    //         m_hitParticle->setPosition(info.getContactPoint(0));
-    //         m_hitParticle->emit();
-    //     }
-    // }
+    void BeginContact(ContactData data) override
+    {
+        if (data.getPointCount() > 0 && getLinearVelocity().lengthSquared() > 250 && data.getCollider()->cast<Wall>())
+        {
+            m_hitParticle->setPosition(data.getContactPoint(0));
+            m_hitParticle->emit();
+        }
+    }
 };
 
 Camera::Ptr Player::m_camera = nullptr;
@@ -239,19 +238,20 @@ public:
         // }
     }
 
-    void PreSolve(PreSolveData data) override
+    bool PreSolve(PreSolveData data) override
     {
-        // if (data.getCollider()->cast<Wall>() != nullptr)
-        //     return;
-        // if (getLocalVector(data.getInfo().getNormal()).y < -0.5f) // if the object is colliding from the bottom
-        // {
-        //     data.setEnabled(false);
-        //     m_freeFlow.emplace(data.getCollider());
-        // }
-        // else if (m_freeFlow.find(data.getCollider()) != m_freeFlow.end())
-        // {
-        //     data.setEnabled(false);
-        // }
+        if (data.getCollider()->cast<Wall>() != nullptr)
+            return true;
+        if (getLocalVector(data.getNormal()).y < -0.5f) // if the object is colliding from the bottom
+        {
+            return false;
+            m_freeFlow.emplace(data.getCollider());
+        }
+        else if (m_freeFlow.find(data.getCollider()) != m_freeFlow.end())
+        {
+            return false;
+        }
+        return true;
     }
 
     void EndContact(ContactData data) override
@@ -273,7 +273,7 @@ int main()
 
     WorldHandler::get()->init({0.f,0.f}); // TODO implement ray cast system
     DebugDraw::get().initCommands();
-    DebugDraw::get().drawAll(true);
+    // DebugDraw::get().drawAll(true);
     Input::get(); // initializing the input dictionary for string conversions
 
     Canvas* gui = new Canvas();

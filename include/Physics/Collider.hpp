@@ -67,26 +67,23 @@ public:
     /// @brief called when a contact begins
     /// @note these are called for each fixture
     /// @param ContactData the collision data
-    inline virtual void BeginContact(ContactData ContactData) {};
+    inline virtual void BeginContact(ContactData ContactData) {}; // TODO add sensor specific versions?
     /// @brief called when a contact ends
     /// @note these are called for each fixture
     /// @param ContactData the collision data
     inline virtual void EndContact(ContactData ContactData) {};
     /// @brief This is called before any collision is handled
     /// @note this will be called if this collider or the one colliding with this one has PreSolveEvents enabled
-    /// @warning MUST be thread safe
+    /// @warning MUST be thread safe assuming you ever use multiple threads with the physics
     /// @warning do NOT write to the colliders or anything physics related during this callback
     /// @note try to make this efficient as it can be called many times per frame
-    /// @param PreContactData the pre solve contact data
-    inline virtual void PreSolve(PreSolveData data) {};
+    /// @param PreContactData the data that should be used for editing any physics data (it will be edited after the physics update)
+    /// @return true if you want the collision to be handled, false if you want to ignore the collision (stops if either collider returns false, only stops for this one collision)
+    inline virtual bool PreSolve(PreSolveData data) { return true; };
     /// @brief called every frame until the two objects are no longer colliding
     /// @note this will also be called on start of contact
     /// @note this is called for each fixture
     inline virtual void OnColliding(ContactData ContactData) {};
-    /// @brief Events are only generated if this collider has hitEvents enabled
-    /// @note only reports hit events that have an approach speed larger than hitEventThreshold defined in the physics world
-    /// @param hitData the data for the hit that occurred
-    inline virtual void OnHit(HitData hitData) {};
 
     /// @returns inertia tensor of this collider, typically in kg*m^2
     float getInertiaTensor() const;
@@ -107,8 +104,6 @@ public:
     void setSleepThreshold(float sleepVelocity);
     /// @brief Get the sleep threshold, typically in meters per second.
     float getSleepThreshold() const;
-    /// @brief Enable/disable hit events on all fixtures
-    void enableHitEvents(bool enableHitEvents);
     /// @brief set if this body can sleep
     /// @note If you disable sleeping, the body will be woken
 	void setSleepingEnabled(bool enabled = true);
@@ -230,7 +225,7 @@ private:
     friend CollisionManager;
     friend Fixture;
     /// @brief updates the object transform to this colliders body transform
-    void m_update();
+    void m_update(b2Transform* transform);
     /// @brief updates the body state (enabled or not)
     void m_updatePhysicsState();
     /// @brief updates the body transform to match the object transform

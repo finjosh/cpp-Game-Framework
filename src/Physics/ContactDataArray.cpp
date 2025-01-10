@@ -1,6 +1,14 @@
 #include "Physics/ContactDataArray.hpp" 
 
-// public 
+#define GET_COLLIDER(b2Shape) ((Collider*)b2Body_GetUserData(b2Shape_GetBody(b2Shape)))
+
+ContactData ContactDataArray::iterator::operator*() 
+{ 
+    if (m_owner == GET_COLLIDER(m_ptr->shapeIdA))
+        return ContactData(m_ptr->shapeIdA, m_ptr->shapeIdB, &m_ptr->manifold); 
+    else
+        return ContactData(m_ptr->shapeIdA, m_ptr->shapeIdB, &m_ptr->manifold); 
+}
 
 ContactDataArray::ContactDataArray(ContactDataArray&& other)
 {
@@ -33,32 +41,38 @@ int ContactDataArray::size() const
 ContactData ContactDataArray::getContactData(int index)
 {
     assert(index >= 0 && index < m_capacity && "ContactData index must be in range!");
-    // return ContactData(&m_dataArray[index], m_owner);
-    return ContactData(m_dataArray[index].shapeIdA, m_dataArray[index].shapeIdB); // TODO remove these as they do not give the proper data
+    if (m_owner == GET_COLLIDER(m_dataArray[index].shapeIdA))
+        return ContactData(m_dataArray[index].shapeIdA, m_dataArray[index].shapeIdB, &m_dataArray[index].manifold);
+    else // the only other option is that shape B is from the collider this data is from
+        return ContactData(m_dataArray[index].shapeIdB, m_dataArray[index].shapeIdA, &m_dataArray[index].manifold);
 }
 
 const ContactData ContactDataArray::getContactData(int index) const
 {
     assert(index >= 0 && index < m_capacity && "ContactData index must be in range!");
-    // return ContactData(&m_dataArray[index], m_owner);
-    return ContactData(m_dataArray[index].shapeIdA, m_dataArray[index].shapeIdB); // TODO remove these as they do not give the proper data
+    if (m_owner == GET_COLLIDER(m_dataArray[index].shapeIdA))
+        return ContactData(m_dataArray[index].shapeIdA, m_dataArray[index].shapeIdB, &m_dataArray[index].manifold);
+    else // the only other option is that shape B is from the collider this data is from
+        return ContactData(m_dataArray[index].shapeIdB, m_dataArray[index].shapeIdA, &m_dataArray[index].manifold);
 }
 
 ContactData ContactDataArray::operator[](int index)
 {
     assert(index >= 0 && index < m_capacity && "ContactData index must be in range!");
-    // return ContactData(&m_dataArray[index], m_owner);
-    return ContactData(m_dataArray[index].shapeIdA, m_dataArray[index].shapeIdB); // TODO remove these as they do not give the proper data
+    if (m_owner == GET_COLLIDER(m_dataArray[index].shapeIdA))
+        return ContactData(m_dataArray[index].shapeIdA, m_dataArray[index].shapeIdB, &m_dataArray[index].manifold);
+    else // the only other option is that shape B is from the collider this data is from
+        return ContactData(m_dataArray[index].shapeIdB, m_dataArray[index].shapeIdA, &m_dataArray[index].manifold);
 }
 
 const ContactData ContactDataArray::operator[](int index) const
 {
     assert(index >= 0 && index < m_capacity && "ContactData index must be in range!");
-    // return ContactData(&m_dataArray[index], m_owner);
-    return ContactData(m_dataArray[index].shapeIdA, m_dataArray[index].shapeIdB); // TODO remove these as they do not give the proper data
+    if (m_owner == GET_COLLIDER(m_dataArray[index].shapeIdA))
+        return ContactData(m_dataArray[index].shapeIdA, m_dataArray[index].shapeIdB, &m_dataArray[index].manifold);
+    else // the only other option is that shape B is from the collider this data is from
+        return ContactData(m_dataArray[index].shapeIdB, m_dataArray[index].shapeIdA, &m_dataArray[index].manifold);
 }
-
-// private
 
 ContactDataArray::ContactDataArray(int capacity, const Collider* owner)
 {
