@@ -32,9 +32,9 @@ bool Settings::tryLoadFromFile(const std::string& fileName, const std::list<std:
         path = fileName;
 
     iniParser fileData(path);
+    fileData.setAutoSave(false);
     if (!fileData.isOpen())
         return false;
-    fileData.setAutoSave(false);
     if (!fileData.loadData())
         return true; // still returning true as the file was found (just skipping any attempt to load since there is no data)
 

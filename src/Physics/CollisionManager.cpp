@@ -69,7 +69,8 @@ void CollisionManager::Update()
 
         for (std::int32_t i = 0; i < events.moveCount; i++)
         {
-            ((Collider*)(events.moveEvents[i].userData))->m_update(&events.moveEvents[i].transform);
+            if (b2Body_IsValid(events.moveEvents[i].bodyId))
+                ((Collider*)(events.moveEvents[i].userData))->m_update(&events.moveEvents[i].transform);
         }
     }
 

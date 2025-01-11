@@ -13,7 +13,8 @@ class Collider;
 /// @note from the world but this is more effective for easy of use 
 /// @warning dont ever store this object
 /// @note ContactData returned from this has "thisFixture" as the fixture that is on the collider that owns this array
-class ContactDataArray { // TODO see if this could be done better by using the data straight from the b2World struct
+class ContactDataArray 
+{ // TODO see if this could be done better by using the data straight from the b2World struct
 public:
     // Iterator class definition
     class iterator {

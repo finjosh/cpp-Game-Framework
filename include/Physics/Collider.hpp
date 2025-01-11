@@ -16,8 +16,6 @@
 
 class CollisionManager;
 
-// TODO add vars for enabling/disabling beginContact and endContact events
-
 // TODO make a gui editor for making bodies over an image (prints the code that will produce the given effect) (should also be able to load based on given code)
 // TODO make parent and child colliders have defined behaviour
 /// @warning If there is a parent and child that have a Collider there is undefined behaviour (try using fixtures instead)
@@ -231,7 +229,9 @@ private:
     /// @brief updates the body transform to match the object transform
     void m_updateTransform();
 
-    b2BodyId m_body = b2_nullBodyId;
+    // TODO make the body dynamically (if no fixtures destroy it, if adding fixture and no body make one)
+    // This is because of a note on the box2d website "‍Caution: A dynamic body should have at least one shape with a non-zero density. Otherwise you will get strange behavior."
+    b2BodyId m_body = b2_nullBodyId; 
     bool m_enabled = true;
 };
 

@@ -43,9 +43,7 @@ void CanvasManager::initGUI()
         assert("Render window must not be nullptr" && window != nullptr);
 
         if (m_gui)
-        {
             m_gui->setWindow(*window);
-        }
         else
             m_gui = new Gui(*window);
     });

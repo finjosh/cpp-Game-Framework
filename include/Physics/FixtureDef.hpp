@@ -8,7 +8,9 @@
 class Fixture;
 class Collider;
 
-class FixtureDef {
+// TODO make a simple construction with all the possible values being given
+class FixtureDef 
+{
 public:
     // Getters
     /// @returns friction value, typically in the range [0,1]
@@ -38,7 +40,7 @@ public:
     /// @brief set the mass density, typically in kg/m^2
     inline void setDensity(float density) { m_shapeDef.density = density; }
     /// @brief set the current collision filter
-    inline void setFilter(const b2Filter& filter = b2DefaultFilter()) { m_shapeDef.filter = filter; }
+    inline void setFilter(const b2Filter& filter = b2DefaultFilter()) { m_shapeDef.filter = filter; } // TODO make a really simple filter wrapper
     /// @brief set if this is a sensor
     inline void setAsSensor(bool isSensor) { m_shapeDef.isSensor = isSensor; }
     /// @brief Enable sensor events for this fixture

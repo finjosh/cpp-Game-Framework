@@ -13,7 +13,7 @@ INCLUDE_DIRS=/VSCodeFolder/Libraries/SFML-3.0.0/include /VSCodeFolder/Libraries/
 # extra include flags
 INCLUDE_FLAGS=-D SFML_STATIC
 # the paths to libs for linking
-LIB_DIRS=/VSCodeFolder/Libraries/SFML-3.0.0/lib /VSCodeFolder/Libraries/TGUI-1.7/lib /Git_projects/cpp-Utilities/libs \VSCodeFolder\Libraries\box2c-3.0\src /Git_projects/cpp-Networking-Library/lib
+LIB_DIRS=/VSCodeFolder/Libraries/SFML-3.0.0/lib /VSCodeFolder/Libraries/TGUI-1.7/lib /Git_projects/cpp-Utilities/lib \VSCodeFolder\Libraries\box2c-3.0\src /Git_projects/cpp-Networking-Library/lib
 # source files directory (the project directory is automatically added)
 SRC:=src
 # the directory for lib files that are made with "make lib"
@@ -39,15 +39,15 @@ LINKERFLAGS:=-lNetworking -lutils -ltgui-s -lsfml-graphics-s -lsfml-window-s \
 			# -mwindows
 # flags to generate dependencies for all .o files
 DEPFLAGS:=-MP -MD
-DEBUG_FLAGS = -g
+DEBUG_FLAGS = -g -D _DEBUG
 RELEASE_FLAGS = -O3
 # just so you dont have to change all occurrences of the flags var
 CURRENT_FLAGS =	${DEBUG_FLAGS}
 # any compiler options
 # put -Werror for warnings to be treated as errors
 # use -Wextra -Wall every so often to find possible bugs
-CPP_COMPILE_OPTIONS:=-std=c++20 -static ${CURRENT_FLAGS}
-C_COMPILE_OPTIONS:=-std=c11 -static ${CURRENT_FLAGS}
+CPP_COMPILE_OPTIONS=-std=c++20 -static ${CURRENT_FLAGS}
+C_COMPILE_OPTIONS=-std=c11 -static ${CURRENT_FLAGS}
 
 #! DONT EDIT ANYTHING FROM HERE DOWN
 
@@ -93,7 +93,8 @@ DEPFILES=$(patsubst %.o,%.d,${OBJECTS})
 BIN_DIRS=$(foreach dir,$(call FIXPATH,$(SOURCEDIRS)),$(patsubst $(call FIXPATH,$(PROJECT_DIR)%),$(call FIXPATH,$(PROJECT_DIR)/$(OBJ_O_DIR)%),$(dir)))
 
 # so there is no file that gets mistaked with the tasks listed
-.PHONY = all info clean lib run
+.PHONY = all info clean libs libs-r libs-d run clean_object clean_exe clean_libs
+.NOTPARALLEL: libs
 
 all: ${BIN_DIRS} ${PROJECT}
 
@@ -106,10 +107,22 @@ ${PROJECT_DIR}/${OBJ_O_DIR}%.o:${PROJECT_DIR}%.${CPP_EXT}
 ${PROJECT_DIR}/${OBJ_O_DIR}%.o:${PROJECT_DIR}%.${C_EXT}
 	${CC} ${C_COMPILE_OPTIONS} ${INCLUDES} ${DEPFLAGS} -c -o ${@} ${<}
 
+libs: 
+	make libs-r 
+	make libs-d
+
 # build the lib with the same compile options
-libs: ${BIN_DIRS} ${LIB_DIR} ${LIB_OBJECTS}
+# do this as a clean build unless sure that previous builds where release builds
+libs-r: CURRENT_FLAGS = ${RELEASE_FLAGS}
+libs-r: clean_object ${BIN_DIRS} ${LIB_DIR} ${LIB_OBJECTS}
 	ar rcs $(call FIXPATH,${PROJECT_DIR}/${LIB_DIR}/${LIB_NAME}.a) ${LIB_OBJECTS}
-	@echo Libs created
+	@echo Release Libs created
+
+# do this as a clean build unless sure that previous builds where release builds
+libs-d: CURRENT_FLAGS = ${DEBUG_FLAGS}
+libs-d: clean_object ${BIN_DIRS} ${LIB_DIR} ${LIB_OBJECTS}
+	ar rcs $(call FIXPATH,${PROJECT_DIR}/${LIB_DIR}/${LIB_NAME}-d.a) ${LIB_OBJECTS}
+	@echo Debug Libs created
 
 # include the dependencies
 -include ${DEPFILES}
@@ -124,9 +137,16 @@ $(call FIXPATH,${PROJECT_DIR}/${OBJ_O_DIR})%:
 ${LIB_DIR}:
 	$(call makeDir,$(call FIXPATH,${PROJECT_DIR}/${LIB_DIR}))
 
-clean:
-	$(shell ${RMDIR} ${OBJ_O_DIR} $(call FIXPATH,${PROJECT_DIR}/${LIB_DIR}))
+clean: clean_object clean_exe clean_libs	
+
+clean_object:
+	$(shell ${RMDIR} ${OBJ_O_DIR})
+
+clean_exe:
 	$(shell ${RM} ${PROJECT}${EXE})
+
+clean_libs:
+	$(shell ${RMDIR} $(call FIXPATH,${PROJECT_DIR}/${LIB_DIR}))
 
 # builds and runs the program
 run: ${BIN_DIRS} ${PROJECT}

@@ -22,7 +22,7 @@ public:
     /// @warning you must first create all settings and then load from file or else nothing will be loaded 
     /// @note the first file that matches the name will be used for loading settings
     /// @param fileName the name of the settings files
-    /// @param directories the directories to search for the file (must end in a "/")
+    /// @param directories the directories to search for the file (must end in a "/" or be a empty string for current dir)
     /// @returns false if no file was found true if file was found and attempted to load from
     bool tryLoadFromFile(const std::string& fileName = "Settings.ini", const std::list<std::string>& directories = {});
     /// @brief saves the settings to file 

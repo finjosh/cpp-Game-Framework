@@ -3,6 +3,8 @@
 
 #pragma once
 
+#include "SFML/Graphics/Color.hpp"
+
 #include <cstdint>
 #include <string>
 
@@ -43,15 +45,13 @@ public:
     void operator /= (float scaler);
 
     //* SFML
-    #ifdef SFML_COLOR_HPP
-     /// @note you MUST include the sfml Color header BEFORE including this Color header
+    /// @note you MUST include the sfml Color header BEFORE including this Color header
     inline Color(const sf::Color& color) : r(color.r), g(color.g), b(color.b), a(color.a) {}
     /// @returns the equivalent sf::Color
     explicit inline operator sf::Color() const
     {
         return sf::Color{r,g,b,a};
     } 
-    #endif
 
     //* TGUI
     #ifdef TGUI_COLOR_HPP

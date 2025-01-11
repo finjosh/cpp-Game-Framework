@@ -47,7 +47,6 @@ private:
     b2Manifold* const m_manifold;
 };
 
-// TODO implement a way to use the updateBody event for either all functions in the collider or a way to easily add functions to the event
 /// @note dont ever store this object
 class PreSolveData 
 {

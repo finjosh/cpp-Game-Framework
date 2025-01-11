@@ -92,12 +92,12 @@ public:
 
     inline DrawRenderer()
     {
-        T::setScale(PIXELS_PER_METER, PIXELS_PER_METER);
+        T::setScale({PIXELS_PER_METER, PIXELS_PER_METER});
     }
 
     inline DrawRenderer(const T& shape) : T(shape)
     {
-        T::setScale(PIXELS_PER_METER, PIXELS_PER_METER);
+        T::setScale({PIXELS_PER_METER, PIXELS_PER_METER});
     }
 
     inline virtual ~DrawRenderer() = default;
