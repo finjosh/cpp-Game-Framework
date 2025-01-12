@@ -8,8 +8,8 @@
                 "${workspaceFolder}/include",
                 "/Git_projects/cpp-Utilities/include",
                 "/VSCodeFolder/Libraries/thread-pool-4.1.0/include",
-                "/VSCodeFolder/Libraries/box2c-3.0/include",
-                "/VSCodeFolder/Libraries/box2c-3.0", // this is used for including stuff that box2d wants to be hidden
+                "/VSCodeFolder/Libraries/box2d-main/include",
+                "/VSCodeFolder/Libraries/box2d-main", // this is used for including stuff that box2d wants to be hidden
                 "/Git_projects/cpp-Networking-Library/include",
                 "/VSCodeFolder/Libraries/TGUI-1.7/include"
             ],

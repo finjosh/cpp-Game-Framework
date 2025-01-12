@@ -15,7 +15,7 @@ A work in progress game engine/framework.
     - Version: 1.7
 
 ### [Box2D](https://box2d.org/)
-    - Version: 2.4
+    - Version: latest commit as of 2025-01-01
 
 ### [thread pool](https://github.com/bshoshany/thread-pool?tab=readme-ov-file#installing-the-library)
     - Version: 4.1.0

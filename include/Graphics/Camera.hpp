@@ -32,7 +32,11 @@ public:
     /// @note sets this as the main camera in CameraManager
     /// @note main cameras have a fixed screenRect (0,0,1,1)
     void setMainCamera();
+    /// @note main camera defaults to the first camera added
+    /// @note main cameras have a fixed screenRect (0,0,1,1)
+    /// @returns pointer to the main camera if there is one else nullptr
     bool isMainCamera() const;
+    static Camera* getMainCamera();
     /// @brief sets the size of the view
     void setViewSize(Vector2 size);
     /// @brief sets the size of the view

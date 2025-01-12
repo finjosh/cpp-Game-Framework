@@ -1,5 +1,6 @@
 #include "Physics/WorldHandler.hpp"
 #include "Physics/CollisionManager.hpp"
+#include "ThreadPool.hpp"
 
 #define CHECK_VALID_WORLD() assert(b2World_IsValid(m_world) && "World must be initalized before use!")
 
@@ -14,10 +15,43 @@ void WorldHandler::init(const Vector2& gravity, unsigned int workerCount)
     b2WorldDef worldDef = b2DefaultWorldDef();
     worldDef.gravity = (b2Vec2)gravity;
     worldDef.workerCount = workerCount == 0 ? 1 : workerCount;
+    worldDef.finishTask = &WorldHandler::finishTask;
+    worldDef.enqueueTask = &WorldHandler::enqueueTask;
 
     m_world = b2CreateWorld(&worldDef);
     CollisionManager::initWorkerThreadLists(worldDef.workerCount);
     b2World_SetPreSolveCallback(m_world, &CollisionManager::PreSolve, CollisionManager::get());
+}
+
+void* WorldHandler::enqueueTask(b2TaskCallback* task, int32_t itemCount, int32_t minRange, void* taskContext, void* userContext)
+{
+    std::list<std::future<void>>* tasks = new std::list<std::future<void>>();
+    std::int32_t end = 0;
+    std::int32_t i = 0;
+    std::int32_t range = std::ceil(itemCount/(float)ThreadPool::get().get_thread_ids().size());
+    range = range < minRange ? minRange : range;
+    for (std::int32_t start = 0; end < itemCount; start += range)
+    {
+        assert(i < ThreadPool::get().get_thread_ids().size() && "Too many tasks for the thread pool");
+        end = start + range;
+        end = end > itemCount ? itemCount : end;
+        tasks->emplace_back(
+            ThreadPool::get().submit_task([task, start, end, i, taskContext]()
+            { 
+                task(start, end, i, taskContext);
+            })
+        );
+        i++;
+    }
+    return tasks;
+}
+
+void WorldHandler::finishTask(void* userTask, void* userContext)
+{   
+    // ThreadPool::get().detach_task(userTask);
+    for (auto& task : *(static_cast<std::list<std::future<void>>*>(userTask)))
+        task.wait();
+    delete static_cast<std::list<std::future<void>>*>(userTask);
 }
 
 b2WorldId WorldHandler::getWorld() const

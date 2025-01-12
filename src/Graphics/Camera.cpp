@@ -39,6 +39,11 @@ bool Camera::isMainCamera() const
     return (this == CameraManager::getMainCamera());
 }
 
+Camera* Camera::getMainCamera() 
+{
+    return CameraManager::getMainCamera();
+}
+
 void Camera::setViewSize(Vector2 size)
 {
     m_size = size;

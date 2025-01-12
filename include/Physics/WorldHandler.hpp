@@ -45,8 +45,14 @@ public:
     bool isKeepLostSimulationTime() const;
     bool isInPhysicsUpdate() const;
 
+protected:
+    /// @returns the task that was enqueued which can be used to finish the task
+    static void* enqueueTask(b2TaskCallback* task, int32_t itemCount, int32_t minRange, void* taskContext, void* userContext);
+    static void finishTask(void* userTask, void* userContext);
+
 private:
-    
+    WorldHandler() = default;
+
     b2WorldId m_world = b2_nullWorldId;
     std::atomic<bool> m_inPhysicsUpdate = false;
     /// @brief if at low frames do we keep the time lost and make up for it later?

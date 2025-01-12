@@ -54,10 +54,7 @@ public:
     inline Rotation(b2Rot rot) : cos(rot.c), sin(rot.s) {}
     explicit inline operator b2Rot() const
     {
-        b2Rot temp;
-        temp.c = cos;
-        temp.s = sin;
-        return temp;
+        return b2MakeRot(this->getRadians());
     }
     // ----------------
 

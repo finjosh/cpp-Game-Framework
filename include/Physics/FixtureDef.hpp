@@ -30,7 +30,7 @@ public:
     /// @brief Normally shapes on static bodies don't invoke contact creation when they are added to the world. This overrides
 	/// @brief that behavior and causes contact creation. This significantly slows down static body creation which can be important
 	/// @brief when there are many static shapes.
-    inline bool isForceContactCreation() const { return m_shapeDef.forceContactCreation; }
+    inline bool isInvokingContactCreation() const { return m_shapeDef.invokeContactCreation; }
 
     // Setters
     /// @brief set the friction, typically in the range [0,1]
@@ -44,19 +44,19 @@ public:
     /// @brief set if this is a sensor
     inline void setAsSensor(bool isSensor) { m_shapeDef.isSensor = isSensor; }
     /// @brief Enable sensor events for this fixture
-    inline void setEnableSensorEvents(bool enable = true) { m_shapeDef.enableSensorEvents = enable; }
+    inline void enableSensorEvents(bool enable = true) { m_shapeDef.enableSensorEvents = enable; }
     /// @brief Enable contact events for this fixture
-    inline void setEnableContactEvents(bool enable = true) { m_shapeDef.enableContactEvents = enable; }
-    /// @brief Enable contact hit events for this fixture
-    /// @note default is false
-    inline void setEnableHitEvents(bool enable = true) { m_shapeDef.enableHitEvents = enable; }
+    inline void enableContactEvents(bool enable = true) { m_shapeDef.enableContactEvents = enable; }
+    // /// @brief Enable contact hit events for this fixture
+    // /// @note default is false
+    // inline void enableHitEvents(bool enable = true) { m_shapeDef.enableHitEvents = enable; }
     /// @brief Enable pre-solve contact events for this fixture
     /// @note default is false
-    inline void setEnablePreSolveEvents(bool enable = true) { m_shapeDef.enablePreSolveEvents = enable; }
+    inline void enablePreSolveEvents(bool enable = true) { m_shapeDef.enablePreSolveEvents = enable; }
     /// @brief Normally shapes on static bodies don't invoke contact creation when they are added to the world. This overrides
 	/// @brief that behavior and causes contact creation. This significantly slows down static body creation which can be important
 	/// @brief when there are many static shapes.
-    inline void setForceContactCreation(bool forceContactCreation) { m_shapeDef.forceContactCreation = forceContactCreation; }
+    inline void setInvokeContactCreation(bool forceContactCreation) { m_shapeDef.invokeContactCreation = forceContactCreation; }
 
 private:
     friend Fixture;

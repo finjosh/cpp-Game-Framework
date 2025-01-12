@@ -13,7 +13,7 @@ DebugDraw::DebugDraw()
     m_drawStruct.DrawSolidPolygon = DebugDraw::DrawSolidPolygon;
     m_drawStruct.DrawCircle = DebugDraw::DrawCircle;
     m_drawStruct.DrawSolidCircle = DebugDraw::DrawSolidCircle;
-    m_drawStruct.DrawCapsule = DebugDraw::DrawCapsule;
+    // m_drawStruct.DrawCapsule = DebugDraw::DrawCapsule;
     m_drawStruct.DrawSolidCapsule = DebugDraw::DrawSolidCapsule;
     m_drawStruct.DrawSegment = DebugDraw::DrawSegment;
     m_drawStruct.DrawTransform = DebugDraw::DrawTransform;
@@ -111,29 +111,29 @@ void DebugDraw::DrawSolidCircle(b2Transform transform, float radius, b2HexColor 
     DrawTransform(transform, context); // so that it has the direction lines
 }
 
-void DebugDraw::DrawCapsule(b2Vec2 p1, b2Vec2 p2, float radius, b2HexColor color, void *context)
-{
-    const int POINT_COUNT = 15; // point count per curved part
+// void DebugDraw::DrawCapsule(b2Vec2 p1, b2Vec2 p2, float radius, b2HexColor color, void *context)
+// {
+//     const int POINT_COUNT = 15; // point count per curved part
 
-    sf::ConvexShape capsule(POINT_COUNT*2);
+//     sf::ConvexShape capsule(POINT_COUNT*2);
 
-    radius *= PIXELS_PER_METER;
-    p1 *= PIXELS_PER_METER;
-    p2 *= PIXELS_PER_METER;
-    float rotation = Vector2(p1 - p2).rotation().getAngle() + PI/2;
+//     radius *= PIXELS_PER_METER;
+//     p1 *= PIXELS_PER_METER;
+//     p2 *= PIXELS_PER_METER;
+//     float rotation = Vector2(p1 - p2).rotation().getAngle() + PI/2;
 
-    for (int i = 0; i < POINT_COUNT; i++)
-        capsule.setPoint(i, (sf::Vector2f)(Vector2::rotate(Vector2{-1,0}, rotation + i*PI/POINT_COUNT) * radius + p1));
+//     for (int i = 0; i < POINT_COUNT; i++)
+//         capsule.setPoint(i, (sf::Vector2f)(Vector2::rotate(Vector2{-1,0}, rotation + i*PI/POINT_COUNT) * radius + p1));
 
-    for (int i = 0; i < POINT_COUNT; i++)
-        capsule.setPoint(i + POINT_COUNT, (sf::Vector2f)(Vector2::rotate(Vector2{1,0}, rotation + i*PI/POINT_COUNT) * radius + p2));
+//     for (int i = 0; i < POINT_COUNT; i++)
+//         capsule.setPoint(i + POINT_COUNT, (sf::Vector2f)(Vector2::rotate(Vector2{1,0}, rotation + i*PI/POINT_COUNT) * radius + p2));
 
-    capsule.setOutlineColor(B2SFColor(color));
-    capsule.setOutlineThickness(m_lineThickness);
-    DebugDraw::get().m_renderTarget->draw(capsule);
+//     capsule.setOutlineColor(B2SFColor(color));
+//     capsule.setOutlineThickness(m_lineThickness);
+//     DebugDraw::get().m_renderTarget->draw(capsule);
 
-    DebugDraw::DrawSegment(p1, p2, color, context);
-}
+//     DebugDraw::DrawSegment(p1, p2, color, context);
+// }
 
 void DebugDraw::DrawSolidCapsule(b2Vec2 p1, b2Vec2 p2, float radius, b2HexColor color, void *context)
 {

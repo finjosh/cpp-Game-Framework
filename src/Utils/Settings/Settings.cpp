@@ -26,10 +26,13 @@ bool Settings::tryLoadFromFile(const std::string& fileName, const std::list<std:
         }
     }
 
-    if (path == "" && directories.size() != 0)
-        return false;
-    else
-        path = fileName;
+    if (path == "")
+    {
+        if (directories.size() != 0)
+            return false;
+        else 
+            path = fileName;
+    }   
 
     iniParser fileData(path);
     fileData.setAutoSave(false);

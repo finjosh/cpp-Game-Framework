@@ -79,7 +79,7 @@ public:
         shape.makeBox(5,5);
 
         FixtureDef fixtureDef;
-        fixtureDef.setEnablePreSolveEvents(true);
+        fixtureDef.enablePreSolveEvents(true);
         fixtureDef.setFriction(1);
 
         Collider::createFixture(shape, fixtureDef);

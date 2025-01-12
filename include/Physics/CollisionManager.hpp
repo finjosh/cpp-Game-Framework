@@ -35,6 +35,8 @@ protected:
     friend PreSolveData;
 
 private:
+    CollisionManager() = default;
+
     struct m_contactData
     {
         m_contactData(b2ShapeId A, b2ShapeId B);

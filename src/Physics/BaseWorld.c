@@ -4,22 +4,22 @@
 
 b2Contact* getWorldContacts(b2WorldId world)
 {
-    return b2GetWorldFromId(world)->contactArray;
+    return b2GetWorldFromId(world)->contacts.data;
 }
 
 b2Contact* getWorldContactsFromWorld(void* worldPtr)
 {
-    return ((b2World*)worldPtr)->contactArray;
+    return ((b2World*)worldPtr)->contacts.data;
 }
 
 int getWorldContactCountFromWorld(void* worldPtr)
 {
-    return b2Array((b2World*)worldPtr).count;
+    return ((b2World*)worldPtr)->contacts.count;
 }
 
 int getWorldContactCount(b2WorldId world)
 {
-    return b2Array(b2GetWorldFromId(world)->contactArray).count;
+    return b2GetWorldFromId(world)->contacts.count;
 }
 
 _b2ContactData getContactData(b2WorldId worldId, b2Contact* contact)
@@ -29,8 +29,8 @@ _b2ContactData getContactData(b2WorldId worldId, b2Contact* contact)
     b2ContactSim* contactSim = b2GetContactSim(world, contact);
     rtn.manifold = &contactSim->manifold;
 
-    b2Shape* shapeA = world->shapeArray + contact->shapeIdA;
-    b2Shape* shapeB = world->shapeArray + contact->shapeIdB;
+    b2Shape* shapeA = world->shapes.data + contact->shapeIdA;
+    b2Shape* shapeB = world->shapes.data + contact->shapeIdB;
     rtn.shapeIdA = (b2ShapeId){shapeA->id + 1, worldId.index1 - 1, shapeA->revision};
     rtn.shapeIdB = (b2ShapeId){shapeB->id + 1, worldId.index1 - 1, shapeB->revision};
 
@@ -49,8 +49,8 @@ _b2ContactData getContactDataFromWorld(void* worldPtr, b2Contact* contact)
     b2ContactSim* contactSim = b2GetContactSim(world, contact);
     rtn.manifold = &contactSim->manifold;
 
-    b2Shape* shapeA = world->shapeArray + contact->shapeIdA;
-    b2Shape* shapeB = world->shapeArray + contact->shapeIdB;
+    b2Shape* shapeA = world->shapes.data + contact->shapeIdA;
+    b2Shape* shapeB = world->shapes.data + contact->shapeIdB;
     rtn.shapeIdA = (b2ShapeId){shapeA->id + 1, world->worldId, shapeA->revision};
     rtn.shapeIdB = (b2ShapeId){shapeB->id + 1, world->worldId, shapeB->revision};
 

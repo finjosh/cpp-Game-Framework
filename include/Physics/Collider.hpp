@@ -59,8 +59,9 @@ public:
     /// @warning asserts that the polygon is valid
     Fixture createFixtureSensor(const Fixture::Shape::Polygon& shape, FixtureDef fixtureDef = FixtureDef{});
 	/// @param fixture the fixture to be removed.
+    /// @param updateBodyMass You may defer the body mass update which can improve performance if several shapes on a body are destroyed at once.
     /// @note the given fixture will be invalid after this function is called since it is just a reference to the actual fixture
-	void destroyFixture(const Fixture& fixture);
+	void destroyFixture(const Fixture& fixture, bool updateBodyMass = true);
 
     /// @brief called when a contact begins
     /// @note these are called for each fixture
@@ -83,8 +84,8 @@ public:
     /// @note this is called for each fixture
     inline virtual void OnColliding(ContactData ContactData) {};
 
-    /// @returns inertia tensor of this collider, typically in kg*m^2
-    float getInertiaTensor() const;
+    /// @returns Get the rotational inertia of the body, usually in kg*m^2
+    float getRotationalInertia() const;
     /// @returns center of mass position in local space
     Vector2 getLocalCenterOfMass() const;
     /// @returns center of mass position in global space
@@ -93,11 +94,6 @@ public:
     /// @note This normally does not need to be called unless you called SetMassData to override the mass and you later want to reset the mass.
     /// @note You may also use this when automatic mass computation has been disabled.
     void applyMassFromShapes();
-    /// @brief Set the automatic mass setting
-    /// @note default is true
-    void setAutomaticMass(bool automaticMass = true);
-    /// @returns if automatic mass is set to true
-    bool getAutomaticMass() const;
     /// @brief Set the sleep threshold, typically in meters per second
     void setSleepThreshold(float sleepVelocity);
     /// @brief Get the sleep threshold, typically in meters per second.
@@ -174,9 +170,14 @@ public:
     /// @brief Get the rotational inertia of the body about the local origin.
 	/// @returns rotational inertia in kg-m^2.
 	float getInertia() const;
-    /// @brief  the mass data of the body.
+    /// @brief the mass data of the body.
 	/// @returns a struct containing the mass, inertia and center of the body.
 	b2MassData getMassData() const;
+    /// @brief calculates the mass of this collider via all of its fixtures
+    /// @note only use this if getMassData does not satisfy your needs (i.e. body is not of type b2_dynamicBody)
+    /// @note just sums the mass from every fixture
+    /// @returns the mass of this collider
+    float calculateMass() const;
     /// @brief Set the mass properties to override the mass properties of the fixtures.
 	/// @note that this changes the center of mass position.
 	/// @note that creating or destroying fixtures can also alter the mass.

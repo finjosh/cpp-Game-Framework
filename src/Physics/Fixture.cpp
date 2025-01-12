@@ -50,9 +50,7 @@ bool Fixture::isSensor()
 
 void Fixture::setDensity(float density, bool updateBodyProperties)
 {
-    b2Shape_SetDensity(m_fixture, density);
-    if (updateBodyProperties)
-        b2Body_ApplyMassFromShapes(b2Shape_GetBody(m_fixture));
+    b2Shape_SetDensity(m_fixture, density, updateBodyProperties);
 }
 
 float Fixture::getDensity() const
@@ -100,15 +98,15 @@ bool Fixture::areSensorEventsEnabled()
     return b2Shape_AreSensorEventsEnabled(m_fixture);
 }
 
-// void Fixture::enableContactEvents(bool enabled)
-// {
-//     b2Shape_EnableContactEvents(m_fixture, enabled);
-// }
+void Fixture::enableContactEvents(bool enabled)
+{
+    b2Shape_EnableContactEvents(m_fixture, enabled);
+}
 
-// bool Fixture::areContactEventsEnabled()
-// {
-//     return b2Shape_AreContactEventsEnabled(m_fixture);
-// }
+bool Fixture::areContactEventsEnabled()
+{
+    return b2Shape_AreContactEventsEnabled(m_fixture);
+}
 
 void Fixture::enablePreSolveEvents(bool enabled)
 {
@@ -135,9 +133,13 @@ bool Fixture::testPoint(Vector2 point)
     return b2Shape_TestPoint(m_fixture, (b2Vec2)point);
 }
 
-b2CastOutput Fixture::rayCast(Vector2 origin, Vector2 translation)
+b2CastOutput Fixture::rayCast(Vector2 origin, Vector2 translation, float maxFraction)
 {
-    return b2Shape_RayCast(m_fixture, (b2Vec2)origin, (b2Vec2)translation);
+    b2RayCastInput input;
+    input.origin = (b2Vec2)origin;
+    input.translation = (b2Vec2)translation;
+    input.maxFraction = 1.f;
+    return b2Shape_RayCast(m_fixture, &input);
 }
 
 Fixture::Shape::Circle Fixture::getCircle() const
@@ -199,20 +201,37 @@ void Fixture::setPolygon(const Fixture::Shape::Polygon& polygon, bool updateBody
         b2Body_ApplyMassFromShapes(b2Shape_GetBody(m_fixture));
 }
 
-// b2ChainId Fixture::getParentChain()
-// {
-//     return b2Shape_GetParentChain(m_fixture);
-// }
+b2MassData Fixture::calculateMassData() const
+{
+    switch (b2Shape_GetType(m_fixture))
+    {
+    case b2_circleShape:
+    {
+        auto temp = b2Shape_GetCircle(m_fixture);
+        return b2ComputeCircleMass(&temp, b2Shape_GetDensity(m_fixture));
+    }
+    
+    case b2_capsuleShape:
+    {
+        auto temp = b2Shape_GetCapsule(m_fixture);
+        return b2ComputeCapsuleMass(&temp, b2Shape_GetDensity(m_fixture));
+    }
 
-// int Fixture::getContactCapacity()
-// {
-//     return b2Shape_GetContactCapacity(m_fixture);
-// }
+    case b2_polygonShape:
+    {
+        auto temp = b2Shape_GetPolygon(m_fixture);
+        return b2ComputePolygonMass(&temp, b2Shape_GetDensity(m_fixture));
+    }
 
-// int Fixture::getContactData(b2ContactData* contactData, int capacity)
-// {
-//     return b2Shape_GetContactData(m_fixture, contactData, capacity);
-// }
+    default:
+        return b2MassData{0};
+    }
+}
+
+float Fixture::calculateMass() const
+{
+    return this->calculateMassData().mass;
+}
 
 b2AABB Fixture::getAABB() const
 {
@@ -224,9 +243,9 @@ Vector2 Fixture::getClosestPoint(Vector2 target) const
     return b2Shape_GetClosestPoint(m_fixture, (b2Vec2)target);
 }
 
-void Fixture::destroy()
+void Fixture::destroy(bool updateMassData)
 {
-    b2DestroyShape(m_fixture);
+    b2DestroyShape(m_fixture, updateMassData);
     m_fixture = b2_nullShapeId;
 }
 

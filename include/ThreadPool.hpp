@@ -5,16 +5,17 @@
 
 #include "BS_thread_pool.hpp"
 
+/// @brief Initializes to the number of hardware threads
 class ThreadPool : public BS::thread_pool
 {
 public:
-    inline ThreadPool() = default;
     /// @brief singleton Getter
     static ThreadPool& get();
 
 protected:
 
 private:
+    ThreadPool() : BS::thread_pool(std::thread::hardware_concurrency()) {};
     ThreadPool(ThreadPool const&) = delete;
     void operator=(ThreadPool const&) = delete;
 };

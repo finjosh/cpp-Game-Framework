@@ -26,7 +26,7 @@ Collider::Collider()
     b2BodyDef bodyDef = b2DefaultBodyDef();
     bodyDef.type = b2_dynamicBody;
     bodyDef.position = (b2Vec2)Object::getPosition();
-    bodyDef.angle = Object::getRotation().getAngle();
+    bodyDef.rotation = (b2Rot)Object::getRotation();
     m_body = b2CreateBody(WorldHandler::get()->getWorld(), &bodyDef);
     b2Body_SetUserData(m_body, (void*)this);
 }
@@ -81,9 +81,9 @@ Fixture Collider::createFixtureSensor(const Fixture::Shape::Polygon& shape, Fixt
     return Fixture{b2CreatePolygonShape(m_body, &fixtureDef.m_shapeDef, &shape.m_shape)};
 }
 
-void Collider::destroyFixture(const Fixture& fixture)
+void Collider::destroyFixture(const Fixture& fixture, bool updateBodyMass)
 {
-    b2DestroyShape(fixture.m_fixture);
+    b2DestroyShape(fixture.m_fixture, updateBodyMass);
 }
 
 void Collider::setPhysicsEnabled(bool enabled)
@@ -112,7 +112,7 @@ void Collider::m_updatePhysicsState()
 void Collider::m_updateTransform()
 {
     // This could lead to slow downs since we are using lots of trig functions here
-    b2Body_SetTransform(m_body, (b2Vec2)Object::getGlobalPosition(), Object::getGlobalRotation().getAngle() /*using atan2 then cos and sin*/); 
+    b2Body_SetTransform(m_body, (b2Vec2)Object::getGlobalPosition(), (b2Rot)Object::getGlobalRotation() /*using atan2 then cos and sin*/); 
 }
 
 void Collider::m_update(b2Transform* transform)
@@ -122,9 +122,9 @@ void Collider::m_update(b2Transform* transform)
     // Object::m_onTransformUpdated.setEnabled(true);
 }
 
-float Collider::getInertiaTensor() const
+float Collider::getRotationalInertia() const
 {
-    return b2Body_GetInertiaTensor(m_body);
+    return b2Body_GetRotationalInertia(m_body);
 }
 
 Vector2 Collider::getLocalCenterOfMass() const
@@ -140,16 +140,6 @@ Vector2 Collider::getGlobalCenterOfMass() const
 void Collider::applyMassFromShapes()
 {
     b2Body_ApplyMassFromShapes(m_body);
-}
-
-void Collider::setAutomaticMass(bool automaticMass)
-{
-    b2Body_SetAutomaticMass(m_body, automaticMass);
-}
-
-bool Collider::getAutomaticMass() const
-{
-    return b2Body_GetAutomaticMass(m_body);
 }
 
 void Collider::setSleepThreshold(float sleepVelocity)
@@ -289,6 +279,16 @@ float Collider::getMass() const
 b2MassData Collider::getMassData() const
 {
     return b2Body_GetMassData(m_body);
+}
+
+float Collider::calculateMass() const
+{
+    float mass = 0.f;
+    for (auto fixture: this->getFixtureArray())
+    {
+        mass += fixture.calculateMass();
+    }
+    return mass;
 }
 
 void Collider::setMassData(const b2MassData& data)

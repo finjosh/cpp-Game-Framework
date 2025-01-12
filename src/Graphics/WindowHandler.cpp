@@ -31,10 +31,10 @@ void WindowHandler::initRenderWindow(sf::VideoMode mode, const sf::String &title
     sf::RenderWindow* temp = m_renderWindow;
 
     m_renderWindow = new sf::RenderWindow(mode, title, style, state, settings);
-    if (temp != nullptr) // The previous window has to be deleted after the new one is created or else it will crash
-        delete(temp);
     m_renderWindow->setFramerateLimit(m_FPSLimit);
     onRenderWindowChanged.invoke(m_renderWindow);
+    if (temp != nullptr) // The previous window has to be deleted after the new one is created or else it will crash
+        delete(temp);
 }
 
 void WindowHandler::Display()
