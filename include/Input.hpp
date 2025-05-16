@@ -14,6 +14,8 @@
 #include <set>
 
 // TODO implement mouse scroll wheel and joystick
+// TODO implement every event type that has not been implemented yet
+// TODO implement clipboard access?
 class Input
 {
 public:
@@ -109,7 +111,7 @@ public:
     /// @note call this before handling any sfml input but NOT in the event loop
     void UpdateJustStates();
 
-    enum State
+    enum class State
     {
         JustPressed, 
         JustReleased,
@@ -119,7 +121,7 @@ public:
 
     struct FrameData
     {
-        enum Type
+        enum class Type
         {
             Mouse,
             Keyboard
@@ -205,9 +207,12 @@ public:
 
 protected:
     std::set<Action> m_actions;
+
 private:
     std::unordered_map<sf::Mouse::Button, State> m_mouse;
     std::unordered_map<sf::Keyboard::Scancode, State> m_keyboard; // storing keys with Scancode for more possible keys that can be used as input
+
+    // std::map<int, Vector2> m_touches;
     std::list<FrameData> m_lastFrame;
 
     /// @brief used for converting from a string to a button

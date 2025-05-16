@@ -21,16 +21,20 @@ sf::RenderWindow* WindowHandler::getRenderWindow()
     return m_renderWindow;
 }
 
-void WindowHandler::initRenderWindow(sf::VideoMode mode, const sf::String &title, std::uint32_t style, sf::State state, const sf::ContextSettings &settings)
+void WindowHandler::initRenderWindowSettings(sf::VideoMode mode, const sf::String &title, std::uint32_t style, sf::State state, const sf::ContextSettings &settings)
 {
     m_videoMode = mode;
     m_contextSettings = settings;
     m_style = style;
     m_state = state;
+    m_title = title;
+}
 
+void WindowHandler::createRenderWindow()
+{
     sf::RenderWindow* temp = m_renderWindow;
 
-    m_renderWindow = new sf::RenderWindow(mode, title, style, state, settings);
+    m_renderWindow = new sf::RenderWindow(m_videoMode, m_title, m_style, m_state, m_contextSettings);
     m_renderWindow->setFramerateLimit(m_FPSLimit);
     onRenderWindowChanged.invoke(m_renderWindow);
     if (temp != nullptr) // The previous window has to be deleted after the new one is created or else it will crash
@@ -55,7 +59,7 @@ void WindowHandler::Display()
     if (CameraManager::m_cameras.size() == 0)
     {   
         DrawableManager::draw(m_renderWindow, m_contextSettings);
-        DebugDraw::get().draw(WorldHandler::get()->getWorld(), m_renderWindow);
+        DebugDraw::get().draw(WorldHandler::get(), m_renderWindow);
     }
     for (auto camera: CameraManager::m_cameras)
     {
@@ -71,7 +75,7 @@ void WindowHandler::Display()
         camera->disableBlacklistedCanvases();
         DrawableManager::draw(m_renderWindow, m_contextSettings);
         camera->enableBlacklistedCanvases();
-        DebugDraw::get().draw(WorldHandler::get()->getWorld(), m_renderWindow);
+        DebugDraw::get().draw(WorldHandler::get(), m_renderWindow);
         
         camera->m_drawOverlay((sf::RenderTarget*)m_renderWindow);
     }
@@ -85,6 +89,8 @@ void WindowHandler::Display()
 
 Vector2 WindowHandler::getMousePos()
 {
+    assert("Must set render window before trying to get mouse position" && m_renderWindow);
+
     Vector2 temp(sf::Mouse::getPosition(*m_renderWindow));
     temp.x *= m_renderWindow->getView().getSize().x / m_renderWindow->getSize().x;
     temp.y *= m_renderWindow->getView().getSize().y / m_renderWindow->getSize().y;
@@ -102,17 +108,19 @@ Vector2 WindowHandler::getMousePos()
 
 Vector2 WindowHandler::getMouseScreenPos()
 {
+    assert("Must set render window before trying to get screen size" && m_renderWindow);
     return Vector2{sf::Mouse::getPosition(*m_renderWindow)}/PIXELS_PER_METER;
 }
 
 Vector2 WindowHandler::getScreenSize()
 {
+    assert("Must set render window before trying to get screen size" && m_renderWindow);
     return Vector2{m_renderWindow->getSize()} / PIXELS_PER_METER;
 }
 
 void WindowHandler::setContextSettings(sf::ContextSettings contextSettings)
 {
-    initRenderWindow(m_videoMode, m_title, m_style, m_state, contextSettings);
+    initRenderWindowSettings(m_videoMode, m_title, m_style, m_state, contextSettings);
 }
 
 sf::ContextSettings WindowHandler::getContextSettings()
@@ -122,12 +130,12 @@ sf::ContextSettings WindowHandler::getContextSettings()
 
 void WindowHandler::setVideMode(sf::VideoMode mode)
 {
-    initRenderWindow(mode, m_title, m_style, m_state, m_contextSettings);
+    initRenderWindowSettings(mode, m_title, m_style, m_state, m_contextSettings);
 }
 
 void WindowHandler::setState(sf::State state)
 {
-    initRenderWindow(m_videoMode, m_title, m_style, state, m_contextSettings);
+    initRenderWindowSettings(m_videoMode, m_title, m_style, state, m_contextSettings);
 }
 
 sf::State WindowHandler::getState()
@@ -142,7 +150,7 @@ sf::VideoMode WindowHandler::getVideMode()
 
 void WindowHandler::setStyle(std::uint32_t style)
 {
-    initRenderWindow(m_videoMode, m_title, style, m_state, m_contextSettings);
+    initRenderWindowSettings(m_videoMode, m_title, style, m_state, m_contextSettings);
 }
 
 std::uint32_t WindowHandler::getStyle()
@@ -152,7 +160,15 @@ std::uint32_t WindowHandler::getStyle()
 
 void WindowHandler::setTitle(const std::string& title)
 {
-    m_renderWindow->setTitle(title);
+    m_title = title;
+    if (m_renderWindow != nullptr)
+    {
+        m_renderWindow->setTitle(title);
+    }
+    #ifdef DEBUG
+    else
+        std::cout << __FUNCTION__ << " - Unable to set title of window immediately since no window exists" << std::endl;
+    #endif
 }
 
 std::string WindowHandler::getTitle()
@@ -163,7 +179,14 @@ std::string WindowHandler::getTitle()
 void WindowHandler::setFPSLimit(unsigned int value)
 {
     m_FPSLimit = value;
-    m_renderWindow->setFramerateLimit(value);
+    if (m_renderWindow != nullptr)
+    {
+        m_renderWindow->setFramerateLimit(value);
+    }
+    #ifdef DEBUG
+    else
+        std::cout << __FUNCTION__ << " - Unable to set FPS limit of window immediately since no window exists" << std::endl;
+    #endif
 }
 
 unsigned int WindowHandler::getFPSLimit()

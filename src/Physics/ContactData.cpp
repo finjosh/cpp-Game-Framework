@@ -52,7 +52,7 @@ const Vector2 ContactData::getContactPoint(std::int32_t index) const
     return m_manifold->points[index].point; // TODO implement getter functions for the manifold point data
 }
 
-const float ContactData::getSeparations(std::int32_t index) const
+float ContactData::getSeparations(std::int32_t index) const
 {
     assert(index > 0 && index <= m_manifold->pointCount && "Index must be in the range [0,2]");
     return m_manifold->points[index].separation;
@@ -61,6 +61,11 @@ const float ContactData::getSeparations(std::int32_t index) const
 Vector2 ContactData::getNormal() const
 {
     return m_manifold->normal;
+}
+
+float ContactData::getRollingImpulse() const
+{
+    return m_manifold->rollingImpulse;
 }
 
 //* Pre Solve Data
@@ -113,13 +118,13 @@ std::int32_t PreSolveData::getPointCount() const
     return m_manifold->pointCount;
 }
 
-const Vector2 PreSolveData::getContactPoint(std::int32_t index) const
+Vector2 PreSolveData::getContactPoint(std::int32_t index) const
 {
     assert(index > 0 && index <= m_manifold->pointCount && "Index must be in the range [0,2]");
     return m_manifold->points[index].point; // TODO implement getter functions for the manifold point data
 }
 
-const float PreSolveData::getSeparations(std::int32_t index) const
+float PreSolveData::getSeparations(std::int32_t index) const
 {
     assert(index > 0 && index <= m_manifold->pointCount && "Index must be in the range [0,2]");
     return m_manifold->points[index].separation;
@@ -128,4 +133,9 @@ const float PreSolveData::getSeparations(std::int32_t index) const
 Vector2 PreSolveData::getNormal() const
 {
     return m_manifold->normal;
+}
+
+float PreSolveData::getRollingImpulse() const
+{
+    return m_manifold->rollingImpulse;
 }

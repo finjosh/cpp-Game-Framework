@@ -8,7 +8,7 @@
 
 class Settings;
 
-enum SettingInputValidation
+enum class SettingInputValidation
 {
     None = 0,
     CompareFunc,

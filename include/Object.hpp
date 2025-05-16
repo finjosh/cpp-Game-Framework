@@ -166,7 +166,7 @@ public:
             if (rawPtr != nullptr)
             {
                 m_ptr = rawPtr;    
-                m_eventID = m_ptr->m_onDestroy.connect(Object::Ptr<T>::removePtr, this);
+                m_eventID = m_ptr->m_onDestroy.connect(&Object::Ptr<T>::removePtr, this);
             }
         }
 

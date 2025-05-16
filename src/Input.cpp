@@ -389,7 +389,7 @@ void Input::HandelEvent(sf::Event event, bool wasHandled)
             if (this->isPressed(key->scancode))
             {
                 m_keyboard[key->scancode] = State::JustReleased;
-                m_lastFrame.emplace_back(FrameData::Keyboard, State::JustReleased, key->scancode);
+                m_lastFrame.emplace_back(FrameData::Type::Keyboard, State::JustReleased, key->scancode);
             }
         }
         else if (const sf::Event::MouseButtonReleased* mouseButton = event.getIf<sf::Event::MouseButtonReleased>()) 
@@ -397,7 +397,7 @@ void Input::HandelEvent(sf::Event event, bool wasHandled)
             if (this->isPressed(mouseButton->button))
             {
                 m_mouse[mouseButton->button] = State::JustReleased;
-                m_lastFrame.emplace_back(FrameData::Mouse, State::JustReleased, mouseButton->button);
+                m_lastFrame.emplace_back(FrameData::Type::Mouse, State::JustReleased, mouseButton->button);
             }
         }
 
@@ -412,7 +412,7 @@ void Input::HandelEvent(sf::Event event, bool wasHandled)
             if (this->isPressed(key.first))
             {
                 m_keyboard[key.first] = State::JustReleased;
-                m_lastFrame.emplace_back(FrameData::Keyboard, State::JustReleased, key.first);
+                m_lastFrame.emplace_back(FrameData::Type::Keyboard, State::JustReleased, key.first);
             }
         }
     
@@ -421,7 +421,7 @@ void Input::HandelEvent(sf::Event event, bool wasHandled)
             if (this->isPressed(button.first))
             {
                 m_mouse[button.first] = State::JustReleased;
-                m_lastFrame.emplace_back(FrameData::Mouse, State::JustReleased, button.first);
+                m_lastFrame.emplace_back(FrameData::Type::Mouse, State::JustReleased, button.first);
             }
         }
 
@@ -431,22 +431,22 @@ void Input::HandelEvent(sf::Event event, bool wasHandled)
     if (const sf::Event::KeyPressed* key = event.getIf<sf::Event::KeyPressed>())
     {
         m_keyboard[key->scancode] = State::JustPressed;
-        m_lastFrame.emplace_back(FrameData::Keyboard, State::JustPressed, key->scancode);
+        m_lastFrame.emplace_back(FrameData::Type::Keyboard, State::JustPressed, key->scancode);
     }
     else if (const sf::Event::KeyReleased* key = event.getIf<sf::Event::KeyReleased>())
     {
         m_keyboard[key->scancode] = State::JustReleased;
-        m_lastFrame.emplace_back(FrameData::Keyboard, State::JustReleased, key->scancode);
+        m_lastFrame.emplace_back(FrameData::Type::Keyboard, State::JustReleased, key->scancode);
     }
     else if (const sf::Event::MouseButtonPressed* mouseButton = event.getIf<sf::Event::MouseButtonPressed>())
     {
         m_mouse[mouseButton->button] = State::JustPressed;
-        m_lastFrame.emplace_back(FrameData::Mouse, State::JustPressed, mouseButton->button);
+        m_lastFrame.emplace_back(FrameData::Type::Mouse, State::JustPressed, mouseButton->button);
     }
     else if (const sf::Event::MouseButtonReleased* mouseButton = event.getIf<sf::Event::MouseButtonReleased>())
     {
         m_mouse[mouseButton->button] = State::JustReleased;
-        m_lastFrame.emplace_back(FrameData::Mouse, State::JustReleased, mouseButton->button);
+        m_lastFrame.emplace_back(FrameData::Type::Mouse, State::JustReleased, mouseButton->button);
     }
 }
 
@@ -457,7 +457,7 @@ void Input::UpdateJustStates()
         State newState = data.state == State::JustPressed ? State::Pressed : State::Released; // since it should only be just states that are added
         if (data.type == FrameData::Type::Mouse)
             m_mouse[data.mouseButton] = newState;
-        else if (data.type == FrameData::Keyboard)
+        else if (data.type == FrameData::Type::Keyboard)
             m_keyboard[data.scanCode] = newState;
     }
     m_lastFrame.clear();

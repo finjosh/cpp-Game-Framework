@@ -10,9 +10,10 @@
 #include "Physics/Fixture.hpp"
 #include "Physics/FixtureArray.hpp"
 #include "Physics/ContactData.hpp"
+#include "Physics/ContactDataArray.hpp"
+#include "Physics/WorldHandler.hpp"
 #include "Object.hpp"
 #include "EngineSettings.hpp"
-#include "Physics/ContactDataArray.hpp"
 
 class CollisionManager;
 
@@ -25,7 +26,7 @@ class Collider : public virtual Object
 public:
     using Ptr = Object::Ptr<Collider>;
 
-    Collider();
+    Collider(WorldHandler& world = WorldHandler::get());
     virtual ~Collider();
 
     /// @brief Set the physics enabled state of this object
@@ -65,12 +66,24 @@ public:
 
     /// @brief called when a contact begins
     /// @note these are called for each fixture
+    /// @note only called if both fixtures are NOT sensors
     /// @param ContactData the collision data
     inline virtual void BeginContact(ContactData ContactData) {}; // TODO add sensor specific versions?
     /// @brief called when a contact ends
     /// @note these are called for each fixture
+    /// @note only called if both fixtures are NOT sensors
     /// @param ContactData the collision data
     inline virtual void EndContact(ContactData ContactData) {};
+    /// @brief called when two fixtures begin contact and one is a sensor
+    /// @note these are called for each fixture
+    /// @warning only gets called if sensor events are enabled for this fixture
+    /// @param ContactData the collision data
+    inline virtual void BeginContactSensor(ContactData ContactData) {};
+    /// @brief called when two fixtures end contact and one is a sensor
+    /// @note these are called for each fixture
+    /// @warning only gets called if sensor events are enabled for this fixture
+    /// @param ContactData the collision data
+    inline virtual void EndContactSensor(ContactData ContactData) {};
     /// @brief This is called before any collision is handled
     /// @note this will be called if this collider or the one colliding with this one has PreSolveEvents enabled
     /// @warning MUST be thread safe assuming you ever use multiple threads with the physics
@@ -82,6 +95,7 @@ public:
     /// @brief called every frame until the two objects are no longer colliding
     /// @note this will also be called on start of contact
     /// @note this is called for each fixture
+    /// @note only called if both fixtures are NOT sensors
     inline virtual void OnColliding(ContactData ContactData) {};
 
     /// @returns Get the rotational inertia of the body, usually in kg*m^2

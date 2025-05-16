@@ -25,8 +25,8 @@ SettingsUI::SettingsUI(Canvas* canvas, const tgui::Layout2d& size, const tgui::L
         }
     });
 
-    m_onEnabled(SettingsUI::setVisible, this, true);
-    m_onDisabled(SettingsUI::setVisible, this, false);
+    m_onEnabled(&SettingsUI::setVisible, this, true);
+    m_onDisabled(&SettingsUI::setVisible, this, false);
 
     SPACE_BETWEEN_WIDGETS = m_parent->getSize().y * 0.01;
     HEIGHT = m_parent->getSize().y * 0.1;

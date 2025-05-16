@@ -4,20 +4,20 @@
 #include "ObjectManager.hpp"
 #include "Physics/ContactData.hpp"
 extern "C" {
-    #include "Physics/BaseWorld.h"
+    #include "BaseWorld.h"
 }
 
 CollisionManager::m_contactData::m_contactData(b2ShapeId A, b2ShapeId B) : A(A), B(B) {}
 bool CollisionManager::m_contactData::operator < (const m_contactData& data) const
 {
     return this->A.world0 < data.A.world0 || this->B.world0 < data.B.world0 ||
-           this->A.revision < data.A.revision || this->B.revision < data.B.revision ||
+           this->A.generation < data.A.generation || this->B.generation < data.B.generation ||
            this->A.index1 < data.A.index1 || this->B.index1 < data.B.index1;
 }
 bool CollisionManager::m_contactData::operator == (const m_contactData& data) const
 {
     return this->A.world0 == data.A.world0 && this->B.world0 == data.B.world0 &&
-           this->A.revision == data.A.revision && this->B.revision == data.B.revision &&
+           this->A.generation == data.A.generation && this->B.generation == data.B.generation &&
            this->A.index1 == data.A.index1 && this->B.index1 == data.B.index1;
 }
 
@@ -65,7 +65,7 @@ void CollisionManager::Update()
 
     // updating the position of the objects for bodies that moved
     {
-        b2BodyEvents events = b2World_GetBodyEvents(WorldHandler::get()->getWorld());
+        b2BodyEvents events = b2World_GetBodyEvents(WorldHandler::get().getWorld());
 
         for (std::int32_t i = 0; i < events.moveCount; i++)
         {
@@ -77,71 +77,56 @@ void CollisionManager::Update()
     // !!!!!! This could end up being very bad if box2d ever uses the last bit of the flags
     // !!!!!! also could be very bad if the flags are ever reset by box2d
     #define WAS_TOUCHING_FLAG 0b10000000000000000000000000000000
-    int count = 0;
-    void* world = getWorld(WorldHandler::get()->getWorld());
-    b2Contact* contact = getWorldContactsFromWorld(world);
-    for (int i = 0; i < getWorldContactCountFromWorld(world); i++)
+    void* world = getWorld(WorldHandler::get().getWorld());
+    b2Contact* contact = getContactsFromWorld(world);
+    for (int i = 0; i < getContactCountFromWorld(world); i++)
     {
-        // only one of the following are set at a time, touching or sensor touching
+        if (contact == nullptr || contact->contactId == B2_NULL_INDEX)
+            continue;
+
         std::uint32_t flags = contact->flags;
         bool isTouching = flags & b2_contactTouchingFlag;
         bool wasTouching = flags & WAS_TOUCHING_FLAG;
-        if (flags & b2_contactSensorTouchingFlag)
-        {
-            if (flags & b2_contactEnableSensorEvents)
+        
+        if (flags & b2_contactEnableContactEvents && (isTouching || wasTouching) && contact->localIndex != B2_NULL_INDEX)
+        {   
+            _b2ContactData contactData = getContactDataFromWorld(world, contact);
+            Collider* A = GET_COLLIDER(contactData.shapeIdA);
+            Collider* B = GET_COLLIDER(contactData.shapeIdB);
+
+            A->OnColliding(ContactData{contactData.shapeIdA, contactData.shapeIdB, contactData.manifold});
+            B->OnColliding(ContactData{contactData.shapeIdB, contactData.shapeIdA, contactData.manifold});
+
+            if (!wasTouching) // we started contact
             {
-                // TODO add sensor specific versions?
-                //! this is currently the exact same as touching events
-                if ((isTouching || wasTouching) && contact->localIndex != B2_NULL_INDEX && flags & b2_contactEnableContactEvents)
-                {   
-                    _b2ContactData contactData = getContactDataFromWorld(world, contact);
-                    Collider* A = GET_COLLIDER(contactData.shapeIdA);
-                    Collider* B = GET_COLLIDER(contactData.shapeIdB);
-
-                    A->OnColliding(ContactData{contactData.shapeIdA, contactData.shapeIdB, contactData.manifold});
-                    B->OnColliding(ContactData{contactData.shapeIdB, contactData.shapeIdA, contactData.manifold});
-
-                    if (!wasTouching) // we started contact
-                    {
-                        if (isTouching)
-                        {
-                            A->BeginContact(ContactData{contactData.shapeIdA, contactData.shapeIdB, contactData.manifold});
-                            B->BeginContact(ContactData{contactData.shapeIdB, contactData.shapeIdA, contactData.manifold});
-                        }
-                    }
-                    else // we lost contact
-                    {
-                        if (!isTouching)
-                        {
-                            A->EndContact(ContactData{contactData.shapeIdA, contactData.shapeIdB, contactData.manifold});
-                            B->EndContact(ContactData{contactData.shapeIdB, contactData.shapeIdA, contactData.manifold});
-                        }
-                    }
-                }
-            }
-        }
-        else
-        {
-            if ((isTouching || wasTouching) && contact->localIndex != B2_NULL_INDEX && flags & b2_contactEnableContactEvents)
-            {   
-                _b2ContactData contactData = getContactDataFromWorld(world, contact);
-                Collider* A = GET_COLLIDER(contactData.shapeIdA);
-                Collider* B = GET_COLLIDER(contactData.shapeIdB);
-
-                A->OnColliding(ContactData{contactData.shapeIdA, contactData.shapeIdB, contactData.manifold});
-                B->OnColliding(ContactData{contactData.shapeIdB, contactData.shapeIdA, contactData.manifold});
-
-                if (!wasTouching) // we started contact
+                if (isTouching)
                 {
-                    if (isTouching)
+                    if (b2Shape_IsSensor(contactData.shapeIdA) || b2Shape_IsSensor(contactData.shapeIdB))
+                    {
+                        if (b2Shape_AreSensorEventsEnabled(contactData.shapeIdA))
+                            A->BeginContactSensor(ContactData{contactData.shapeIdA, contactData.shapeIdB, contactData.manifold});
+                        if (b2Shape_AreSensorEventsEnabled(contactData.shapeIdB))
+                            B->BeginContactSensor(ContactData{contactData.shapeIdB, contactData.shapeIdA, contactData.manifold});
+                    }
+                    else
                     {
                         A->BeginContact(ContactData{contactData.shapeIdA, contactData.shapeIdB, contactData.manifold});
                         B->BeginContact(ContactData{contactData.shapeIdB, contactData.shapeIdA, contactData.manifold});
                     }
                 }
-                else // we lost contact
+            }
+            else // we lost contact
+            {
+                if (!isTouching)
                 {
-                    if (!isTouching)
+                    if (b2Shape_IsSensor(contactData.shapeIdA) || b2Shape_IsSensor(contactData.shapeIdB))
+                    {
+                        if (b2Shape_AreSensorEventsEnabled(contactData.shapeIdA))
+                            A->EndContactSensor(ContactData{contactData.shapeIdA, contactData.shapeIdB, contactData.manifold});
+                        if (b2Shape_AreSensorEventsEnabled(contactData.shapeIdB))
+                            B->EndContactSensor(ContactData{contactData.shapeIdB, contactData.shapeIdA, contactData.manifold});
+                    }
+                    else
                     {
                         A->EndContact(ContactData{contactData.shapeIdA, contactData.shapeIdB, contactData.manifold});
                         B->EndContact(ContactData{contactData.shapeIdB, contactData.shapeIdA, contactData.manifold});
@@ -159,6 +144,8 @@ void CollisionManager::Update()
     }
     #undef WAS_TOUCHING_FLAG
 }
+
+#undef GET_COLLIDER
 
 void CollisionManager::addCollider(Collider* Collider)
 {

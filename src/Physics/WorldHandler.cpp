@@ -4,10 +4,10 @@
 
 #define CHECK_VALID_WORLD() assert(b2World_IsValid(m_world) && "World must be initalized before use!")
 
-WorldHandler* WorldHandler::get()
+WorldHandler& WorldHandler::get()
 {
-    static WorldHandler handler;
-    return &handler;
+    static WorldHandler* handler = new WorldHandler();
+    return *handler;
 }
 
 void WorldHandler::init(const Vector2& gravity, unsigned int workerCount)
@@ -56,6 +56,7 @@ void WorldHandler::finishTask(void* userTask, void* userContext)
 
 b2WorldId WorldHandler::getWorld() const
 {
+    CHECK_VALID_WORLD();
     return m_world;
 }
 
@@ -64,13 +65,14 @@ void WorldHandler::updateWorld(double deltaTime)
     CHECK_VALID_WORLD();
     m_accumulate += deltaTime;
     std::int32_t updates = std::min(int(m_accumulate*m_tickRate), m_maxUpdates);
-    m_accumulate -= updates*(1.f/m_tickRate);
+    double tickTime = 1.0/m_tickRate;
+    m_accumulate -= updates*(tickTime);
     if (!m_keepLostSimulationTime)
-        m_accumulate = m_accumulate > 1.f/m_tickRate ? 0.f : m_accumulate;
+        m_accumulate = m_accumulate > tickTime ? 0.f : m_accumulate;
     m_interpolateTime = m_accumulate > m_maxInterpolateTime ? m_maxInterpolateTime : m_accumulate;
     while (updates > 0)
     {
-        b2World_Step(m_world, 1.f/m_tickRate, m_substepCount);
+        b2World_Step(m_world, tickTime, m_substepCount);
         updates--;
     }
 }
@@ -95,9 +97,15 @@ double WorldHandler::getInterpolationTime() const
     return m_interpolateTime;
 }
 
+double WorldHandler::getMaxDeltaTime() const
+{
+    return m_maxDeltaTime;
+}
+
 void WorldHandler::setTickRate(std::int32_t interval)
 {
     m_tickRate = interval;
+    m_maxDeltaTime = 1.0/m_tickRate*m_maxUpdates;
 }
 
 std::int32_t WorldHandler::getTickRate() const
@@ -118,6 +126,7 @@ std::int32_t WorldHandler::getSubstepCount() const
 void WorldHandler::setMaxUpdates(std::int32_t maxUpdates)
 {
     m_maxUpdates = maxUpdates;
+    m_maxDeltaTime = 1.0/m_tickRate*m_maxUpdates;
 }
 
 std::int32_t WorldHandler::getMaxUpdates() const
@@ -151,4 +160,18 @@ bool WorldHandler::isKeepLostSimulationTime() const
 bool WorldHandler::isInPhysicsUpdate() const
 {
     return m_inPhysicsUpdate;
+}
+
+void WorldHandler::explode(ExplosionDef def)
+{
+    b2ExplosionDef input = b2DefaultExplosionDef();
+    input.radius = def.radius;
+    input.position = (b2Vec2)def.position;
+    input.impulsePerLength = def.impulsePerLength;
+    b2World_Explode(m_world, &input);
+}
+
+int WorldHandler::getFixtureCount() const
+{
+    return b2World_GetCounters(m_world).shapeCount;
 }

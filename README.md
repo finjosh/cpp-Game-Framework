@@ -2,20 +2,24 @@
 A work in progress game engine/framework.
 
 ### Tested with: 
-    - -std=c++20
-    - -std=c11
+    -std=c++20
+    -std=c17
+#### Linux:
     - Compiler: g++
-    - Version: g++.exe (Rev2, Built by MSYS2 project) 14.2.0
-    - To use the prebuilt libs you have to use the ucrt MSYS2 mingw build for g++ 14.2.0
+    - Version: g++ (GCC) 15.1.1 20250425
+#### Windows:
+    - Compiler: x86_64-w64-mingw32-g++
+    - Version: x86_64-w64-mingw32-g++ (GCC) 15.1.0
 
 ### [SFML](https://www.sfml-dev.org/index.php)
     - Version 3.0.0
 
 ### [TGUI](https://tgui.eu/)
-    - Version: 1.7
+    - Version: 1.9.0
 
 ### [Box2D](https://box2d.org/)
-    - Version: latest commit as of 2025-01-01
+    - Version: 3.1.0
+    - Disable Validation when compiling box2d for maximum performance
 
 ### [thread pool](https://github.com/bshoshany/thread-pool?tab=readme-ov-file#installing-the-library)
     - Version: 4.1.0
@@ -25,7 +29,7 @@ A work in progress game engine/framework.
 ### [cpp-Networking-Library](https://github.com/finjosh/cpp-Networking-Library)
 
 # Class breakdown
-  - This excludes Managers
+  - This excludes Managers and some other smaller classes
 
 | File | Brief Description  |
 | --- | --- |

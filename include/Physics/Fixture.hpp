@@ -3,7 +3,7 @@
 
 #pragma once
 
-#include "box2d/box2d.h"
+#include "box2d/types.h"
 #include "Vector2.hpp"
 #include "FixtureDef.hpp"
 
@@ -13,33 +13,42 @@ class ContactData;
 class HitData;
 class PreSolveData;
 
-// TODO implement joints
+// TODO implement joints wrapper
 /// @note unless you are sure this still exists you should check if this is valid before use
 /// @note all events are disabled by default
 /// @note this is just a reference to a fixture on a body not the fixture itself
 class Fixture
 {
 public:
-
 	struct Shape
 	{
+		enum class Type
+		{
+			Circle = b2ShapeType::b2_circleShape,
+			Capsule = b2ShapeType::b2_capsuleShape,
+			Polygon = b2ShapeType::b2_polygonShape,
+			Segment = b2ShapeType::b2_segmentShape,
+			ChainSegment = b2ShapeType::b2_chainSegmentShape,
+			Count = b2ShapeType::b2_shapeTypeCount,
+		};
+
 		/// @brief A solid circle
 		class Circle
 		{
 		public:
-			inline Circle() : m_shape({{0,0}, 1}) {}
-			inline Circle(b2Circle circle) : m_shape(circle) {}
-			inline Circle(Vector2 center, float radius) : m_shape({{(b2Vec2)center}, radius}) {}
+			Circle();
+			Circle(Vector2 center, float radius);
 
-			inline Vector2 getCenter() const { return (Vector2)m_shape.center; }
-			inline float getRadius() const { return m_shape.radius; }
+			Vector2 getCenter() const;
+			float getRadius() const;
 
-			inline void setCenter(Vector2 center) { m_shape.center = (b2Vec2)center; }
-			inline void setRadius(float radius) { m_shape.radius = radius; }
+			void setCenter(Vector2 center);
+			void setRadius(float radius);
 
 		private:
 			friend Fixture;
 			friend Collider;
+			Circle(b2Circle circle);
 			
 			b2Circle m_shape;
 		};
@@ -48,21 +57,21 @@ public:
 		class Capsule
 		{
 		public:
-			inline Capsule() : m_shape({{0,0}, {0,1}, 1}) {}
-			inline Capsule(b2Capsule capsule) : m_shape(capsule) {}
-			inline Capsule(Vector2 center1, Vector2 center2, float radius) : m_shape({{(b2Vec2)center1}, {(b2Vec2)center2}, radius}) {}
+			Capsule();
+			Capsule(Vector2 center1, Vector2 center2, float radius);
 
-			inline Vector2 getCenter1() const { return (Vector2)m_shape.center1; }
-			inline Vector2 getCenter2() const { return (Vector2)m_shape.center2; }
-			inline float getRadius() const { return m_shape.radius; }
+			Vector2 getCenter1() const;
+			Vector2 getCenter2() const;
+			float getRadius() const;
 
-			inline void setCenter1(Vector2 center1) { m_shape.center1 = (b2Vec2)center1; }
-			inline void setCenter2(Vector2 center2) { m_shape.center2 = (b2Vec2)center2; }
-			inline void setRadius(float radius) { m_shape.radius = radius; }
+			void setCenter1(Vector2 center1);
+			void setCenter2(Vector2 center2);
+			void setRadius(float radius);
 
 		protected:
 			friend Fixture;
 			friend Collider;
+			Capsule(b2Capsule capsule);
 
 			b2Capsule m_shape;
 		};
@@ -73,7 +82,7 @@ public:
 		class Polygon
 		{
 		public:
-			#define MAX_VERTICES b2_maxPolygonVertices
+			#define MAX_POLYGON_VERTICES B2_MAX_POLYGON_VERTICES
 
 			/// @note a hull MUST have at least 3 points
 			/// @note a hull can have at most Polygon::MAX_VERTICES
@@ -89,123 +98,92 @@ public:
 				/// @note - all points on a line
 				/// @note - less than 3 points
 				/// @note - more than Polygon::MAX_VERTICES points
-				inline Hull(b2Vec2 points[], std::int32_t size) : m_hull(b2ComputeHull(points, size)) {}
-				inline Hull(b2Hull hull) : m_hull(hull) {}
-				inline bool isValid() const { return m_hull.count >= 3; }
+				Hull(b2Vec2 points[], std::int32_t size);
+				bool isValid() const;
 
 			private:
 				friend Polygon;
+				Hull(b2Hull hull);
 
 				b2Hull m_hull = {{} /*empty list*/, 0/*size zero list*/};
 			};
 
 			/// @warning this will be a invalid polygon and must be setup before usage
-			inline Polygon() { m_shape.count = 0; }
+			Polygon();
 			/// @brief makes this polygon a box of size x (width) by y (height)
 			/// @ingroup Box
-			inline Polygon(float x, float y) : m_shape(b2MakeBox(x/2,y/2)) {}
+			Polygon(float x, float y);
 			/// @brief makes this polygon a box of size x (width) by y (height).
 			/// @note offset and angle are applied locally
 			/// @ingroup Box
-			inline Polygon(float x, float y, Vector2 center, Rotation rotation) : m_shape(b2MakeOffsetBox(x/2, y/2, (b2Vec2)center, (b2Rot)rotation)) {}
+			Polygon(float x, float y, Vector2 center, Rotation rotation);
 			/// @brief fills this polygon with points from the given hull
 			/// @param radius how the polygon will be rounded (0 means no rounding). Radius is added around the entire shape and allows for a curve at edges
 			/// @exception asserts that the hull is valid
 			/// @ingroup Polygon
-			inline Polygon(const Hull& hull, float radius = 0.f) 
-			{ 
-				assert(hull.isValid() && "Hull must be valid to create Polygon!"); 
-				m_shape = b2MakePolygon(&hull.m_hull, radius);
-			}
+			Polygon(const Hull& hull, float radius = 0.f);
 			/// @brief fills this polygon with points from the given hull
 			/// @note offset and angle are applied locally
 			/// @exception asserts that the hull is valid
 			/// @ingroup Polygon
-			inline Polygon(const Hull& hull, Vector2 center, Rotation rotation)
-			{
-				assert(hull.isValid() && "Hull must be valid to create Polygon!"); 
-				m_shape = b2MakeOffsetPolygon(&hull.m_hull, (b2Vec2)center, (b2Rot)rotation);
-			}
+			Polygon(const Hull& hull, Vector2 center, Rotation rotation);
 			/// @brief makes this polygon a rounded box of size x (width) by y (height)
 			/// @param radius how the polygon will be rounded (0 means no rounding). Radius is added around the entire shape and allows for a curve at edges
 			/// @ingroup RoundedBox
-			inline Polygon(float x, float y, float radius) : m_shape(b2MakeRoundedBox(x/2, y/2, radius)) {}
+			Polygon(float x, float y, float radius);
 			/// @brief makes this polygon a square with the given side length
 			/// @param radius how the polygon will be rounded (0 means no rounding). Radius is added around the entire shape and allows for a curve at edges
 			/// @ingroup Square
-			inline Polygon(float sideLengths) : m_shape(b2MakeSquare(sideLengths/2)) {}
-			inline Polygon(b2Polygon polygon) : m_shape(polygon) {}
+			Polygon(float sideLengths);
 			
-			inline bool isValid() const { return m_shape.count >= 3; }
+			bool isValid() const;
 
 			/// @brief makes this polygon a box of size x (width) by y (height)
 			/// @ingroup Box
-			inline void makeBox(float x, float y) 
-			{ this->m_shape = b2MakeBox(x/2, y/2); }
+			void makeBox(float x, float y);
 			/// @brief makes this polygon a box of size x (width) by y (height).
 			/// @note offset and angle are applied locally
 			/// @ingroup Box
-			inline void makeOffsetBox(float x, float y, Vector2 center, Rotation rotation) 
-			{ this->m_shape = b2MakeOffsetBox(x/2, y/2, (b2Vec2)center, (b2Rot)rotation); }
+			void makeOffsetBox(float x, float y, Vector2 center, Rotation rotation);
 			/// @brief fills this polygon with points from the given hull
 			/// @param radius how the polygon will be rounded (0 means no rounding). Radius is added around the entire shape and allows for a curve at edges
 			/// @exception asserts that the hull is valid
 			/// @ingroup Polygon
-			inline void makePolygon(const Hull& hull, float radius = 0.f) 
-			{ 
-				assert(hull.isValid() && "Hull must be valid to create Polygon!"); 
-				m_shape = b2MakePolygon(&hull.m_hull, radius);
-			}
+			void makePolygon(const Hull& hull, float radius = 0.f);
 			/// @brief fills this polygon with points from the given hull
 			/// @note offset and angle are applied locally
 			/// @exception asserts that the hull is valid
 			/// @ingroup Polygon
-			inline void makeOffsetPolygon(const Hull& hull, Vector2 center, Rotation rotation) 
-			{ 
-				assert(hull.isValid() && "Hull must be valid to create Polygon!"); 
-				m_shape = b2MakeOffsetPolygon(&hull.m_hull, (b2Vec2)center, (b2Rot)rotation);
-			}
+			void makeOffsetPolygon(const Hull& hull, Vector2 center, Rotation rotation);
 			/// @brief fills this polygon with points from the given hull
 			/// @note offset and angle are applied locally
 			/// @param radius how the polygon will be rounded (0 means no rounding). Radius is added around the entire shape and allows for a curve at edges
 			/// @exception asserts that the hull is valid
 			/// @ingroup Polygon
-			inline void makeOffsetRoundedPolygon(const Hull& hull, float radius, Vector2 center, Rotation rotation) 
-			{ 
-				assert(hull.isValid() && "Hull must be valid to create Polygon!"); 
-				m_shape = b2MakeOffsetRoundedPolygon(&hull.m_hull, (b2Vec2)center, (b2Rot)rotation, radius);
-			}
+			void makeOffsetRoundedPolygon(const Hull& hull, float radius, Vector2 center, Rotation rotation);
 			/// @brief makes this polygon a rounded box of size x (width) by y (height)
 			/// @param radius how the polygon will be rounded (0 means no rounding). Radius is added around the entire shape and allows for a curve at edges
 			/// @ingroup RoundedBox
-			inline void makeRoundedBox(float x, float y, float radius) 
-			{ this->m_shape = b2MakeRoundedBox(x/2, y/2, radius); }
+			void makeRoundedBox(float x, float y, float radius);
 			/// @brief makes this polygon a rounded box of size x (width) by y (height)
 			/// @note offset and angle are applied locally
 			/// @param radius how the polygon will be rounded (0 means no rounding). Radius is added around the entire shape and allows for a curve at edges
 			/// @ingroup RoundedBox
-			inline void makeOffsetRoundedBox(float x, float y, float radius, Vector2 center, Rotation rotation) 
-			{ 
-				this->m_shape = b2MakeOffsetBox(x/2, y/2, (b2Vec2)center, (b2Rot)rotation);
-				this->m_shape.radius = radius;
-			}
+			void makeOffsetRoundedBox(float x, float y, float radius, Vector2 center, Rotation rotation);
 			/// @brief makes this polygon a square with the given side length
 			/// @param radius how the polygon will be rounded (0 means no rounding). Radius is added around the entire shape and allows for a curve at edges
 			/// @ingroup Square
-			inline void makeSquare(float sideLengths) 
-			{ this->m_shape = b2MakeSquare(sideLengths); }
+			void makeSquare(float sideLengths);
 			/// @brief makes this polygon a square with the given side length
 			/// @note offset and angle are applied locally
 			/// @param radius how the polygon will be rounded (0 means no rounding). Radius is added around the entire shape and allows for a curve at edges
 			/// @ingroup Square
-			inline void makeOffsetSquare(float sideLengths, Vector2 center, Rotation rotation) 
-			{ 
-				this->m_shape = b2MakeOffsetBox(sideLengths/2, sideLengths/2, (b2Vec2)center, (b2Rot)rotation);
-			}
+			void makeOffsetSquare(float sideLengths, Vector2 center, Rotation rotation);
 
 		private:
 			friend Fixture;
 			friend Collider;
+			Polygon(b2Polygon polygon);
 
 			b2Polygon m_shape;
 		};
@@ -214,20 +192,20 @@ public:
 		class Segment
 		{
 		public:
-			inline Segment() : m_shape({{0,0}, {0,1}}) {}
-			inline Segment(b2Segment segment) : m_shape(segment) {}
-			inline Segment(Vector2 point1, Vector2 point2) : m_shape({{(b2Vec2)point1}, {(b2Vec2)point2}}) {}
+			Segment();
+			Segment(Vector2 point1, Vector2 point2);
 			
-			inline void setPoint1(Vector2 point1) { m_shape.point1 = (b2Vec2)point1; }
-			inline void setPoint2(Vector2 point2) { m_shape.point2 = (b2Vec2)point2; }
-
-			inline Vector2 getPoint1() const { return (Vector2)m_shape.point1; }
-			inline Vector2 getPoint2() const { return (Vector2)m_shape.point2; }
-
+			void setPoint1(Vector2 point1);
+			void setPoint2(Vector2 point2);
+			
+			Vector2 getPoint1() const;
+			Vector2 getPoint2() const;
+			
 		protected:
 			friend Fixture;
 			friend Collider;
-
+			Segment(b2Segment segment);
+			
 			b2Segment m_shape;
 		};
 
@@ -297,8 +275,10 @@ public:
 	/// @returns true if this fixture is valid
 	bool isValid() const;
 	/// @returns the fixtures shape type
-	b2ShapeType getType() const;
-	inline b2ShapeType getShapeType() const { return getType(); }
+	Fixture::Shape::Type getType() const;
+	/// @note same as getType() 
+	inline Fixture::Shape::Type getShapeType() const { return getType(); }
+	/// @note a fixture cannot start or stop being a sensor (only enable/disable event calls)
 	/// @returns true if this is a sensor
 	bool isSensor();
 	/// @brief set the mass density, typically in kg/m^2
@@ -316,10 +296,10 @@ public:
 	/// @returns restitution, typically in the range [0,1]
 	float getRestitution() const;
 	/// @returns collision filter
-	b2Filter getFilter() const;
+	Filter getFilter() const;
 	/// @brief set the current collision filter
 	/// @note this is almost as expensive as recreating the fixture
-	void setFilter(b2Filter filter);
+	void setFilter(Filter filter);
 	/// @brief Enable sensor events for this fixture
 	/// @note Only applies to kinematic and dynamic bodies
 	/// @note Ignored for sensors
@@ -340,13 +320,6 @@ public:
 	void enablePreSolveEvents(bool enabled = true);
 	/// @returns true if pre-solve events are enabled
 	bool arePreSolveEventsEnabled();
-	// /// @brief Enable contact hit events for this fixture
-	// /// @note Ignored for sensors
-	// /// @note default is false
-	// void enableHitEvents(bool enabled = true);
-	// /// @brief Check if hit events are enabled
-	// /// @returns true if hit events are enabled
-	// bool areHitEventsEnabled();
 	/// @brief Test a point for overlap with a fixture
 	/// @param point The point to test
 	/// @returns true if the point overlaps with the fixture

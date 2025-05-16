@@ -152,11 +152,11 @@ public:
     static float distance(const Vector2& a, const Vector2& b);
     /// @returns the distance between this and the given vector
     float distance(const Vector2& vector) const;
-    /// @note angle is +-[0,PI]
+    /// @note angle is [-PI,PI]
     /// @note this is treating the vectors as directions not positions
     /// @returns the smallest absolute angle from a to b in radians
     static Rotation angle(Vector2 a, Vector2 b);
-    /// @note angle is +-[0,PI]
+    /// @note angle is [-PI,PI]
     /// @note this is treating the vectors as directions not positions
     /// @returns the smallest absolute angle from a (this) to b in radians
     Rotation angle(Vector2 b) const;
@@ -179,8 +179,10 @@ public:
     /// @returns a point based on the distance between the two points and relative distance
     static Vector2 lerpUnclamped(const Vector2& current, const Vector2& target, float relativeDistance);
     /// @returns a vector with the max components from a and b
+    /// @note i.e. (1,2) and (2,1) will return (2,2)
     static Vector2 max(const Vector2& a, const Vector2& b);
     /// @returns a vector with the min components from a and b
+    /// @note i.e. (1,2) and (2,1) will return (1,1)
     static Vector2 min(const Vector2& a, const Vector2& b);
     /// @param maxDistance that max distance that the returned vector will be from current
     /// @returns a vector between current and target moving no further than maxDistance

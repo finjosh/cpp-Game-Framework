@@ -14,7 +14,7 @@ class Collider;
 /// @warning dont ever store this object
 /// @note ContactData returned from this has "thisFixture" as the fixture that is on the collider that owns this array
 class ContactDataArray 
-{ // TODO see if this could be done better by using the data straight from the b2World struct
+{
 public:
     // Iterator class definition
     class iterator {
@@ -25,16 +25,16 @@ public:
         using pointer = ContactData*;
         using reference = ContactData&;
 
-        iterator(b2ContactData* ptr, const Collider* owner) : m_ptr(ptr), m_owner(owner) {}
+        iterator(b2ContactData* ptr, const Collider* owner);
 
         ContactData operator*();
-        iterator& operator++() { m_ptr++; return *this; }
-        iterator operator++(int) { iterator tmp = *this; ++(*this); return tmp; }
-        iterator& operator--() { m_ptr--; return *this; }
-        iterator operator--(int) { iterator tmp = *this; --(*this); return tmp; }
+        iterator& operator++();
+        iterator operator++(int);
+        iterator& operator--();
+        iterator operator--(int);
 
-        friend bool operator==(const iterator& a, const iterator& b) { return a.m_ptr == b.m_ptr; }
-        friend bool operator!=(const iterator& a, const iterator& b) { return a.m_ptr != b.m_ptr; }
+        friend bool operator==(const iterator& a, const iterator& b);
+        friend bool operator!=(const iterator& a, const iterator& b);
 
     private:
         b2ContactData* m_ptr;

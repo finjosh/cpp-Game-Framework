@@ -1,4 +1,5 @@
 #include "Physics/DebugDraw.hpp"
+#include "Graphics/CameraManager.hpp"
 #include "box2d/box2d.h"
 #include "Vector2.hpp"
 
@@ -9,16 +10,16 @@ DebugDraw::DebugDraw()
     this->drawAll(false);
     m_drawStruct.useDrawingBounds = false;
     m_drawStruct.context = this;
-    m_drawStruct.DrawPolygon = DebugDraw::DrawPolygon;
-    m_drawStruct.DrawSolidPolygon = DebugDraw::DrawSolidPolygon;
-    m_drawStruct.DrawCircle = DebugDraw::DrawCircle;
-    m_drawStruct.DrawSolidCircle = DebugDraw::DrawSolidCircle;
+    m_drawStruct.DrawPolygonFcn = DebugDraw::DrawPolygon;
+    m_drawStruct.DrawSolidPolygonFcn = DebugDraw::DrawSolidPolygon;
+    m_drawStruct.DrawCircleFcn = DebugDraw::DrawCircle;
+    m_drawStruct.DrawSolidCircleFcn = DebugDraw::DrawSolidCircle;
     // m_drawStruct.DrawCapsule = DebugDraw::DrawCapsule;
-    m_drawStruct.DrawSolidCapsule = DebugDraw::DrawSolidCapsule;
-    m_drawStruct.DrawSegment = DebugDraw::DrawSegment;
-    m_drawStruct.DrawTransform = DebugDraw::DrawTransform;
-    m_drawStruct.DrawPoint = DebugDraw::DrawPoint;
-    m_drawStruct.DrawString = DebugDraw::DrawString;
+    m_drawStruct.DrawSolidCapsuleFcn = DebugDraw::DrawSolidCapsule;
+    m_drawStruct.DrawSegmentFcn = DebugDraw::DrawSegment;
+    m_drawStruct.DrawTransformFcn = DebugDraw::DrawTransform;
+    m_drawStruct.DrawPointFcn = DebugDraw::DrawPoint;
+    m_drawStruct.DrawStringFcn = DebugDraw::DrawString;
 }
 
 DebugDraw& DebugDraw::get()
@@ -27,11 +28,16 @@ DebugDraw& DebugDraw::get()
     return singleton;
 }
 
-void DebugDraw::draw(b2WorldId world, sf::RenderTarget* target)
+void DebugDraw::draw(WorldHandler& world, sf::RenderTarget* target)
 {
     assert(target != nullptr && "Render target must be valid to draw!");
     m_renderTarget = target;
-    b2World_Draw(world, &m_drawStruct);
+
+    Vector2 center = CameraManager::getMainCamera()->getCameraView().getCenter();
+    Vector2 size = CameraManager::getMainCamera()->getCameraView().getSize();
+
+    this->setDrawingBounds((center - size/2) / PIXELS_PER_METER, (center + size/2) / PIXELS_PER_METER);
+    b2World_Draw(world.getWorld(), &m_drawStruct);
 }
 
 sf::Color B2SFColor(const b2HexColor &color, int alpha = 255)
@@ -212,7 +218,7 @@ void DebugDraw::DrawPoint(b2Vec2 p, float size, b2HexColor color, void *context)
 	DebugDraw::get().m_renderTarget->draw(temp);
 }
 
-void DebugDraw::DrawString(b2Vec2 p, const char *s, void *context)
+void DebugDraw::DrawString(b2Vec2 p, const char* s, b2HexColor color, void* context)
 {
     return;
 }

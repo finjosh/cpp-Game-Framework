@@ -6,7 +6,7 @@
 #define PIXELS_PER_METER 10.0f
 
 /// @brief draws from low to high
-enum DrawStage
+enum class DrawStage
 {
     Particles = 0,
     Default = 10,

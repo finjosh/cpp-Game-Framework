@@ -164,7 +164,7 @@ std::set<Object*> Player::m_players;
 
 class Sensor : public virtual Object, public Renderer<sf::RectangleShape>, public Collider
 {
-public:
+public:    
     Sensor(funcHelper::func<void> onEnter, const Object::Ptr<>& object = Object::Ptr<>(nullptr))
     {
         Fixture::Shape::Polygon shape;
@@ -182,6 +182,8 @@ public:
         m_onEnter = onEnter;
         m_object = object;
     }
+
+    ~Sensor() noexcept = default;
 
     void BeginContact(ContactData data) override
     {
@@ -265,13 +267,14 @@ private:
 
 int main()
 {
-    WindowHandler::initRenderWindow(sf::VideoMode::getDesktopMode(), "Game Framework");
+    WindowHandler::initRenderWindowSettings(sf::VideoMode::getDesktopMode(), "Game Framework", sf::Style::Default, sf::State::Fullscreen);
+    WindowHandler::createRenderWindow();
     CanvasManager::initGUI();
 
     tryLoadTheme({"Dark.txt", "Black.txt"}, {"", "Assets/", "themes/", "Themes/", "assets/", "Assets/Themes/", "Assets/themes/", "assets/themes/", "assets/Themes/"});
     // -----------------------
 
-    WorldHandler::get()->init({0.f,0.f}); // TODO implement ray cast system
+    WorldHandler::get().init({0.f,0.f}); // TODO implement ray cast system
     DebugDraw::get().initCommands();
     // DebugDraw::get().drawAll(true);
     Input::get(); // initializing the input dictionary for string conversions
@@ -359,11 +362,11 @@ int main()
         //! Updates all Terminating Functions
         TerminatingFunction::UpdateFunctions(deltaTime.asSeconds());
         //* Updates for the terminating functions display
-        TFuncDisplay::update(); // updates the terminating functions display
+        TFuncDisplay::Update(); // updates the terminating functions display
         //! ------------------------------
 
         //! Do physics before this for consistent physics (in object update)
-        WorldHandler::get()->updateWorld(deltaTime.asSeconds()); // updates the world physics
+        WorldHandler::get().updateWorld(deltaTime.asSeconds()); // updates the world physics
         CollisionManager::get()->Update(); // updates the collision callbacks
         //! Draw after this
         UpdateManager::LateUpdate(deltaTime.asSeconds());
@@ -376,6 +379,19 @@ int main()
             fpsLabel->setText("FPS: " + std::to_string(fps));
             secondTimer = 0;
             fps = 0;
+        }
+
+        if (Input::get().isJustPressed(sf::Mouse::Button::Left))
+        {
+            float explosion = 1000;
+            const float blastRadius = std::sqrt(std::abs(explosion*2.f));
+
+            ExplosionDef input;
+            input.radius = blastRadius;
+            input.position = (b2Vec2)WindowHandler::getMousePos();
+            input.impulsePerLength = explosion;
+            // input.falloff = blastRadius*0.25;
+            WorldHandler::get().explode(input);
         }
 
         // ---------------
@@ -400,7 +416,6 @@ void tryLoadTheme(std::list<std::string> themes, std::list<std::string> director
             if (std::filesystem::exists(directory + theme))
             {
                 tgui::Theme::setDefault(directory + theme);
-                Command::Prompt::UpdateDefaultColor();
                 return;
             }
         }

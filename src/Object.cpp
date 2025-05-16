@@ -9,9 +9,9 @@ Object::Object()
     ObjectManager::addObject(this);
 }
 
-Object::Object(unsigned long long id) : m_id(id) {}
+Object::Object(uint64_t id) : m_id(id) {}
 
-void Object::m_setID(unsigned long long id)
+void Object::m_setID(uint64_t id)
 {
     m_id = id;
 }

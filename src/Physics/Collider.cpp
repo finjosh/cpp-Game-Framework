@@ -2,15 +2,15 @@
 #include "Physics/CollisionManager.hpp"
 #include "Physics/WorldHandler.hpp"
 
-#ifdef _DEBUG
-#define CHECK_IF_IN_PHYSICS_UPDATE(note) assert(WorldHandler::get()->isInPhysicsUpdate() == 0 && note)
+#ifdef DEBUG
+#define CHECK_IF_IN_PHYSICS_UPDATE(note) assert(WorldHandler::get().isInPhysicsUpdate() == 0 && note)
 #define CHECK_IF_IN_PHYSICS_UPDATE_EDITING_DATA() CHECK_IF_IN_PHYSICS_UPDATE("Cannot edit any physics data while in a physics update")
 #else
 #define CHECK_IF_IN_PHYSICS_UPDATE(note)
 #define CHECK_IF_IN_PHYSICS_UPDATE_EDITING_DATA()
 #endif
 
-Collider::Collider()
+Collider::Collider(WorldHandler& world)
 {
     Object::m_onDisabled(&Collider::m_updatePhysicsState, this);
     Object::m_onEnabled(&Collider::m_updatePhysicsState, this);
@@ -27,7 +27,7 @@ Collider::Collider()
     bodyDef.type = b2_dynamicBody;
     bodyDef.position = (b2Vec2)Object::getPosition();
     bodyDef.rotation = (b2Rot)Object::getRotation();
-    m_body = b2CreateBody(WorldHandler::get()->getWorld(), &bodyDef);
+    m_body = b2CreateBody(world.getWorld(), &bodyDef);
     b2Body_SetUserData(m_body, (void*)this);
 }
 
@@ -370,5 +370,5 @@ bool Collider::isFixedRotation() const
 
 Transform Collider::getInterpolatedTransform() const
 {
-    return Transform{Object::getPosition() + WorldHandler::get()->getInterpolationTime() * b2Body_GetLinearVelocity(m_body), Object::getRotation() + b2Body_GetAngularVelocity(m_body) * WorldHandler::get()->getInterpolationTime()};
+    return Transform{Object::getPosition() + WorldHandler::get().getInterpolationTime() * b2Body_GetLinearVelocity(m_body), Object::getRotation() + b2Body_GetAngularVelocity(m_body) * WorldHandler::get().getInterpolationTime()};
 }

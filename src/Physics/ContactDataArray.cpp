@@ -10,6 +10,14 @@ ContactData ContactDataArray::iterator::operator*()
         return ContactData(m_ptr->shapeIdA, m_ptr->shapeIdB, &m_ptr->manifold); 
 }
 
+ContactDataArray::iterator::iterator(b2ContactData* ptr, const Collider* owner) : m_ptr(ptr), m_owner(owner) {}
+ContactDataArray::iterator& ContactDataArray::iterator::operator++() { m_ptr++; return *this; }
+ContactDataArray::iterator ContactDataArray::iterator::operator++(int) { iterator tmp = *this; ++(*this); return tmp; }
+ContactDataArray::iterator& ContactDataArray::iterator::operator--() { m_ptr--; return *this; }
+ContactDataArray::iterator ContactDataArray::iterator::operator--(int) { iterator tmp = *this; --(*this); return tmp; }
+bool operator==(const ContactDataArray::iterator& a, const ContactDataArray::iterator& b) { return a.m_ptr == b.m_ptr; }
+bool operator!=(const ContactDataArray::iterator& a, const ContactDataArray::iterator& b) { return a.m_ptr != b.m_ptr; }
+
 ContactDataArray::ContactDataArray(ContactDataArray&& other)
 {
     if (this != &other) {

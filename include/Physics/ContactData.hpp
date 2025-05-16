@@ -31,9 +31,11 @@ public:
     /// @warning asserts that the index is in range [0,(size of point count)]
     /// @note negative distance is overlap in meters
     /// @returns returns the distance at the given index
-    const float getSeparations(std::int32_t index) const;
+    float getSeparations(std::int32_t index) const;
     /// @returns the normal of the collision
     Vector2 getNormal() const;
+    /// @returns Angular impulse applied for rolling resistance. N * m * s = kg * m^2 / s.
+    float getRollingImpulse() const;
 
 private:
     friend CollisionManager;
@@ -78,13 +80,15 @@ public:
     std::int32_t getPointCount() const;
     /// @warning asserts that the index is in range [0,(size of point count)]
     /// @returns returns the point at the given index
-    const Vector2 getContactPoint(std::int32_t index) const;
+    Vector2 getContactPoint(std::int32_t index) const;
     /// @warning asserts that the index is in range [0,(size of point count)]
     /// @note negative distance is overlap in meters
     /// @returns returns the distance at the given index
-    const float getSeparations(std::int32_t index) const;
+    float getSeparations(std::int32_t index) const;
     /// @returns the normal of the collision
     Vector2 getNormal() const;
+    /// @returns Angular impulse applied for rolling resistance. N * m * s = kg * m^2 / s.
+    float getRollingImpulse() const;
 
 private:
     friend CollisionManager;

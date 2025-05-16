@@ -8,18 +8,32 @@
 #include <thread>
 #include <atomic>
 
+// TODO temp
+class ExplosionDef
+{
+public:
+	uint64_t maskBits = 0xFFFFFFFFFFFFFFFF;
+
+	Vector2 position = Vector2(0,0);
+
+	float radius = 0;
+
+	float falloff = 0;
+
+	float impulsePerLength = 100;
+};
+
 class WorldHandler
 {
 public:
-    static WorldHandler* get();
+    static WorldHandler& get();
 
     void init(const Vector2& gravity, unsigned int workerCount = std::thread::hardware_concurrency());
-    /// @note only use this if you know what you are doing
-    b2WorldId getWorld() const;
     void updateWorld(double deltaTime);
     /// @note only call this before using any physics
-    /// @param ticksPerSecond the number of updates the physics engine will take per second
+    /// @param ticksPerSecond the max number of updates the physics engine will take per second
     void setTickRate(std::int32_t ticksPreSecond = 60);
+    /// @returns the set tick rate
     std::int32_t getTickRate() const;
     /// @brief sets how many substeps are taken per update
     /// @note only call this before using any physics
@@ -30,7 +44,8 @@ public:
     std::int32_t getMaxUpdates() const;
     void setGravity(const Vector2& gravity);
     Vector2 getGravity() const;
-    /// @returns the time that was not able to be calculated this frame
+    /// @brief the time that was not able to be simulated since the tick rate was not met
+    /// @returns the left over time from previous frames that will be used for interpolation and future updates
     double getLeftOverTime() const;
     /// @brief the max time that interpolation will be set to
     /// @note interpolationTime = leftOverTime > maxTime ? maxTime : leftOverTime
@@ -38,17 +53,28 @@ public:
     double getMaxInterpolationTime() const;
     /// @returns the amount of time that should be interpolated for
     double getInterpolationTime() const;
+    /// @brief helper function to get the max delta time
+    /// @returns the max delta time based on tick rate and max updates
+    double getMaxDeltaTime() const;
     /// @brief this affects what happens to physics at low frames
     /// @note any time left over after updating physics that is larger than 1/tickRate will be cleared if false
     /// @note default: True
     void setKeepLostSimulationTime(bool flag = true);
     bool isKeepLostSimulationTime() const;
     bool isInPhysicsUpdate() const;
+    void explode(ExplosionDef def);
+    int getFixtureCount() const; // TODO make a simple wrapper for the box2d counters instead of functions for each counter supplied
 
 protected:
+    friend class DebugDraw;
+    friend class CollisionManager;
+    friend class Collider;
+
     /// @returns the task that was enqueued which can be used to finish the task
     static void* enqueueTask(b2TaskCallback* task, int32_t itemCount, int32_t minRange, void* taskContext, void* userContext);
     static void finishTask(void* userTask, void* userContext);
+    /// @note only use this if you know what you are doing
+    b2WorldId getWorld() const;
 
 private:
     WorldHandler() = default;
@@ -63,6 +89,7 @@ private:
     std::int32_t m_tickRate = 60;
     std::int32_t m_substepCount = 4; 
     std::int32_t m_maxUpdates = 8;
+    double m_maxDeltaTime = 1.0/m_tickRate*m_maxUpdates;
 };
 
 #endif

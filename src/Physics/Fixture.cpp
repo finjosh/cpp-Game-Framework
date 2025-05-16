@@ -1,6 +1,100 @@
 #include "Physics/Fixture.hpp"
 #include "Physics/Collider.hpp"
 
+//* Circle
+Fixture::Shape::Circle::Circle() : m_shape({{0,0}, 1}) {}
+Fixture::Shape::Circle::Circle(b2Circle circle) : m_shape(circle) {}
+Fixture::Shape::Circle::Circle(Vector2 center, float radius) : m_shape({{(b2Vec2)center}, radius}) {}
+
+Vector2 Fixture::Shape::Circle::getCenter() const { return (Vector2)m_shape.center; }
+float Fixture::Shape::Circle::getRadius() const { return m_shape.radius; }
+
+void Fixture::Shape::Circle::setCenter(Vector2 center) { m_shape.center = (b2Vec2)center; }
+void Fixture::Shape::Circle::setRadius(float radius) { m_shape.radius = radius; }
+
+//* Capsule
+Fixture::Shape::Capsule::Capsule() : m_shape({{0,0}, {0,1}, 1}) {}
+Fixture::Shape::Capsule::Capsule(b2Capsule capsule) : m_shape(capsule) {}
+Fixture::Shape::Capsule::Capsule(Vector2 center1, Vector2 center2, float radius) : m_shape({{(b2Vec2)center1}, {(b2Vec2)center2}, radius}) {}
+
+Vector2 Fixture::Shape::Capsule::getCenter1() const { return (Vector2)m_shape.center1; }
+Vector2 Fixture::Shape::Capsule::getCenter2() const { return (Vector2)m_shape.center2; }
+float Fixture::Shape::Capsule::getRadius() const { return m_shape.radius; }
+
+void Fixture::Shape::Capsule::setCenter1(Vector2 center1) { m_shape.center1 = (b2Vec2)center1; }
+void Fixture::Shape::Capsule::setCenter2(Vector2 center2) { m_shape.center2 = (b2Vec2)center2; }
+void Fixture::Shape::Capsule::setRadius(float radius) { m_shape.radius = radius; }
+
+//* Polygon::Hull
+Fixture::Shape::Polygon::Hull::Hull(b2Vec2 points[], std::int32_t size) : m_hull(b2ComputeHull(points, size)) {}
+Fixture::Shape::Polygon::Hull::Hull(b2Hull hull) : m_hull(hull) {}
+bool Fixture::Shape::Polygon::Hull::isValid() const { return m_hull.count >= 3; }
+
+//* Polygon
+Fixture::Shape::Polygon::Polygon() { m_shape.count = 0; }
+Fixture::Shape::Polygon::Polygon(float x, float y) : m_shape(b2MakeBox(x/2,y/2)) {}
+Fixture::Shape::Polygon::Polygon(float x, float y, Vector2 center, Rotation rotation) : m_shape(b2MakeOffsetBox(x/2, y/2, (b2Vec2)center, (b2Rot)rotation)) {}
+Fixture::Shape::Polygon::Polygon(const Hull& hull, float radius) 
+{ 
+    assert(hull.isValid() && "Hull must be valid to create Polygon!"); 
+    m_shape = b2MakePolygon(&hull.m_hull, radius);
+}
+Fixture::Shape::Polygon::Polygon(const Hull& hull, Vector2 center, Rotation rotation)
+{
+    assert(hull.isValid() && "Hull must be valid to create Polygon!"); 
+    m_shape = b2MakeOffsetPolygon(&hull.m_hull, (b2Vec2)center, (b2Rot)rotation);
+}
+Fixture::Shape::Polygon::Polygon(float x, float y, float radius) : m_shape(b2MakeRoundedBox(x/2, y/2, radius)) {}
+Fixture::Shape::Polygon::Polygon(float sideLengths) : m_shape(b2MakeSquare(sideLengths/2)) {}
+Fixture::Shape::Polygon::Polygon(b2Polygon polygon) : m_shape(polygon) {}
+
+bool Fixture::Shape::Polygon::isValid() const { return m_shape.count >= 3; }
+
+void Fixture::Shape::Polygon::makeBox(float x, float y) 
+{ this->m_shape = b2MakeBox(x/2, y/2); }
+void Fixture::Shape::Polygon::makeOffsetBox(float x, float y, Vector2 center, Rotation rotation) 
+{ this->m_shape = b2MakeOffsetBox(x/2, y/2, (b2Vec2)center, (b2Rot)rotation); }
+void Fixture::Shape::Polygon::makePolygon(const Hull& hull, float radius) 
+{ 
+    assert(hull.isValid() && "Hull must be valid to create Polygon!"); 
+    m_shape = b2MakePolygon(&hull.m_hull, radius);
+}
+void Fixture::Shape::Polygon::makeOffsetPolygon(const Hull& hull, Vector2 center, Rotation rotation) 
+{ 
+    assert(hull.isValid() && "Hull must be valid to create Polygon!"); 
+    m_shape = b2MakeOffsetPolygon(&hull.m_hull, (b2Vec2)center, (b2Rot)rotation);
+}
+void Fixture::Shape::Polygon::makeOffsetRoundedPolygon(const Hull& hull, float radius, Vector2 center, Rotation rotation) 
+{ 
+    assert(hull.isValid() && "Hull must be valid to create Polygon!"); 
+    m_shape = b2MakeOffsetRoundedPolygon(&hull.m_hull, (b2Vec2)center, (b2Rot)rotation, radius);
+}
+void Fixture::Shape::Polygon::makeRoundedBox(float x, float y, float radius) 
+{ this->m_shape = b2MakeRoundedBox(x/2, y/2, radius); }
+void Fixture::Shape::Polygon::makeOffsetRoundedBox(float x, float y, float radius, Vector2 center, Rotation rotation) 
+{ 
+    this->m_shape = b2MakeOffsetBox(x/2, y/2, (b2Vec2)center, (b2Rot)rotation);
+    this->m_shape.radius = radius;
+}
+void Fixture::Shape::Polygon::makeSquare(float sideLengths) 
+{ this->m_shape = b2MakeSquare(sideLengths); }
+void Fixture::Shape::Polygon::makeOffsetSquare(float sideLengths, Vector2 center, Rotation rotation) 
+{ 
+    this->m_shape = b2MakeOffsetBox(sideLengths/2, sideLengths/2, (b2Vec2)center, (b2Rot)rotation);
+}
+
+//* Segment
+Fixture::Shape::Segment::Segment() : m_shape({{0,0}, {0,1}}) {}
+Fixture::Shape::Segment::Segment(b2Segment segment) : m_shape(segment) {}
+Fixture::Shape::Segment::Segment(Vector2 point1, Vector2 point2) : m_shape({{(b2Vec2)point1}, {(b2Vec2)point2}}) {}
+
+void Fixture::Shape::Segment::setPoint1(Vector2 point1) { m_shape.point1 = (b2Vec2)point1; }
+void Fixture::Shape::Segment::setPoint2(Vector2 point2) { m_shape.point2 = (b2Vec2)point2; }
+
+Vector2 Fixture::Shape::Segment::getPoint1() const { return (Vector2)m_shape.point1; }
+Vector2 Fixture::Shape::Segment::getPoint2() const { return (Vector2)m_shape.point2; }
+
+//* Fixture
 Fixture::Fixture(Collider& collider, const FixtureDef& fixtureDef, const Shape::Circle& shape)
 {
     m_fixture = b2CreateCircleShape(collider.m_body, &fixtureDef.m_shapeDef, &shape.m_shape);
@@ -38,9 +132,9 @@ bool Fixture::isValid() const
     return b2Shape_IsValid(m_fixture);
 }
 
-b2ShapeType Fixture::getType() const
+Fixture::Shape::Type Fixture::getType() const
 {
-    return b2Shape_GetType(m_fixture);
+    return (Fixture::Shape::Type)b2Shape_GetType(m_fixture);
 }
 
 bool Fixture::isSensor()
@@ -78,14 +172,14 @@ float Fixture::getRestitution() const
     return b2Shape_GetRestitution(m_fixture);
 }
 
-b2Filter Fixture::getFilter() const
+Filter Fixture::getFilter() const
 {
-    return b2Shape_GetFilter(m_fixture);
+    return Filter(b2Shape_GetFilter(m_fixture));
 }
 
-void Fixture::setFilter(b2Filter filter)
+void Fixture::setFilter(Filter filter)
 {
-    b2Shape_SetFilter(m_fixture, filter);
+    b2Shape_SetFilter(m_fixture, filter.m_filter);
 }
 
 void Fixture::enableSensorEvents(bool enabled)
@@ -117,16 +211,6 @@ bool Fixture::arePreSolveEventsEnabled()
 {
     return b2Shape_ArePreSolveEventsEnabled(m_fixture);
 }
-
-// void Fixture::enableHitEvents(bool enabled)
-// {
-//     b2Shape_EnableHitEvents(m_fixture, enabled);
-// }
-
-// bool Fixture::areHitEventsEnabled()
-// {
-//     return b2Shape_AreHitEventsEnabled(m_fixture);
-// }
 
 bool Fixture::testPoint(Vector2 point)
 {

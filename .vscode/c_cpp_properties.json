@@ -6,15 +6,36 @@
                 "${default}",
                 "${workspaceFolder}",
                 "${workspaceFolder}/include",
-                "/Git_projects/cpp-Utilities/include",
-                "/VSCodeFolder/Libraries/thread-pool-4.1.0/include",
-                "/VSCodeFolder/Libraries/box2d-main/include",
-                "/VSCodeFolder/Libraries/box2d-main", // this is used for including stuff that box2d wants to be hidden
-                "/Git_projects/cpp-Networking-Library/include",
-                "/VSCodeFolder/Libraries/TGUI-1.7/include"
+                "${workspaceFolder}/../../libraries/windows/TGUI-1.7/include",
+                "${workspaceFolder}/../../libraries/windows/SFML-3.0.0/include",
+                "${workspaceFolder}/../cpp-Utilities/include",
+                "${workspaceFolder}/../cpp-Networking-Library/include",
+                "${workspaceFolder}/../../libraries/windows/thread-pool-4.1.0/include",
+                "${workspaceFolder}/../../libraries/windows/box2d-3.1.0/include",
+                "${workspaceFolder}/../../libraries/windows/box2d-3.1.0"
             ],
             "defines": [
-                "_DEBUG",
+                "UNICODE",
+                "_UNICODE"
+            ],
+            "cStandard": "c17",
+            "cppStandard": "gnu++20"
+        },
+        {
+            "name": "Linux",
+            "includePath": [
+                "${default}",
+                "${workspaceFolder}",
+                "${workspaceFolder}/include",
+                "${workspaceFolder}/../../libraries/linux/TGUI-1.9.0/include",
+                "${workspaceFolder}/../cpp-Utilities/include",
+                "${workspaceFolder}/../cpp-Networking-Library/include",
+                "${workspaceFolder}/../../libraries/windows/thread-pool-4.1.0/include",
+                "${workspaceFolder}/../../libraries/windows/box2d-3.1.0/include",
+                "${workspaceFolder}/../../libraries/windows/box2d-3.1.0",
+                "/usr/include"
+            ],
+            "defines": [
                 "UNICODE",
                 "_UNICODE"
             ],

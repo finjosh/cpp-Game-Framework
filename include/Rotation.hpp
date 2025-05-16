@@ -51,7 +51,7 @@ public:
     static Rotation lerpUnclamped(const Rotation& current, const Rotation& target, float relativeRotation);
 
     //* box2d functions
-    inline Rotation(b2Rot rot) : cos(rot.c), sin(rot.s) {}
+    inline Rotation(b2Rot rot) : sin(rot.s), cos(rot.c) {}
     explicit inline operator b2Rot() const
     {
         return b2MakeRot(this->getRadians());
