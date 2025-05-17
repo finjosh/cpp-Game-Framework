@@ -2,7 +2,7 @@
 
 ThreadPool& ThreadPool::get()
 {
-    static ThreadPool* threadPool = new ThreadPool();
+    static ThreadPool threadPool;
 
-    return *threadPool;
+    return threadPool;
 }

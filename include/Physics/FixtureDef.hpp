@@ -5,7 +5,7 @@
 
 #include <box2d/types.h>
 #include "Physics/SurfaceMaterial.hpp"
-#include "Physics/CollisionFilter.hpp"
+#include "Physics/Filter.hpp"
 
 // TODO make a simple construction with all the possible values being given
 class FixtureDef 

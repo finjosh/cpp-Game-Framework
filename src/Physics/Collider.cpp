@@ -370,5 +370,6 @@ bool Collider::isFixedRotation() const
 
 Transform Collider::getInterpolatedTransform() const
 {
+    // TODO make it so that you are able to choose which world handler you get the interpolation time from
     return Transform{Object::getPosition() + WorldHandler::get().getInterpolationTime() * b2Body_GetLinearVelocity(m_body), Object::getRotation() + b2Body_GetAngularVelocity(m_body) * WorldHandler::get().getInterpolationTime()};
 }

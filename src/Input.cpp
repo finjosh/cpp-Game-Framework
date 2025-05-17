@@ -608,7 +608,7 @@ std::string Input::toString(sf::Keyboard::Scancode scanCode)
 {
     std::string rtn = sf::Keyboard::getDescription(scanCode);
     if (rtn == "Unknown")
-        rtn += " " + getDescription(scanCode).toAnsiString();
+        rtn += " " + sf::Keyboard::getDescription(scanCode).toAnsiString();
     return rtn;
 }
 
@@ -682,7 +682,7 @@ void Input::setAction(const Input::Action& action)
 
 Input::Action::Event Input::fromString_Action_Event(const std::string& str)
 {
-    assert("Input must have been initalized before using this function (use Input::get())" && m_keyboardDict.size() != 0);
+    assert(m_keyboardDict.size() != 0 && "Input must have been initalized before using this function (use Input::get())");
 
     std::stringstream sstr(str);
     std::string token;

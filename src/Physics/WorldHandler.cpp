@@ -6,8 +6,8 @@
 
 WorldHandler& WorldHandler::get()
 {
-    static WorldHandler* handler = new WorldHandler();
-    return *handler;
+    static WorldHandler handler;
+    return handler;
 }
 
 void WorldHandler::init(const Vector2& gravity, unsigned int workerCount)

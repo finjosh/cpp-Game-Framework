@@ -1,44 +1,36 @@
 #include <iostream>
 
+// Basic includes
+#include "Engine.hpp"
+#include "Graphics/WindowHandler.hpp"
+// --------------
+
+// Testing includes
 #include "SFML/Graphics.hpp"
-#include "TGUI/TGUI.hpp"
-#include "TGUI/Backend/SFML-Graphics.hpp"
-// #include "BS_thread_pool.hpp"
+#include "TGUI/Widgets/Label.hpp"
 
-#include "Utils/CommandPrompt.hpp"
-#include "Utils/Debug/LiveVar.hpp"
-#include "Utils/Debug/VarDisplay.hpp"
-#include "Utils/Debug/TFuncDisplay.hpp"
-#include "Utils/iniParser.hpp"
-
-#include "ObjectManager.hpp"
-#include "UpdateManager.hpp"
-#include "Particles/ParticleEmitter.hpp"
+#include "Utils/funcHelper.hpp"
 
 #include "Graphics/Renderer.hpp"
-#include "Graphics/WindowHandler.hpp"
-#include "Graphics/DrawableManager.hpp"
-#include "Graphics/CameraManager.hpp"
+#include "Graphics/Camera.hpp"
 #include "Graphics/CanvasManager.hpp"
 
-#include "Physics/WorldHandler.hpp"
-#include "Physics/CollisionManager.hpp"
-#include "Physics/DebugDraw.hpp"
+#include "Physics/Collider.hpp"
+#include "Physics/FixtureDef.hpp"
+#include "Physics/Filter.hpp"
 
+#include "Particles/ParticleEmitter.hpp"
+
+#include "UpdateInterface.hpp"
+#include "Object.hpp"
 #include "Input.hpp"
-
-#include "Utils/Settings/SettingsUI.hpp"
-#include "Utils/Settings/AllSettingTypes.hpp"
+// -----------------
 
 using namespace std;
 
 // TODO make animation class
 // TODO implement fixture and joint isValid functions that connect the the collider with the body that relates to them
-// TODO update managers to be singletons and make the getter function thread safe
-
-/// @param themes in order of most wanted
-/// @param directories directories to check in ("" for current)
-void tryLoadTheme(std::list<std::string> themes, std::list<std::string> directories);
+// TODO update managers to be singletons
 
 class Wall : public virtual Object, public Collider, public Renderer<sf::RectangleShape>
 {
@@ -267,28 +259,7 @@ private:
 
 int main()
 {
-    WindowHandler::initRenderWindowSettings(sf::VideoMode::getDesktopMode(), "Game Framework", sf::Style::Default, sf::State::Fullscreen);
-    WindowHandler::createRenderWindow();
-    CanvasManager::initGUI();
-
-    tryLoadTheme({"Dark.txt", "Black.txt"}, {"", "Assets/", "themes/", "Themes/", "assets/", "Assets/Themes/", "Assets/themes/", "assets/themes/", "assets/Themes/"});
-    // -----------------------
-
-    WorldHandler::get().init({0.f,0.f}); // TODO implement ray cast system
-    DebugDraw::get().initCommands();
-    // DebugDraw::get().drawAll(true);
-    Input::get(); // initializing the input dictionary for string conversions
-
-    Canvas* gui = new Canvas();
-
-    //! Required to initialize VarDisplay and CommandPrompt
-    // creates the UI for the VarDisplay
-    VarDisplay::init(gui->getGroup()); 
-    // creates the UI for the CommandPrompt
-    Command::Prompt::init(gui->getGroup());
-    // create the UI for the TFuncDisplay
-    TFuncDisplay::init(gui->getGroup());
-    //! ---------------------------------------------------
+    Engine::get().init(sf::VideoMode::getDesktopMode(), "Game Framework", sf::Style::Default, sf::State::Fullscreen);
 
     //* init code
 
@@ -313,63 +284,29 @@ int main()
 
     new OneWay({40,25}, {40,10});
 
+    Canvas* gui = new Canvas();
+
     float secondTimer = 0;
     int fps = 0;
     auto fpsLabel = tgui::Label::create("FPS");
-    // gui->add(fpsLabel);
+    gui->add(fpsLabel);
     // -------------
 
-    sf::Clock deltaClock;
-    float fixedUpdate = 0;
-    UpdateManager::Start();
+    Engine::get().preLoop();
     while (WindowHandler::getRenderWindow()->isOpen())
     {
-        EventHelper::Event::ThreadSafe::update();
-        // updating the delta time var
-        sf::Time deltaTime = deltaClock.restart();
-        fixedUpdate += deltaTime.asSeconds();
-        secondTimer += deltaTime.asSeconds();
+        Engine::get().preEventHandling();
+        secondTimer += Engine::get().getDeltaTime();
 
-        Input::get().UpdateJustStates();
         while (const std::optional<sf::Event> event = WindowHandler::getRenderWindow()->pollEvent())
         {
-            if (event->is<sf::Event::Closed>())
-                WindowHandler::getRenderWindow()->close();
-            else if (const auto* keyPressed = event->getIf<sf::Event::KeyPressed>()) 
-                if (keyPressed->code == sf::Keyboard::Key::Escape)
+            if (const auto* keyPressed = event->getIf<sf::Event::KeyPressed>()) 
+                if (WindowHandler::getRenderWindow()->isOpen() && keyPressed->code == sf::Keyboard::Key::Escape)
                     WindowHandler::getRenderWindow()->close();
 
-            bool wasHandled = false;
-            if (Command::Prompt::UpdateEvent(event.value()))
-                wasHandled = true;
-            else if (CanvasManager::handleEvent(event.value()))
-                wasHandled = true;
-            else
-                LiveVar::UpdateLiveVars(event.value());
-
-            Input::get().HandelEvent(event.value(), wasHandled);
+            Engine::get().handleEvent(event.value());
         }
-
-        UpdateManager::Update(deltaTime.asSeconds());
-        if (fixedUpdate >= 0.2)
-        {
-            UpdateManager::FixedUpdate();
-            fixedUpdate = 0;
-        }
-        //! Updates all the vars being displayed
-        VarDisplay::Update();
-        //! ------------------------------=-----
-        //! Updates all Terminating Functions
-        TerminatingFunction::UpdateFunctions(deltaTime.asSeconds());
-        //* Updates for the terminating functions display
-        TFuncDisplay::Update(); // updates the terminating functions display
-        //! ------------------------------
-
-        //! Do physics before this for consistent physics (in object update)
-        WorldHandler::get().updateWorld(deltaTime.asSeconds()); // updates the world physics
-        CollisionManager::get()->Update(); // updates the collision callbacks
-        //! Draw after this
-        UpdateManager::LateUpdate(deltaTime.asSeconds());
+        Engine::get().preUserCode();
 
         //* Write code here
 
@@ -381,43 +318,12 @@ int main()
             fps = 0;
         }
 
-        if (Input::get().isJustPressed(sf::Mouse::Button::Left))
-        {
-            float explosion = 1000;
-            const float blastRadius = std::sqrt(std::abs(explosion*2.f));
+        //* ---------------
 
-            ExplosionDef input;
-            input.radius = blastRadius;
-            input.position = (b2Vec2)WindowHandler::getMousePos();
-            input.impulsePerLength = explosion;
-            // input.falloff = blastRadius*0.25;
-            WorldHandler::get().explode(input);
-        }
-
-        // ---------------
-
-        ObjectManager::ClearDestroyQueue();
-        WindowHandler::Display();
+        Engine::get().postUserCode();
     }
 
-    ObjectManager::destroyAllObjects();
-    CanvasManager::closeGUI();
-    WindowHandler::getRenderWindow()->close();
+    Engine::get().close();
 
-    return 0;
-}
-
-void tryLoadTheme(std::list<std::string> themes, std::list<std::string> directories)
-{
-    for (auto theme: themes)
-    {
-        for (auto directory: directories)
-        {
-            if (std::filesystem::exists(directory + theme))
-            {
-                tgui::Theme::setDefault(directory + theme);
-                return;
-            }
-        }
-    }
+    return EXIT_SUCCESS;
 }

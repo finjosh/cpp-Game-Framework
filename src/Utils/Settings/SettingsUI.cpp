@@ -441,6 +441,15 @@ tgui::Widget::Ptr SettingsUI::createSettingUI(SettingBase* setting)
                         toggleBtn->setDown(false);
                         break;
                     }
+                    // Dont allow for backspace in the keybind and remove keybind on backspace
+                    else if (frameData.state == Input::State::JustPressed && frameData.type == Input::FrameData::Type::Keyboard 
+                             && frameData.scanCode == sf::Keyboard::delocalize(sf::Keyboard::Key::Backspace))
+                    {
+                        data->setFinished();
+                        toggleBtn->setDown(false);
+                        setting->cast<InputSetting>()->setValue(Input::Action::Event()); // setting it with no keybind
+                        return;
+                    }
                 }
                 setting->cast<InputSetting>()->setValue(Input::get().getAllOfState({Input::State::Pressed, Input::State::JustReleased, Input::State::JustPressed}));
             }
